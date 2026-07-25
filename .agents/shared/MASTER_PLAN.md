@@ -32,17 +32,35 @@
 ## 🗓️ 2. Project Roadmap
 
 ### Phase 1: Deep Data Profiling of ReXGroundingCT 🟢 ACTIVE
-* Perform comprehensive statistics on CT scans, 3D GT masks, and free-text prompts across all 200 validation cases.
-* Map ground truth masks to the 14 official challenge categories.
+* **Core Focus**: Comprehensive statistics on CT scans, 3D GT masks, and free-text prompts across the dataset.
+* **Expected Deliverables & Outputs**:
+  1. *Statistical & Annotation Disparity Analysis*: Quantitative profiling of sparse vs. exhaustive mask distributions in Train (~1 mask/scan) vs Val (~3 masks/scan) (`exp_001`).
+  2. *3D Average Mask & Spatial Density Maps*: Canonical RAS ($128 \times 128 \times 128$) probability density maps $P(\mathbf{x}' \in \text{mask} \mid c)$, 2D AIP projections, and spatial centroids for all 14 categories (`exp_003`).
+  3. *Free-Text Prompt & NLP Shift Analysis*: Quantitative analysis of word counts, punctuation shifts, syntactic complexity, TTR (-45.2%), and prompt normalization trade-offs (`exp_002`).
+  4. *Hounsfield Unit (HU) Radiodensity Profiling*: Category-level HU intensity distributions inside mask regions vs. healthy lung parenchyma to define optimal preprocessing intensity windowing (`[min_HU, max_HU]`).
+  5. *Physical Resolution & Voxel Spacing Profiling*: Distribution of slice thickness ($\Delta z$) and in-plane voxel dimensions ($\Delta x, \Delta y$) across Train and Val splits.
+  6. *3D Bounding Box Scale & Aspect Ratio Profiling*: Spatial extents ($\Delta X, \Delta Y, \Delta Z$) and volume aspect ratios per pathology for tile/patch size selection and spatial filtering.
+  7. *Multi-Finding Co-Occurrence Matrix*: Pairwise co-occurrence matrix $P(c_i \text{ present} \mid c_j \text{ present})$ across CT scans.
+  8. *Multi-Instance Component Profiling*: Connected-component analysis of mask fragmentation and instance count distributions (`entity_counts`).
+  9. *Comprehensive Phase 1 Technical Report*: Consolidated technical report detailing dataset architecture, spatial priors, prompt syntax, and actionable recommendations.
 
-### Phase 2: VoxTell Zero-Shot Inference & Preprocessing Audit 🟢 ACTIVE
-* Benchmark VoxTell v1.1 on raw unmodified challenge prompts using official `NibabelIOWithReorient`.
-* Profile raw logit probability distributions and optimal binarization thresholds per category.
-* Perform fine-grained error analysis across the 14 categories.
+### Phase 2: VoxTell Zero-Shot Inference & Preprocessing Audit ⏳ UPCOMING
+* **Core Focus**: Zero-shot evaluation, sliding window sensitivity, continuous logit analysis, and 14-category error profiling.
+* **Expected Deliverables & Outputs**:
+  1. *Zero-Shot Baseline Benchmark*: Full 200-scan validation evaluation of VoxTell v1.1 using official `NibabelIOWithReorient` and 4D Back-Reorientation pipeline.
+  2. *14-Category Error Breakdown Matrix*: Category-level Dice and Hit Rate ($\ge 0.1$) performance matrix isolating high-performing vs failing findings.
+  3. *Sliding Window Sensitivity Study*: Quantitative evaluation of tile step size (`tile_step_size` 0.5 vs 0.25), patch padding, and Gaussian tile weighting.
+  4. *Continuous Logit & Threshold Profiling*: Pre-sigmoid logit probability distribution analysis and category-specific binarization threshold optimization.
+  5. *Phase 2 Failure Mode Audit Report*: Comprehensive failure analysis mapping root causes (text shift, spatial misalignment, low logit magnitude, or suppression bias) per category.
 
 ### Phase 3: Fine-Tuning & Model Adaptations ⏳ UPCOMING
-* Adapting VoxTell weights with partial-annotation loss functions (standard supervised, Positive-Unlabeled, SPOCO, or MPR consistency losses).
-* Formulated step-by-step to address specific failure modes identified in Phase 1 & 2.
+* **Core Focus**: Model weight adaptation using partial-annotation and consistency loss formulations.
+* **Expected Deliverables & Outputs**:
+  1. *Stabilized Fine-Tuning Pipeline*: Robust trainer supporting float32 loss upcasting, L2 gradient clipping, and fast RAID SSD volume caching.
+  2. *Positive-Unlabeled (PU) SPOCO + MPR Consistency Training*: Fine-tuned model resolving instance suppression bias via PU-SPOCO loss and multi-planar reconstruction (MPR) consistency.
+  3. *Multi-GPU Scaled Fine-Tuning*: Scaled training runs on full 2,992-scan training split.
+  4. *Ensemble & Post-Processing Pipeline*: Multi-checkpoint ensemble and 4D Back-Reorientation test submission generator.
+  5. *Final Submission Package & MICCAI Paper Manuscript*: Competition submission artifact and research manuscript.
 
 ---
 
