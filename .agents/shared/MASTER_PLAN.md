@@ -10,16 +10,17 @@
 
 ---
 
-## 🔬 1. Core Research Pillars
+## 🔬 1. Core Research
 
 ### Pillar A: Comprehensive ReXGroundingCT Data Analysis
-* **3D CT Image & Metadata Profiling**: Voxel spacings, orientation affines, physical dimensions, and intensity distributions.
+* **3D CT Image & Metadata Profiling**: Voxel spacings, orientation affines, physical dimensions, intensity distributions, and longitudinal field-of-view (FOV) bounds.
 * **Exhaustive vs Sparse Mask Analysis**: Quantitative comparison of ground-truth mask distributions between the training set (partially annotated) and validation set (exhaustively annotated).
+* **Positive-Unlabeled (PU) Noise & Inter-Class Overlap Profiling**: Empirical unannotated true-positive rate per category in background voxels and inter-class voxel-level IoU.
 * **The 14 Official Finding Categories**: Detailed error profiling across the 14 challenge categories:
   * *Non-focal (6)*: Bronchial wall thickening, Bronchiectasis, Emphysema, Septal thickening, Micronodules, Other non-focal.
   * *Focal (8)*: Linear opacities, Atelectasis / consolidation, Ground-glass opacity, Pulmonary nodules / masses, Pleural effusion / thickening, Honeycombing, Pneumothorax, Other focal.
-* **Finding Volume & Multi-Instance Statistics**: Distribution of component counts, voxel volumes, and spatial centroids per finding category.
-* **Free-Text Radiology Report Analysis**: Quantitative NLP analysis of finding descriptions in `dataset.json` (syntax, modifier adjectives, length, and anatomical jargon).
+* **Finding Volume, Component & Topology Statistics**: Component counts, voxel volumes, spatial centroids, sphericity indices, and surface area-to-volume ratios.
+* **Free-Text Radiology Report & Spatial Directive Analysis**: Quantitative NLP analysis of finding descriptions in `dataset.json` (syntax, modifier adjectives, spatial locators, length, and anatomical jargon).
 
 ### Pillar B: In-Depth VoxTell Inference & Preprocessing Audit
 * **Official Preprocessing & Reorientation**: Audit official `nnunetv2.imageio.nibabel_reader_writer.NibabelIOWithReorient` and `VoxTellPredictor` to ensure 100% fidelity with the authors' intended input pipeline.
@@ -32,7 +33,7 @@
 ## 🗓️ 2. Project Roadmap
 
 ### Phase 1: Deep Data Profiling of ReXGroundingCT 🟢 ACTIVE
-* **Core Focus**: Comprehensive statistics on CT scans, 3D GT masks, and free-text prompts across the dataset.
+* **Core Focus**: Comprehensive statistics on CT scans, 3D GT masks, free-text prompts, PU noise, and topological boundary features.
 * **Expected Deliverables & Outputs**:
   1. *Statistical & Annotation Disparity Analysis*: Quantitative profiling of sparse vs. exhaustive mask distributions in Train (~1 mask/scan) vs Val (~3 masks/scan) (`exp_001`).
   2. *3D Average Mask & Spatial Density Maps*: Canonical RAS ($128 \times 128 \times 128$) probability density maps $P(\mathbf{x}' \in \text{mask} \mid c)$, 2D AIP projections, and spatial centroids for all 14 categories (`exp_003`).
@@ -42,7 +43,10 @@
   6. *3D Bounding Box Scale & Aspect Ratio Profiling*: Spatial extents ($\Delta X, \Delta Y, \Delta Z$) and volume aspect ratios per pathology for tile/patch size selection and spatial filtering.
   7. *Multi-Finding Co-Occurrence Matrix*: Pairwise co-occurrence matrix $P(c_i \text{ present} \mid c_j \text{ present})$ across CT scans.
   8. *Multi-Instance Component Profiling*: Connected-component analysis of mask fragmentation and instance count distributions (`entity_counts`).
-  9. *Comprehensive Phase 1 Technical Report*: Consolidated technical report detailing dataset architecture, spatial priors, prompt syntax, and actionable recommendations.
+  9. *PU Background Contamination & Inter-Class Overlap Profiling*: Empirical unannotated true-positive rate $P(\text{cat}_c \in \text{bg} \mid \text{cat}_k \text{ annotated})$ and voxel-level inter-class IoU overlap matrix.
+  10. *Text-Spatial Directive Parsing & Alignment*: Parsing of spatial locators vs entity terms and correlation between prompt locators and 3D mask centroids.
+  11. *Morphological Topology & Lung FOV Profiling*: Sphericity index, surface area-to-volume ratio distributions, and longitudinal CT scan FOV extents.
+  12. *Comprehensive Phase 1 Technical Report*: Consolidated technical report detailing dataset architecture, spatial priors, prompt syntax, topology, and actionable recommendations.
 
 ### Phase 2: VoxTell Zero-Shot Inference & Preprocessing Audit ⏳ UPCOMING
 * **Core Focus**: Zero-shot evaluation, sliding window sensitivity, continuous logit analysis, and 14-category error profiling.
