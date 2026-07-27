@@ -38,14 +38,13 @@ rexgroundingct-data-profiling/
 │   ├── exp_002_nlp_prompt_syntax.py
 │   ├── exp_003_spatial_density_priors.py
 │   ├── exp_004_hu_radiodensity.py
-│   ├── exp_005_morphology_noise_pruning.py
-│   └── exp_006_pu_overlap.py
+│   └── exp_005_morphology_noise_pruning.py
 └── README.md                   # Primary repository documentation
 ```
 
 ---
 
-## 🔬 Consolidated 6-Experiment Profiling Suite
+## 🔬 Consolidated 5-Experiment Profiling Suite
 
 Run any experiment using the shared Python environment:
 
@@ -64,9 +63,6 @@ python scripts/exp_004_hu_radiodensity.py
 
 # 5. 3D Connected-Component Morphology, Sphericity & Noise Pruning Thresholds
 python scripts/exp_005_morphology_noise_pruning.py
-
-# 6. Positive-Unlabeled (PU) Inter-Class Voxel Overlap Profiling
-python scripts/exp_006_pu_overlap.py
 ```
 
 ---
