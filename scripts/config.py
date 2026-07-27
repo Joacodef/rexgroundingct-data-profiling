@@ -19,9 +19,8 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 PARENT_DIR = ROOT_DIR.parent
 
 # 3. Base Directory Definitions
-# Check parent container directory (/home/.../rex_project) for shared data and models folders
+# Check parent container directory (/home/.../rex_project) for shared data folder
 DATA_DIR = Path(os.getenv("DATA_DIR") or (PARENT_DIR / "data" if (PARENT_DIR / "data").exists() else ROOT_DIR / "data"))
-MODELS_DIR = Path(os.getenv("MODELS_DIR") or (PARENT_DIR / "models" if (PARENT_DIR / "models").exists() else ROOT_DIR / "models"))
 LOGS_DIR = ROOT_DIR / "logs"
 SCRATCH_DIR = ROOT_DIR / "scratch"
 
@@ -33,16 +32,8 @@ PREPROCESSED_DIR = Path(os.getenv("DATA_PREP_DIR") or (DATA_DIR / "preprocessed"
 PREDICTIONS_DIR = Path(os.getenv("DATA_PRED_DIR") or (DATA_DIR / "predictions"))
 TEXT_CACHE_DIR = Path(os.getenv("TEXT_CACHE_DIR") or (DATA_DIR / "text_cache"))
 
-# 5. Model & Checkpoint Paths
-MODEL_DIR = Path(os.getenv("MODEL_DIR") or (MODELS_DIR / "voxtell_v1.1"))
-CHECKPOINTS_DIR = Path(os.getenv("CHECKPOINTS_DIR") or (MODELS_DIR / "checkpoints"))
-
-# 6. Temporary / Fast SSD Storage (Fallback to system /tmp)
+# 5. Temporary / Fast SSD Storage (Fallback to system /tmp)
 TMP_PREP_DIR = Path(os.getenv("TMP_PREP_DIR") or "/tmp/rexgroundingct_preprocessed")
-
-# 7. Hardware & Hardware Isolation Settings
-DEFAULT_DEVICE = os.getenv("DEFAULT_DEVICE", "cuda:0")
-CUDA_VISIBLE_DEVICES = os.getenv("CUDA_VISIBLE_DEVICES", "0")
 
 # 8. Challenge 14-Category Definitions & Taxonomy
 CATEGORY_MAP = {

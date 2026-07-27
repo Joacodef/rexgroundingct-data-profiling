@@ -1,10 +1,10 @@
 # Master Plan — ReXGroundingCT Challenge 2026
 
-**Primary Goal:** Top-3 on the leaderboard (September 2026) AND an original paper accepted at MICCAI 2026, built on rigorous data understanding and zero-shot baseline inference mastery.
+**Primary Goal:** Top-3 on the leaderboard (September 2026) supported by a comprehensive internal group technical report built on rigorous data understanding and zero-shot baseline inference mastery.
 
 > [!IMPORTANT]
 > **Phased Research Roadmap**:
-> 1. **Phase 1 — ReXGroundingCT Data Profiling**: 3D CT metadata, sparse vs exhaustive mask profiling, 14 finding categories, component topology, and prompt syntax.
+> 1. **Phase 1 — ReXGroundingCT Data Profiling**: 3D CT metadata, sparse vs exhaustive mask profiling, 14 finding categories, component topology, prompt syntax, and internal group technical report.
 > 2. **Phase 2 — VoxTell Zero-Shot Baseline & Audit**: Official `NibabelIOWithReorient` pipeline, sliding window tile overlap, continuous logit distributions, and failure modes.
 > 3. **Phase 3 — Model Fine-Tuning & Consistency Adaptations**: Supervised fine-tuning, Positive-Unlabeled (PU) SPOCO, and MPR consistency learning.
 

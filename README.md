@@ -4,7 +4,7 @@ Dedicated research workspace for **Phase 1 Data Profiling & Spatial-Text Analysi
 
 > [!IMPORTANT]
 > **Repository Scope & Governance**:
-> This repository is dedicated exclusively to **Data Profiling, Spatial Density Prior Mapping, HU Radiodensity Analysis, NLP Syntax Shift Profiling, 3D Component Topology, Positive-Unlabeled Overlap Analysis, and Paper Manuscript Generation**.
+> This repository is dedicated exclusively to **Data Profiling, Spatial Density Prior Mapping, HU Radiodensity Analysis, NLP Syntax Shift Profiling, 3D Component Topology, Positive-Unlabeled Overlap Analysis, and Group Technical Report Generation**.
 > Model fine-tuning pipelines consume the empirical priors exported in `data/phase_1/phase_1_priors_bundle.json`.
 
 ---
@@ -14,18 +14,18 @@ Dedicated research workspace for **Phase 1 Data Profiling & Spatial-Text Analysi
 ```text
 rexgroundingct-data-profiling/
 ├── .agents/                    # Agentic rules, host setup docs, and governance
-│   ├── shared/                 # Server-agnostic master plan and paper digests
+│   ├── shared/                 # Server-agnostic master plan and technical digests
 │   ├── AGENTS.md               # Repository operating rules & governance
 │   ├── STATUS.md               # Local active macro progress matrix
 │   ├── HANDSHAKE.md            # Tactical session bridge & transition handoff
 │   └── server_documentation.txt# Host server hardware setup & guides
-├── logs/                       # Data profiling experiment logs & paper manuscript
+├── logs/                       # Data profiling experiment logs & technical report
 │   ├── exp_001_dataset_disparity_leakage.md
 │   ├── exp_002_nlp_prompt_syntax.md
 │   ├── exp_003_spatial_density_priors.md
 │   ├── exp_004_hu_radiodensity.md
 │   ├── exp_005_morphology_noise_pruning.md
-│   ├── phase_1_report_overleaf/ # Consolidated LaTeX paper manuscript
+│   ├── phase_1_report_overleaf/ # Consolidated LaTeX group technical report
 │   └── phase_1_report_overleaf.zip
 ├── scratch/                    # One-off exploratory analysis scripts & ITK-SNAP test masks
 │   ├── export_itksnap_mask.py
@@ -79,7 +79,7 @@ python scripts/exp_006_pu_overlap.py
    - 4-Tier Spatial Prior Taxonomy mapping
    - Patient ID cross-split leakage blacklist
 
-2. **Overleaf LaTeX Manuscript**:
+2. **Overleaf LaTeX Group Technical Report**:
    - Source code located in [`logs/phase_1_report_overleaf/main.tex`](file:///home/jdeferrari/rex_project/rexgroundingct-data-profiling/logs/phase_1_report_overleaf/main.tex) and packaged in `logs/phase_1_report_overleaf.zip`.
 
 ---
