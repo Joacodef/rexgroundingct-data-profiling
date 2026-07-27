@@ -23,6 +23,18 @@ To prevent scope drift and preserve clear separation of concerns across AI sessi
   * **Update Cadence**: Updated at the end of every active session to hand off context to the next session.
   * **Prohibited Content**: Must NOT duplicate full historical experiment logs or macro phase progress matrices.
 
+### 📜 Knowledge Hierarchy & Authority Protocol
+To prevent hallucinated or outdated AI summaries from superseding ground-truth scientific specifications:
+* **Tier 1 — Highest Authority (Official Publication Papers & Official Specifications)**:
+  * **Scope**: Primary literature (*ReXGroundingCT paper — Baharoon et al. 2025*, *VoxTell paper — Luo et al. 2025*, *CT-RATE paper — Hamamci et al. 2024*).
+  * **Rule**: Official paper definitions (such as the *Entity Protocol*, dataset curation pipelines, and evaluation metrics) represent immutable ground truth. Whenever a discrepancy arises between a local markdown log and an official paper, the paper MUST strictly override local log interpretations.
+* **Tier 2 — Codebase Contracts & Master Architecture**:
+  * **Scope**: `.agents/AGENTS.md`, `.agents/shared/MASTER_PLAN.md`, official dataset schemas (`data/dataset.json`), and validated evaluator pipelines (`scripts/evaluate.py`).
+  * **Rule**: Governs system architecture, data pipelines, and binding operational contracts. Must be 100% calibrated against Tier 1.
+* **Tier 3 — Empirical Observations & Working Hypotheses (Lower Authority)**:
+  * **Scope**: `logs/` (experiment logs, data profiling summaries, technical report drafts).
+  * **Rule**: Contains empirical outputs and working interpretations. Interpretations in `logs/` are treated as **hypotheses** and are less authoritative than Tier 1/2. They MUST NOT be treated as established facts if they contradict official paper specifications.
+
 ### 🌐 Server-Agnostic File Separation Rule
 * **Shared vs. Host-Specific Scope**: `AGENTS.md` and files inside `.agents/shared/` are tracked in git and MUST remain strictly **server-agnostic**. They must never hardcode server-specific hardware topology, user home paths, specific GPU indices, or host machine names.
 * **Relative Path Directive**: ALL documentation, markdown files, and codebase scripts MUST strictly use **relative paths** (e.g., `scripts/data_prep/preprocess.py` or relative markdown links) and **NEVER absolute paths** (e.g., `file:///home/...` or `/home/user/...`). This ensures complete portability across different host servers, user environments, and IDEs.

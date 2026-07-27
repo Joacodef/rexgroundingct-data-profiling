@@ -12,6 +12,23 @@
 \usepackage{caption}
 \usepackage{subcaption}
 \usepackage{microtype}
+\usepackage{listings}
+
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{backcolour}{rgb}{0.96,0.96,0.96}
+\lstset{
+    backgroundcolor=\color{backcolour},
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numberstyle=\tiny\color{codegray},
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2
+}
 
 \hypersetup{
     colorlinks=true,
@@ -43,12 +60,62 @@ This technical report synthesizes the quantitative results of 11 comprehensive d
 \subsection{Benchmark Challenge Overview \& Dataset Hierarchy}
 The ReXGroundingCT Challenge @ MICCAI 2026 evaluates automated multi-modal 3D grounding models tasked with segmenting anatomical pathologies in 3D thoracic Computed Tomography (CT) scans from free-text radiology finding descriptions. 
 
-To eliminate confusion across dataset metrics, we define the 4-tier dataset indexing structure:
+To eliminate confusion across dataset metrics, we formally define the 4-tier dataset indexing structure:
 \begin{itemize}
-    \item \textbf{Physical NIfTI Scans (3,078 volumes)}: The ground-truth image repository containing 2,578 Training scans, 200 Validation scans, and 300 Test scans.
-    \item \textbf{Dataset Record Entries (3,192 entries)}: The primary indexing structures in \texttt{dataset.json} (comprising 2,992 Training entries and 200 Validation entries).
-    \item \textbf{Target Findings (3,758 findings)}: Discrete 3D segmentation target masks (3,192 in Train, 566 in Val).
-    \item \textbf{Radiology Report Prompts (8,650 prompts)}: Free-text sentence queries (averaging 2.3 prompt variations per finding target).
+    \item \textbf{Tier 1: Physical NIfTI Scans (3,078 volumes)}: The underlying ground-truth image repository containing 2,578 Training scans, 200 Validation scans, and 300 Test scans acquired from physical CT scan acquisition sessions.
+    \item \textbf{Tier 2: Dataset Record Entries (3,192 entries)}: The primary indexing entries stored in \texttt{dataset.json} (comprising 2,992 Training entries and 200 Validation entries). The total record entries (3,192) exceed physical scan acquisitions (3,078) because multiple reconstruction series (e.g., soft-tissue vs.\ high-resolution lung kernels, or thin vs.\ thick slice reconstructions \texttt{\_1.nii.gz}, \texttt{\_2.nii.gz}) derived from a single physical CT examination are indexed as separate records.
+    \item \textbf{Tier 3: Target Findings (3,758 findings)}: Discrete 3D target segmentation masks (3,192 in Train, 566 in Val). As specified in the official ReXGroundingCT paper (Baharoon et al., 2025), findings were extracted from radiology reports using GPT-4. Under the training set's \textit{Entity Protocol}, annotators were instructed to segment at most three representative instances per finding ($\le 3$ instances/finding, mean $1.95$) to manage annotation workload, whereas Validation and Test splits feature exhaustive annotation of all visible instances (mean $3.80$, reaching up to 36 instances).
+    \item \textbf{Tier 4: Radiology Report Prompts (8,650 prompts)}: Free-text sentence queries extracted across all findings (7,687 in Train, 381 in Val, 582 in Test), averaging $2.3$ prompt variations per annotated target finding mask ($\frac{8,650}{3,758} = 2.3018$).
+\end{itemize}
+
+\subsubsection{Dataset Metadata Indexing Structure (\texttt{dataset.json})}
+Master dataset metadata is organized in \texttt{dataset.json} as a dictionary keyed by split names (\texttt{"train"}, \texttt{"val"}, \texttt{"test"}). Listing~\ref{lst:dataset_sample} illustrates a representative entry (\texttt{train\_1935\_a\_1.nii.gz}) demonstrating multi-finding annotations:
+
+\begin{lstlisting}[language=json,caption={Representative \texttt{dataset.json} record entry (\texttt{train\_1935\_a\_1.nii.gz}) illustrating finding descriptions, categories, component counts, pixel volumes, and spatial matrix shapes.},label={lst:dataset_sample}]
+{
+  "name": "train_1935_a_1.nii.gz",
+  "findings": {
+    "0": "Segmental and subsegmental peribronchial thickening with prominent luminal narrowing in both lungs",
+    "1": "Mosaic attenuation pattern in both lungs",
+    "2": "Reticulonodular density increases in both lung apices",
+    "3": "Paraseptal emphysema in both lung apices",
+    "4": "Several subcentimeter nonspecific pulmonary nodules in both lungs"
+  },
+  "entity_counts": {
+    "0": 2,
+    "1": 3,
+    "2": 2,
+    "3": 3,
+    "4": 3
+  },
+  "shape": [512, 512, 264],
+  "pixels": {
+    "0": 101934,
+    "1": 315619,
+    "2": 10405,
+    "3": 7065,
+    "4": 772
+  },
+  "categories": {
+    "0": "1a",
+    "1": "1c",
+    "2": "1d",
+    "3": "1c",
+    "4": "2d"
+  },
+  "protocol": "protocol1"
+}
+\end{lstlisting}
+
+Each field within a record entry indexes a specific structural dimension of the benchmark dataset hierarchy:
+\begin{itemize}
+    \item \texttt{name} (\texttt{string}): Unique filename of the 3D CT scan and corresponding 4D segmentation mask in \texttt{data/raw/} (\texttt{<split>\_<patient\_id>\_<visit\_id>\_<series\_id>.nii.gz}).
+    \item \texttt{findings} (\texttt{dict[string, string]}): Dictionary mapping string indices (\texttt{"0"}, \texttt{"1"}, \dots) to free-text clinical report query sentences extracted from the patient's radiology report.
+    \item \texttt{categories} (\texttt{dict[string, string]}): Mapping of each finding index to its official challenge pathology code (\texttt{"1a"} through \texttt{"2h"}).
+    \item \texttt{entity\_counts} (\texttt{dict[string, int]}): Number of 3D connected component lesion blobs ($N_{\text{components}}$) present within the ground-truth segmentation target for that finding.
+    \item \texttt{pixels} (\texttt{dict[string, int]}): Total positive voxel count ($V_{\text{voxels}}$) occupying the 3D target segmentation mask.
+    \item \texttt{shape} (\texttt{list[int]}): 3D spatial matrix resolution $[H, W, D]$ of the CT volume array (e.g., $512 \times 512 \times 264$ axial slices).
+    \item \texttt{protocol} (\texttt{string}): Clinical CT scanner acquisition protocol identifier.
 \end{itemize}
 
 \subsection{Clinical Provenance, Cohort Demographics \& Hardware Specs}
@@ -58,7 +125,7 @@ Table~\ref{tab:master_metadata} consolidates the official dataset parameters, ha
 
 \begin{table}[H]
 \centering
-\caption{ReXGroundingCT Master Dataset Parameters, Hardware Acquisition Specs, and Cohort Metadata.}
+\caption{ReXGroundingCT Master Dataset Parameters, Hardware Acquisition Specs, and Official Paper Metadata (Baharoon et al., 2025).}
 \label{tab:master_metadata}
 \small
 \resizebox{\linewidth}{!}{%
@@ -67,13 +134,18 @@ Table~\ref{tab:master_metadata} consolidates the official dataset parameters, ha
 \textbf{Parameter / Dimension} & \textbf{Value / Official Specification} \\
 \midrule
 Source Dataset \& Clinical Origin & CT-RATE (Istanbul Medipol University Mega Hospital) \\
-Acquisition Window \& Modality & February 2016 -- November 2022; Non-contrast 3D Thoracic CT \\
+Acquisition Window \& Modality & May 2015 -- January 2023; Non-contrast 3D Thoracic CT \\
+Curated Benchmark Size & 3,142 non-contrast 3D CT volumes (from 21,304 CT-RATE patients) \\
+Total Findings \& 3D Entities & 8,028 text-finding pairs; 16,301 separate 3D entity segmentations \\
+Finding Pattern Distribution & 79\% Focal (Nodules/Masses 28.9\%); 21\% Non-focal (Emphysema 27.7\%) \\
+Entity Protocol (Partial vs Exhaustive) & Train: $\le 3$ instances/finding (mean 1.95); Val/Test: Exhaustive (mean 3.80) \\
+Annotation Protocols & Protocol 1 (1,400 CTs: Professional + Rad); Protocol 2 (1,592 CTs: Med Students + Rad) \\
 Patient Demographics & Age: $42.08 \pm 14.52$ yrs; Sex: 55.9\% Male / 44.1\% Female \\
 Reconstruction Matrix Distribution & $512\times512$ (92.6\%), $768\times768$ (7.2\%), $1024\times1024$ (0.2\%) \\
 Axial Slice Depth Range & 104 to 1005 axial slices per volume (mean $\sim 351$ slices) \\
 Slice Thickness ($\Delta z$) Bounds & $0.50\text{ mm}$ -- $5.00\text{ mm}$ (Mean: $1.053 \pm 0.325\text{ mm}$) \\
 In-plane Pixel Spacing ($\Delta x, \Delta y$) & $0.30\text{ mm}$ -- $0.98\text{ mm}$ (Mean: $0.710 \pm 0.117\text{ mm}$) \\
-Candidate Finding Exclusion Audit & 10,012 initial candidate findings $\rightarrow$ 8,028 eligible (1,984 excluded) \\
+Candidate Finding Exclusion Audit & 10,012 initial findings $\rightarrow$ 8,028 eligible (1,984 excluded by radiologist audit) \\
 Supervised Baselines (Paper Val) & Off-the-shelf ($\sim0.00$ Dice) vs SAT-FT ($0.209$ Dice) / VoxTell ($0.2139$ Dice) \\
 \bottomrule
 \end{tabular}%
@@ -83,7 +155,7 @@ Supervised Baselines (Paper Val) & Off-the-shelf ($\sim0.00$ Dice) vs SAT-FT ($0
 \subsection{Research Questions \& Core Objectives}
 Phase 1 establishes the empirical foundation for 3D text-to-segmentation grounding on the ReXGroundingCT benchmark. Across 3,192 CT volume entries and 8,650 radiology report finding prompts, this investigation addresses five core research questions:
 \begin{enumerate}
-    \item \textbf{Annotation Disparity \& Instance Fragmentation (Q1)}: What is the quantitative gap between partially labeled training scans ($\sim 1.07$ findings/scan, $1.948$ instances/finding) and exhaustively labeled validation scans ($\sim 2.83$ findings/scan, $3.714$ instances/finding)?
+    \item \textbf{Annotation Disparity \& Instance Fragmentation (Q1)}: What is the quantitative gap between the training set Entity Protocol ($\le 3$ instances/finding, mean $1.95$) and exhaustively labeled validation/test scans (all visible instances, mean $3.80$)?
     \item \textbf{Text Prompt Shift \& Syntactic Complexity (Q2)}: How does the free-text prompt structure shift from short paper queries (mean 11 words) to long multi-clause report sentences (up to 38 words, $+12.4\%$ commas, $-45.2\%$ TTR), multi-finding compound prompts ($18.77\%$), hedging ($0.38\%$), and spatial prepositions ($72.53\%$)?
     \item \textbf{Anatomical Spatial Priors \& Centroid Drift (Q3)}: What are the canonical RAS space ($128 \times 128 \times 128$) 3D spatial probability density distributions, centroid coordinates, and inter-split vertical shifts per pathology?
     \item \textbf{GT Mask Radiodensity (HU) Attenuation (Q4)}: What are the empirical Hounsfield Unit (HU) attenuation bounds ($\left[-1024, +400\right]$~HU) and contrast deltas ($\Delta\text{HU}$) inside mask regions versus healthy parenchymal tissue, and what do they reveal regarding annotation boundary precision?
@@ -109,7 +181,7 @@ Table~\ref{tab:exp_index} maps each of the 11 Phase 1 profiling experiments to i
 \toprule
 \textbf{Exp ID} & \textbf{Research Focus} & \textbf{Scope Analyzed} & \textbf{Primary Research Finding} \\
 \midrule
-\texttt{exp\_001} & Mask Disparity \& Sparsity & 2,992 Train vs 200 Val entries & Quantified partial (1.07/entry) vs exhaustive (2.83/entry) gap \\
+\texttt{exp\_001} & Mask Disparity \& Sparsity & 2,992 Train vs 200 Val entries & Quantified Entity Protocol ($\le 3$ instances/finding vs exhaustive) \\
 \texttt{exp\_002} & Prompt Text Shift & Paper split vs full MICCAI split & Measured prompt length spike (+9.3\%) and TTR drop (-45.2\%) \\
 \texttt{exp\_003} & 3D Spatial Density Maps & 3,192 3D GT masks in RAS space & Extracted 14 category centroids; identified upper lobe dominance \\
 \texttt{exp\_004} & HU Radiodensity Profiling & Mask vs parenchyma attenuation & Defined intensity windowing ($\left[-1024, +400\right]$~HU) and contrast $\Delta\text{HU}$ \\
@@ -130,13 +202,13 @@ Table~\ref{tab:exp_index} maps each of the 11 Phase 1 profiling experiments to i
 \section{Statistical Mask Analysis \& Disparity (Exp 001 \& 005)}
 
 \subsection{Split Disparity \& Annotation Sparsity}
-Quantitative analysis of the master dataset annotations demonstrates a fundamental structural disparity between training and validation annotation protocols. As detailed in Table~\ref{tab:split_disparity}, training record entries contain an average of \textbf{1.07 findings per entry} (corresponding to \textbf{1.24 findings per physical NIfTI scan} across 2,578 physical training volumes) and \textbf{1.948 labeled entity instances per finding} (totaling $\sim 7,633$ annotated target lesion instances overall), adhering to a \textit{partial annotation protocol} where annotators selectively labeled primary lesion instances per scan. In contrast, validation record entries contain an average of \textbf{2.83 findings per entry} and \textbf{3.714 instances per finding} (reaching up to \textbf{36 instances} per finding for diffuse ground-glass opacities), reflecting an \textit{exhaustive annotation protocol}.
+Quantitative analysis of the master dataset annotations demonstrates a fundamental structural disparity between training and validation annotation protocols as defined in the official ReXGroundingCT benchmark paper (Baharoon et al., 2025). Under the official \textit{Entity Protocol}, training record entries were annotated with a workload-management cap of \textbf{at most three representative instances per finding} (averaging \textbf{1.95 instances per finding} in Train), leaving any remaining unannotated instances of the same finding as background zeros. In contrast, validation and test entries required \textbf{exhaustive labeling of all visible instances} (averaging \textbf{3.80 instances per finding}, and reaching up to \textbf{36 instances} per finding for diffuse lesions).
 
 It is crucial to distinguish between \textit{Annotated Finding Targets} ($3,758$ total findings in Table~\ref{tab:split_disparity}) and \textit{3D Connected Component Blobs} ($27,136$ total blobs in Table~\ref{tab:category_prevalence} and Table~\ref{tab:morphology}). In 3D medical image segmentation, a single annotated finding target mask (e.g., multifocal ground-glass opacities or emphysema) frequently comprises multiple spatially disconnected 3D lesion components. Topological extraction via 3D connected-component labeling (\texttt{scipy.ndimage.label}) yields $27,136$ discrete 3D blobs across the dataset (averaging $3.364$ connected blobs per pathology-scan occurrence across the 8,067 category-scan instances in Table~\ref{tab:category_prevalence}).
 
-Furthermore, summing the \textit{Scans with Pathology} column across all 14 categories in Table~\ref{tab:category_prevalence} yields $8,067$ category-scan instances. This figure exceeds the $3,758$ annotated target findings in Table~\ref{tab:split_disparity} because CT scans in ReXGroundingCT frequently exhibit multi-label pathology co-occurrences (e.g., a single scan simultaneously exhibiting ground-glass opacity, atelectasis, and emphysema). Under partial annotation in Train, annotators selectively labeled a primary subset of findings ($3,758$ total target finding masks), whereas category-level profiling evaluates all multi-label pathology occurrences across scans ($8,067$ total category-scan instances).
+Furthermore, summing the \textit{Scans with Pathology} column across all 14 categories in Table~\ref{tab:category_prevalence} yields $8,067$ category-scan instances. This figure exceeds the $3,758$ annotated target findings in Table~\ref{tab:split_disparity} because CT scans in ReXGroundingCT frequently exhibit multi-label pathology co-occurrences. Under the abnormality extraction pipeline, GPT-4 extracted eligible lung/pleural findings from report texts, which were paired 1-to-1 with 3D segmentation masks.
 
-This structural disparity has profound implications for supervised model training. Standard supervised segmentation losses (such as Binary Cross-Entropy or Dice Loss) assume that unannotated background voxels represent true negative healthy tissue. Under partial annotation, however, unannotated background regions in the training set harbor true-positive lesions. Applying standard BCE/Dice losses directly penalizes predictions on unannotated true lesions, inducing severe \textit{Instance Suppression Bias} during gradient backpropagation.
+This instance-level partial annotation protocol ($\le 3$ instances in Train) has profound implications for supervised model training. Standard supervised segmentation losses (such as Binary Cross-Entropy or Dice Loss) assume that unannotated background voxels represent true negative healthy tissue. When a model predicts unannotated real instances of a finding in the training set, standard BCE/Dice losses actively penalize the model, inducing severe \textit{Instance Suppression Bias} during gradient backpropagation.
 
 \subsection{Finding Exclusion Audit \& Dual-Protocol Annotation Lineage}
 Understanding the origin of partial annotations in the training set requires examining the 3-stage dataset curation pipeline established in the official challenge specification. Out of \textbf{10,012 initial candidate finding descriptions} extracted from translated reports, a multi-stage radiologist audit systematically excluded \textbf{1,984 findings}:
@@ -607,7 +679,7 @@ Based strictly on empirical findings across Phase 1 (\texttt{exp\_001}--\texttt{
     \item \textbf{Instance F1 Noise Pruning}: Apply recommended minimum component size floors (15 voxels for Nodules \texttt{2d}, 47 voxels for Other Non-Focal \texttt{1f}, 10 voxels default) in post-processing to eliminate spurious tiny false-positive connected components without recall degradation.
     \item \textbf{Dynamic Range Intensity Windowing}: Enforce broad CT intensity windowing ($\left[-1024, +400\right]$~HU) during pre-processing to preserve dynamic range across hyper-dense and hypo-dense pathologies.
     \item \textbf{Text Fusion Resilience \& Chain-of-Thought Leverage}: Because 72.53\% of prompts contain spatial locators and 18.77\% are compound descriptions, avoid aggressive text stripping. In Phase 3, leverage the Anatomical Chain-of-Thought (CoT) hierarchical sequences to train spatial cross-attention fusion layers to anchor anatomical directives.
-    \item \textbf{Positive-Unlabeled (PU) SPOCO Fine-Tuning}: Incorporate class-weighted PU-SPOCO loss with float32 upcasting and L2 gradient clipping to mitigate background suppression bias on unannotated training findings (justified by the dual-protocol partial annotation lineage in Train where $1.07$ findings/scan are annotated vs $2.83$ findings/scan in Val).
+    \item \textbf{Positive-Unlabeled (PU) SPOCO Fine-Tuning}: Incorporate class-weighted PU-SPOCO loss with float32 upcasting and L2 gradient clipping to mitigate background suppression bias on unannotated training instances (justified by the official Entity Protocol in Train where $\le 3$ instances per finding are annotated vs exhaustive labeling in Val/Test).
     \item \textbf{Sliding Window Sensitivity \& Logit Profiling (Phase 2)}: Benchmark zero-shot baseline error breakdown across all 14 categories (contextualized against SAT-FT $0.209$ and VoxTell $0.2139$ paper baselines) and optimize per-category logit binarization thresholds and tile step size.
 \end{enumerate}
 
