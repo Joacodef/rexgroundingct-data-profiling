@@ -64,3 +64,22 @@ NON_FOCAL_CATEGORIES = {'1a', '1b', '1c', '1d', '1e', '1f'}
 FOCAL_CATEGORIES = {'2a', '2b', '2c', '2d', '2e', '2f', '2g', '2h'}
 REVERSE_CATEGORY_MAP = {v: k for k, v in CATEGORY_MAP.items()}
 
+# 4-Tier Spatial Prior Taxonomy Mapping
+SPATIAL_TAXONOMY = {
+    '1a': 'Hilar / Peribronchial',
+    '1b': 'Hilar / Peribronchial',
+    '1c': 'Apical Dominant',
+    '1d': 'Isotropic / Parenchymal',
+    '1e': 'Isotropic / Parenchymal',
+    '1f': 'Isotropic / Parenchymal',
+    '2a': 'Isotropic / Parenchymal',
+    '2b': 'Basal / Dependent',
+    '2c': 'Isotropic / Parenchymal',
+    '2d': 'Isotropic / Parenchymal',
+    '2e': 'Basal / Dependent',
+    '2f': 'Basal / Dependent',
+    '2g': 'Isotropic / Parenchymal',
+    '2h': 'Isotropic / Parenchymal',
+}
+
+

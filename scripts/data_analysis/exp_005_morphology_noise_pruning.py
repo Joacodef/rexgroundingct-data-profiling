@@ -22,8 +22,8 @@ from scripts.config import (
 
 DATA_JSON = str(DATASET_JSON)
 SEG_DIR = str(RAW_MASKS_DIR)
-OUTPUT_DIR = str(DATA_DIR / 'phase_1' / 'analysis_experiment_008')
-MAX_WORKERS = 16
+OUTPUT_DIR = str(DATA_DIR / 'phase_1' / 'analysis_experiment_005')
+MAX_WORKERS = min(32, os.cpu_count() or 4)
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
@@ -49,7 +49,7 @@ def analyze_mask_morphology(item):
                 if ch_idx < data.shape[0] and cat_code in CATEGORY_MAP:
                     mask = data[ch_idx]
                     total_vol_vox = mask.sum()
-                    if total_vol_vox > 5:
+                    if total_vol_vox > 0:
                         # Extract 3D connected components (lesion blobs)
                         labeled_mask, num_components = label(mask)
                         
@@ -93,8 +93,13 @@ def analyze_mask_morphology(item):
         
     return results
 
-def run_experiment_008():
-    print(f"[exp_008] Loading dataset from {DATA_JSON}...")
+
+def run_experiment_005():
+    if not os.path.exists(DATA_JSON):
+        print(f"[exp_005] Error: Dataset JSON not found at {DATA_JSON}")
+        return
+
+    print(f"[exp_005] Loading dataset from {DATA_JSON}...")
     with open(DATA_JSON, 'r') as f:
         ds = json.load(f)
         
@@ -102,7 +107,7 @@ def run_experiment_008():
     val_items = ds.get('val', [])
     all_items = train_items + val_items
     
-    print(f"[exp_008] Profiling 3D connected-component morphology across {len(all_items)} scans using {MAX_WORKERS} workers...")
+    print(f"[exp_005] Profiling 3D connected-component morphology across {len(all_items)} scans using {MAX_WORKERS} workers...")
     
     cat_data = {
         k: {
@@ -117,7 +122,7 @@ def run_experiment_008():
     
     with ProcessPoolExecutor(max_workers=MAX_WORKERS) as executor:
         futures = [executor.submit(analyze_mask_morphology, item) for item in all_items]
-        for f in tqdm(as_completed(futures), total=len(all_items)):
+        for f in tqdm(as_completed(futures), total=len(all_items), desc="Processing Mask Topology"):
             scan_res = f.result()
             for r in scan_res:
                 code = r['cat_code']
@@ -129,9 +134,9 @@ def run_experiment_008():
                     cat_data[code]['all_sphericities'].extend(r['sphericities'])
                     cat_data[code]['all_sa_v_ratios'].extend(r['sa_v_ratios'])
                     
-    # Aggregate stats
+    # Aggregate stats per category
     summary_data = {}
-    for k, c_name in CATEGORY_MAP.items():
+    for k, c_name in sorted(CATEGORY_MAP.items()):
         comp_vox = cat_data[k]['all_comp_voxels']
         comp_vols = cat_data[k]['all_comp_vols_mm3']
         sph_list = cat_data[k]['all_sphericities']
@@ -147,8 +152,8 @@ def run_experiment_008():
             'cat_code': k,
             'findings_count': len(total_vols),
             'total_components_count': len(comp_vox),
-            'mean_components_per_finding': float(np.mean(num_comps)) if num_comps else 0.0,
-            'mean_mask_vol_mm3': float(np.mean(total_vols)) if total_vols else 0.0,
+            'mean_components_per_finding': round(float(np.mean(num_comps)), 2) if num_comps else 0.0,
+            'mean_mask_vol_mm3': round(float(np.mean(total_vols)), 2) if total_vols else 0.0,
             'component_voxel_stats': {
                 'min': int(np.min(comp_vox)) if comp_vox else 0,
                 'p5': p5_vox,
@@ -157,20 +162,22 @@ def run_experiment_008():
                 'max': int(np.max(comp_vox)) if comp_vox else 0
             },
             'component_vol_mm3_stats': {
-                'mean': float(np.mean(comp_vols)) if comp_vols else 0.0,
-                'p5': float(np.percentile(comp_vols, 5)) if comp_vols else 0.0,
-                'median': float(np.median(comp_vols)) if comp_vols else 0.0,
-                'p95': float(np.percentile(comp_vols, 95)) if comp_vols else 0.0
+                'mean': round(float(np.mean(comp_vols)), 2) if comp_vols else 0.0,
+                'p5': round(float(np.percentile(comp_vols, 5)), 2) if comp_vols else 0.0,
+                'median': round(float(np.median(comp_vols)), 2) if comp_vols else 0.0,
+                'p95': round(float(np.percentile(comp_vols, 95)), 2) if comp_vols else 0.0
             },
-            'mean_sphericity': float(np.mean(sph_list)) if sph_list else 0.0,
-            'mean_sa_v_ratio': float(np.mean(sav_list)) if sav_list else 0.0,
+            'mean_sphericity': round(float(np.mean(sph_list)), 4) if sph_list else 0.0,
+            'mean_sa_v_ratio': round(float(np.mean(sav_list)), 4) if sav_list else 0.0,
             'recommended_min_size_voxels': max(10, p5_vox)
         }
         
-    with open(os.path.join(OUTPUT_DIR, 'morphology_fov_summary.json'), 'w') as f:
+    out_json = os.path.join(OUTPUT_DIR, 'exp005_morphology_noise_pruning_summary.json')
+    with open(out_json, 'w') as f:
         json.dump(summary_data, f, indent=2)
 
-    print("[exp_008] Completed successfully!")
+    print(f"[exp_005] Summary JSON successfully generated at {out_json}")
+
 
 if __name__ == '__main__':
-    run_experiment_008()
+    run_experiment_005()

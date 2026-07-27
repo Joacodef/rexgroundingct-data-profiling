@@ -8,13 +8,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from tqdm import tqdm
 from concurrent.futures import ProcessPoolExecutor, as_completed
-
-DATA_JSON = 'data/dataset.json'
-SEG_DIR = 'data/raw/segmentations'
-OUTPUT_DIR = 'data/phase_1/analysis_experiment_006'
-LOG_FILE = 'logs/phase_1_data_profiling/exp_006_pu_overlap.md'
-MAX_WORKERS = 16
-
 import sys
 from pathlib import Path
 
@@ -22,10 +15,19 @@ ROOT_DIR = Path(__file__).resolve().parent.parent.parent
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-from scripts.config import CATEGORY_MAP
+from scripts.config import (
+    CATEGORY_MAP,
+    DATASET_JSON,
+    RAW_MASKS_DIR,
+    DATA_DIR
+)
+
+DATA_JSON = str(DATASET_JSON)
+SEG_DIR = str(RAW_MASKS_DIR)
+OUTPUT_DIR = str(DATA_DIR / 'phase_1' / 'analysis_experiment_006')
+MAX_WORKERS = 16
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
-os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
 
 
 def analyze_scan_voxel_overlap(item):
@@ -100,7 +102,6 @@ def run_experiment_006():
     iou_matrix[nz_mask] = total_inter[nz_mask] / total_union[nz_mask].astype(np.float64)
     
     # 2. Compute PU Background Contamination Ratios
-    # In Train split (~1 mask/scan), average findings = 1.0. In Val split (~3 masks/scan), average findings = 2.8.
     val_cooccur_counts = np.zeros(num_cats, dtype=float)
     val_total_scans = len(val_items)
     
@@ -143,24 +144,6 @@ def run_experiment_006():
     
     with open(os.path.join(OUTPUT_DIR, 'pu_overlap_summary.json'), 'w') as f:
         json.dump(summary_data, f, indent=2)
-        
-    # Write experiment log markdown
-    with open(LOG_FILE, 'w') as f:
-        f.write("# Experiment Log 006: [Phase 1] Positive-Unlabeled (PU) Noise & Inter-Class Overlap Analysis\n\n")
-        f.write("**Status**: Completed\n\n")
-        f.write("## 1. Executive Summary\n\n")
-        f.write(f"* **Mean Off-Diagonal Voxel IoU**: `{summary_data['mean_inter_class_iou']:.4f}`\n\n")
-        f.write("## 2. PU Unannotated Contamination Estimation (Train vs Val Rates)\n\n")
-        f.write("| Category Name | Train Annotated Rate | Val Exhaustive Rate | Estimated PU Unannotated Bias |\n")
-        f.write("|---|---|---|---|\n")
-        for k in cat_keys:
-            c_name = CATEGORY_MAP[k]
-            tr_r = pu_unannotated_prob[c_name]['train_annotated_rate']
-            val_r = pu_unannotated_prob[c_name]['val_exhaustive_rate']
-            pu_b = pu_unannotated_prob[c_name]['estimated_pu_unannotated_bias']
-            f.write(f"| **{c_name}** | `{tr_r:.3f}` | `{val_r:.3f}` | `{pu_b:.3f}` |\n")
-        f.write("\n---\n")
-        f.write("Voxel IoU heatmap saved to `data/phase_1/analysis_experiment_006/exp006_inter_class_iou_matrix.png`.\n")
 
     print("[exp_006] Completed successfully!")
 
