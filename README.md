@@ -4,7 +4,7 @@ Dedicated research workspace for **Phase 1 Data Profiling & Spatial-Text Analysi
 
 > [!IMPORTANT]
 > **Repository Scope & Governance**:
-> This repository is dedicated exclusively to **Data Profiling, Spatial Density Prior Mapping, HU Radiodensity Analysis, NLP Syntax Shift Profiling, 3D Component Topology, Positive-Unlabeled Overlap Analysis, and Group Technical Report Generation**.
+> This repository is dedicated exclusively to **Data Profiling, Spatial Density Prior Mapping, HU Radiodensity Analysis, NLP Syntax Shift Profiling, 3D Component Topology, Multi-Finding Co-Occurrence Profiling, and Group Technical Report Generation**.
 > Model fine-tuning pipelines consume the empirical priors exported in `data/phase_1/phase_1_priors_bundle.json`.
 
 ---
@@ -49,10 +49,10 @@ rexgroundingct-data-profiling/
 Run any experiment using the shared Python environment:
 
 ```bash
-# 1. Dataset Disparity, Patient Hierarchy & Cross-Split Leakage Audit
+# 1. Dataset Disparity (14-Category Breakdown), Scan-Level Co-Occurrence Matrix ($14 \times 14$) & Patient Leakage Audit
 python scripts/exp_001_dataset_disparity_leakage.py
 
-# 2. Free-Text NLP Syntax Shift, Tokenization Dynamics & Spatial Locators
+# 2. Free-Text NLP Syntax Shift, Subword BPE Tokenization & Truncation Thresholds (77/128 tokens)
 python scripts/exp_002_nlp_prompt_syntax.py
 
 # 3. 3D RAS Spatial Coordinate Centroids, Density Maps & 4-Panel Figure
@@ -61,7 +61,7 @@ python scripts/exp_003_spatial_density_priors.py
 # 4. Hounsfield Unit (HU) Radiodensity, Contrast Deltas & Windowing Bounds
 python scripts/exp_004_hu_radiodensity.py
 
-# 5. 3D Connected-Component Morphology, Sphericity & Noise Pruning Thresholds
+# 5. 3D Connected-Component Morphology, Sphericity, Physical Extents (mm) & Noise Pruning Thresholds
 python scripts/exp_005_morphology_noise_pruning.py
 ```
 
@@ -72,8 +72,10 @@ python scripts/exp_005_morphology_noise_pruning.py
 1. **Empirical Data Priors Bundle** (`../data/phase_1/phase_1_priors_bundle.json`):
    - Categorical HU attenuation windowing bounds (`[min_HU, max_HU]`)
    - 3D morphology noise size pruning thresholds (`recommended_min_size_voxels`)
+   - Physical 3D bounding box dimensions $(\Delta X, \Delta Y, \Delta Z)$ & aspect ratios
+   - $14 \times 14$ Scan-Level Multi-Finding Co-Occurrence Matrix ($P(c_j \mid c_i)$) & heatmap (`exp001_cooccurrence_heatmap.png`)
    - 4-Tier Spatial Prior Taxonomy mapping
-   - Patient ID cross-split leakage blacklist
+   - Patient ID cross-split leakage audit lists
 
 2. **Overleaf LaTeX Group Technical Report**:
    - Source code located in [`logs/phase_1_report_overleaf/main.tex`](file:///home/jdeferrari/rex_project/rexgroundingct-data-profiling/logs/phase_1_report_overleaf/main.tex) and packaged in `logs/phase_1_report_overleaf.zip`.

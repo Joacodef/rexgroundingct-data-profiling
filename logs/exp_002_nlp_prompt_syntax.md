@@ -3,7 +3,7 @@
 **Date**: July 2026 (Consolidated July 27, 2026)  
 **Status**: Completed  
 **Primary Output**: `data/phase_1/analysis_experiment_002/exp002_nlp_prompt_syntax_summary.json`  
-**Consolidated Script**: `scripts/data_analysis/exp_002_nlp_prompt_syntax.py`
+**Consolidated Script**: `scripts/exp_002_nlp_prompt_syntax.py`
 
 ---
 
@@ -95,4 +95,4 @@ Experiment 002 consolidates NLP clinical text profiling across all 8,650 finding
 ## 6. Artifact & Script References
 
 * **Summary Output JSON**: `data/phase_1/analysis_experiment_002/exp002_nlp_prompt_syntax_summary.json`
-* **Analysis Entrypoint**: `scripts/data_analysis/exp_002_nlp_prompt_syntax.py`
+* **Analysis Entrypoint**: `scripts/exp_002_nlp_prompt_syntax.py`

@@ -57,6 +57,8 @@ def analyze_mask_morphology(item):
                         comp_vols_mm3 = []
                         comp_sphericities = []
                         comp_sa_v_ratios = []
+                        comp_bboxes_mm = []
+                        comp_aspect_ratios = []
                         
                         for comp_id in range(1, num_components + 1):
                             c_mask = (labeled_mask == comp_id)
@@ -67,6 +69,19 @@ def analyze_mask_morphology(item):
                             c_vol_mm3 = float(c_voxels * voxel_vol)
                             comp_voxels.append(c_voxels)
                             comp_vols_mm3.append(c_vol_mm3)
+
+                            # Calculate 3D Physical Bounding Box Extents (mm)
+                            coords = np.argwhere(c_mask)
+                            min_c = coords.min(axis=0)
+                            max_c = coords.max(axis=0)
+                            span_vox = (max_c - min_c + 1)
+                            dx_mm = float(span_vox[0] * zooms[0])
+                            dy_mm = float(span_vox[1] * zooms[1])
+                            dz_mm = float(span_vox[2] * zooms[2])
+                            
+                            aspect_ratio = float(dz_mm / max(1e-3, max(dx_mm, dy_mm)))
+                            comp_bboxes_mm.append([dx_mm, dy_mm, dz_mm])
+                            comp_aspect_ratios.append(aspect_ratio)
                             
                             if c_voxels > 5:
                                 eroded = binary_erosion(c_mask)
@@ -86,7 +101,9 @@ def analyze_mask_morphology(item):
                             'comp_voxels': comp_voxels,
                             'comp_vols_mm3': comp_vols_mm3,
                             'sphericities': comp_sphericities,
-                            'sa_v_ratios': comp_sa_v_ratios
+                            'sa_v_ratios': comp_sa_v_ratios,
+                            'bboxes_mm': comp_bboxes_mm,
+                            'aspect_ratios': comp_aspect_ratios
                         })
     except Exception:
         pass
@@ -116,7 +133,9 @@ def run_experiment_005():
             'all_comp_voxels': [],
             'all_comp_vols_mm3': [],
             'all_sphericities': [],
-            'all_sa_v_ratios': []
+            'all_sa_v_ratios': [],
+            'all_bboxes_mm': [],
+            'all_aspect_ratios': []
         } for k in CATEGORY_MAP.keys()
     }
     
@@ -133,6 +152,8 @@ def run_experiment_005():
                     cat_data[code]['all_comp_vols_mm3'].extend(r['comp_vols_mm3'])
                     cat_data[code]['all_sphericities'].extend(r['sphericities'])
                     cat_data[code]['all_sa_v_ratios'].extend(r['sa_v_ratios'])
+                    cat_data[code]['all_bboxes_mm'].extend(r['bboxes_mm'])
+                    cat_data[code]['all_aspect_ratios'].extend(r['aspect_ratios'])
                     
     # Aggregate stats per category
     summary_data = {}
@@ -141,6 +162,8 @@ def run_experiment_005():
         comp_vols = cat_data[k]['all_comp_vols_mm3']
         sph_list = cat_data[k]['all_sphericities']
         sav_list = cat_data[k]['all_sa_v_ratios']
+        bboxes = cat_data[k]['all_bboxes_mm']
+        aspects = cat_data[k]['all_aspect_ratios']
         num_comps = cat_data[k]['num_components_per_finding']
         total_vols = cat_data[k]['total_mask_vols_mm3']
         
@@ -148,12 +171,23 @@ def run_experiment_005():
         med_vox = int(np.median(comp_vox)) if comp_vox else 0
         p95_vox = int(np.percentile(comp_vox, 95)) if comp_vox else 0
         
+        mean_dx = round(float(np.mean([b[0] for b in bboxes])), 2) if bboxes else 0.0
+        mean_dy = round(float(np.mean([b[1] for b in bboxes])), 2) if bboxes else 0.0
+        mean_dz = round(float(np.mean([b[2] for b in bboxes])), 2) if bboxes else 0.0
+        mean_aspect = round(float(np.mean(aspects)), 2) if aspects else 0.0
+
         summary_data[c_name] = {
             'cat_code': k,
             'findings_count': len(total_vols),
             'total_components_count': len(comp_vox),
             'mean_components_per_finding': round(float(np.mean(num_comps)), 2) if num_comps else 0.0,
             'mean_mask_vol_mm3': round(float(np.mean(total_vols)), 2) if total_vols else 0.0,
+            'physical_extent_mm_stats': {
+                'mean_extent_X_mm': mean_dx,
+                'mean_extent_Y_mm': mean_dy,
+                'mean_extent_Z_mm': mean_dz,
+                'mean_aspect_ratio_Z_vs_XY': mean_aspect
+            },
             'component_voxel_stats': {
                 'min': int(np.min(comp_vox)) if comp_vox else 0,
                 'p5': p5_vox,

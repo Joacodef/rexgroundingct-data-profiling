@@ -3,7 +3,7 @@
 **Date**: July 2026 (Consolidated July 27, 2026)  
 **Status**: Completed  
 **Primary Output**: `data/phase_1/analysis_experiment_001/exp001_disparity_leakage_summary.json`  
-**Consolidated Script**: `scripts/data_analysis/exp_001_dataset_disparity_leakage.py`
+**Consolidated Script**: `scripts/exp_001_dataset_disparity_leakage.py`
 
 ---
 
@@ -17,10 +17,10 @@ Experiment 001 quantifies the dataset composition across Train, Validation, and 
 
 | Split | Total CT Scans | Total Findings | Findings / Scan | Unique Patients | Mean Instances / Finding | Std Dev | Max Instances | Annotation Protocol |
 |---|---|---|---|---|---|---|---|---|
-| **Train** | 2,992 | 7,687 | `2.57` | 2,334 | `1.948` | $\pm 1.25$ | 11 | Partial / Sparse |
-| **Validation** | 200 | 381 | `1.91` | 190 | `3.714` | $\pm 3.82$ | **36** | Exhaustive |
-| **Test** | 300 | — | — | 281 | — | — | — | Exhaustive |
-| **Total / Overall** | 3,192 | 8,068 | `2.53` | 2,752 | `2.031` | $\pm 1.63$ | 36 | Mixed |
+| **Train** | 2,992 | 7,687 | `2.57` | 2,603 | `1.948` | $\pm 0.96$ | 11 | Partial / Sparse |
+| **Validation** | 200 | 381 | `1.91` | 190 | `3.714` | $\pm 4.44$ | **36** | Exhaustive |
+| **Test** | 300 | 582 | `1.94` | 281 | `1.000` | $\pm 0.00$ | 1 | Exhaustive |
+| **Total / Overall** | 3,192 | 8,650 | `2.71` | 3,063 | `2.000` | $\pm 1.63$ | 36 | Mixed |
 
 ### Key Scientific Findings:
 1. **The Instance Sparsity Gap**:
@@ -39,7 +39,7 @@ A 3-tier ID decomposition was performed across all 3,192 scans to identify longi
 | Cross-Split Comparison | Overlapping Patients | Patient IDs | Action Taken |
 |---|---|---|---|
 | **Train $\leftrightarrow$ Val Overlap** | **2 patients** | `['1841', '2936']` | Flagged for validation isolation to prevent optimistic validation bias. |
-| **Train $\leftrightarrow$ Test Overlap** | **3 patients** | `['3357', '3675', '39']` | Noted for final evaluation integrity. |
+| **Train $\leftrightarrow$ Test Overlap** | **4 patients** | `['302', '3357', '3675', '39']` | Noted for final evaluation integrity. |
 | **Val $\leftrightarrow$ Test Overlap** | **5 patients** | `['13119', '13278', '13479', '13492', '13583']` | Recorded in validation hierarchy metadata. |
 
 ---
