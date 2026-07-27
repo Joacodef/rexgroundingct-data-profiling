@@ -128,7 +128,7 @@ def run_experiment_005():
     sns.heatmap(co_matrix, xticklabels=cat_labels, yticklabels=cat_labels, annot=True, fmt='d', cmap='Blues')
     plt.title("ReXGroundingCT Multi-Finding Co-Occurrence Matrix")
     plt.tight_layout()
-    plt.savefig(os.path.join(OUTPUT_DIR, 'cooccurrence_matrix.png'), dpi=200)
+    plt.savefig(os.path.join(OUTPUT_DIR, 'exp005_cooccurrence_matrix.png'), dpi=200)
     plt.close()
     
     # Save JSON summary
@@ -165,7 +165,7 @@ def run_experiment_005():
             c_cnt = summary_data['category_counts'][c_name]
             f.write(f"| **{c_name}** | {c_cnt} | `{e_mean:.2f}` | `{e_max}` |\n")
         f.write("\n---\n")
-        f.write("Co-occurrence heatmap saved to `data/analysis_experiment_005/cooccurrence_matrix.png`.\n")
+        f.write("Co-occurrence heatmap saved to `data/phase_1/analysis_experiment_005/exp005_cooccurrence_matrix.png`.\n")
 
     print("[exp_005] Completed successfully!")
 

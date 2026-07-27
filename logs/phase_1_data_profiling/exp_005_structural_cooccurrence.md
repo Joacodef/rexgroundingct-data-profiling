@@ -27,4 +27,4 @@
 | **Other focal** | 62 | `1.70` | `5` |
 
 ---
-Co-occurrence heatmap saved to `data/phase_1/analysis_experiment_005/cooccurrence_matrix.png`.
+Co-occurrence heatmap saved to `data/phase_1/analysis_experiment_005/exp005_cooccurrence_matrix.png`.

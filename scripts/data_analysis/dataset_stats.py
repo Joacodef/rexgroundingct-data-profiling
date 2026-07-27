@@ -42,7 +42,7 @@ plt.yscale('log')
 plt.xticks(rotation=90)
 plt.title('Distribution of Mask Volume Relative to Scan Volume')
 plt.tight_layout()
-plt.savefig(os.path.join(OUTPUT_DIR, 'relative_volume_boxplot.png'), dpi=300)
+plt.savefig(os.path.join(OUTPUT_DIR, 'exp008_relative_volume_boxplot.png'), dpi=300)
 plt.close()
 
 # 2. Average Entity Count
@@ -51,7 +51,7 @@ sns.barplot(data=df, x='Category', y='EntityCount', hue='Split')
 plt.xticks(rotation=90)
 plt.title('Average Entity Counts per Finding Category')
 plt.tight_layout()
-plt.savefig(os.path.join(OUTPUT_DIR, 'average_entity_counts.png'), dpi=300)
+plt.savefig(os.path.join(OUTPUT_DIR, 'exp001_average_entity_counts.png'), dpi=300)
 plt.close()
 
 # 3. Histogram of Entity Counts
@@ -62,7 +62,7 @@ plt.title('Distribution of Entity Counts per Finding (Normalized)')
 plt.xlabel('Entity Count (Number of Instances)')
 plt.ylabel('Proportion of Findings in Split')
 plt.tight_layout()
-plt.savefig(os.path.join(OUTPUT_DIR, 'entity_counts_hist.png'), dpi=300)
+plt.savefig(os.path.join(OUTPUT_DIR, 'exp001_entity_counts_hist.png'), dpi=300)
 plt.close()
 
 # 4. Findings per Scan
@@ -74,7 +74,7 @@ plt.title('Distribution of Findings Count per Scan (Normalized)')
 plt.xlabel('Total Number of Findings in a Single Scan')
 plt.ylabel('Proportion of Scans in Split')
 plt.tight_layout()
-plt.savefig(os.path.join(OUTPUT_DIR, 'findings_per_scan.png'), dpi=300)
+plt.savefig(os.path.join(OUTPUT_DIR, 'exp001_findings_per_scan.png'), dpi=300)
 plt.close()
 
 print("Descriptive statistics generated successfully.")

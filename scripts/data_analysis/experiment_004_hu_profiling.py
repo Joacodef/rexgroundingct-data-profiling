@@ -201,7 +201,7 @@ def main():
     plt.title('Hounsfield Unit (HU) Radiodensity Distribution Across 14 Pathology Categories', fontsize=14, fontweight='bold')
     plt.legend(loc='upper right')
     plt.tight_layout()
-    plt.savefig(os.path.join(OUTPUT_DIR, 'hu_distribution_violin.png'), dpi=300)
+    plt.savefig(os.path.join(OUTPUT_DIR, 'exp004_hu_distribution_violin.png'), dpi=300)
     plt.close()
 
     # 2. Bar plot of Contrast Delta HU
@@ -212,7 +212,7 @@ def main():
     plt.ylabel('Contrast Delta HU (Pathology - Background)', fontsize=12)
     plt.title('HU Contrast Delta Against Surrounding Healthy Tissue per Pathology', fontsize=14, fontweight='bold')
     plt.tight_layout()
-    plt.savefig(os.path.join(OUTPUT_DIR, 'hu_contrast_delta_barplot.png'), dpi=300)
+    plt.savefig(os.path.join(OUTPUT_DIR, 'exp004_hu_contrast_delta_barplot.png'), dpi=300)
     plt.close()
 
     # Generate Quantitative Experiment Log
@@ -246,9 +246,9 @@ def main():
 
 ## 3. Generated Visual Artifacts
 
-* **`data/analysis_experiment_004/hu_distribution_violin.png`**: High-resolution violin plot showing complete HU distribution profiles for all 14 categories.
-* **`data/analysis_experiment_004/hu_contrast_delta_barplot.png`**: Bar plot quantifying contrast deltas ($\Delta \\text{{HU}}$) between mask regions and surrounding tissue.
-* **`data/analysis_experiment_004/hu_summary_stats.csv` & `json`**: Raw CSV/JSON statistical data.
+* **`data/phase_1/analysis_experiment_004/exp004_hu_distribution_violin.png`**: High-resolution violin plot showing complete HU distribution profiles for all 14 categories.
+* **`data/phase_1/analysis_experiment_004/exp004_hu_contrast_delta_barplot.png`**: Bar plot quantifying contrast deltas ($\Delta \\text{{HU}}$) between mask regions and surrounding tissue.
+* **`data/phase_1/analysis_experiment_004/hu_summary_stats.csv` & `json`**: Raw CSV/JSON statistical data.
 """
 
     with open(LOG_FILE, 'w') as f:

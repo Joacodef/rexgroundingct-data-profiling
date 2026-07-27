@@ -132,7 +132,7 @@ def run_experiment_006():
     sns.heatmap(iou_matrix, xticklabels=cat_labels, yticklabels=cat_labels, annot=True, fmt='.3f', cmap='Oranges')
     plt.title("Validation Multi-Label Voxel-Level Inter-Class IoU Matrix")
     plt.tight_layout()
-    plt.savefig(os.path.join(OUTPUT_DIR, 'inter_class_iou_matrix.png'), dpi=200)
+    plt.savefig(os.path.join(OUTPUT_DIR, 'exp006_inter_class_iou_matrix.png'), dpi=200)
     plt.close()
     
     # Save JSON summary
@@ -160,7 +160,7 @@ def run_experiment_006():
             pu_b = pu_unannotated_prob[c_name]['estimated_pu_unannotated_bias']
             f.write(f"| **{c_name}** | `{tr_r:.3f}` | `{val_r:.3f}` | `{pu_b:.3f}` |\n")
         f.write("\n---\n")
-        f.write("Voxel IoU heatmap saved to `data/analysis_experiment_006/inter_class_iou_matrix.png`.\n")
+        f.write("Voxel IoU heatmap saved to `data/phase_1/analysis_experiment_006/exp006_inter_class_iou_matrix.png`.\n")
 
     print("[exp_006] Completed successfully!")
 

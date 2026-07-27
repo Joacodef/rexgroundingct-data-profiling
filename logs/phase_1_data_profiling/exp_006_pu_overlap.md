@@ -26,4 +26,4 @@
 | **Other focal** | `0.018` | `0.035` | `0.017` |
 
 ---
-Voxel IoU heatmap saved to `data/phase_1/analysis_experiment_006/inter_class_iou_matrix.png`.
+Voxel IoU heatmap saved to `data/phase_1/analysis_experiment_006/exp006_inter_class_iou_matrix.png`.
