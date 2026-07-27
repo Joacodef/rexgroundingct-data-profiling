@@ -12,29 +12,22 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 DATA_JSON = 'data/dataset.json'
 IMG_DIR = 'data/raw/images'
 SEG_DIR = 'data/raw/segmentations'
-OUTPUT_DIR = 'data/analysis_experiment_005'
+OUTPUT_DIR = 'data/phase_1/analysis_experiment_005'
 LOG_FILE = 'logs/phase_1_data_profiling/exp_005_structural_cooccurrence.md'
 MAX_WORKERS = 16
+
+import sys
+from pathlib import Path
+
+ROOT_DIR = Path(__file__).resolve().parent.parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
+from scripts.config import CATEGORY_MAP
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
 
-CATEGORY_MAP = {
-    '1a': 'Bronchial wall thickening',
-    '1b': 'Bronchiectasis',
-    '1c': 'Emphysema',
-    '1d': 'Septal thickening',
-    '1e': 'Micronodules',
-    '1f': 'Other non-focal',
-    '2a': 'Linear opacities',
-    '2b': 'Atelectasis / consolidation',
-    '2c': 'Ground-glass opacity',
-    '2d': 'Pulmonary nodules / masses',
-    '2e': 'Pleural effusion / thickening',
-    '2f': 'Honeycombing',
-    '2g': 'Pneumothorax',
-    '2h': 'Other focal'
-}
 
 def analyze_single_scan_header(item):
     name = item['name']
@@ -61,8 +54,8 @@ def analyze_single_scan_header(item):
             seg = nib.load(seg_path)
             data = seg.get_fdata() > 0
             if data.ndim == 4:
-                for idx in range(data.shape[3]):
-                    ch_data = data[..., idx]
+                for idx in range(data.shape[0]):
+                    ch_data = data[idx]
                     if np.any(ch_data):
                         coords = np.argwhere(ch_data)
                         min_c = coords.min(axis=0)
@@ -86,7 +79,7 @@ def run_experiment_005():
         ds = json.load(f)
         
     train_items = ds.get('train', [])
-    val_items = ds.get('validation', [])
+    val_items = ds.get('val', [])
     all_items = train_items + val_items
     
     # 1. Co-occurrence Matrix Across All Scans

@@ -10,7 +10,7 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 
 DATA_JSON = 'data/dataset.json'
 SEG_DIR = 'data/raw/segmentations'
-OUTPUT_DIR = 'data/analysis_experiment_007'
+OUTPUT_DIR = 'data/phase_1/analysis_experiment_007'
 LOG_FILE = 'logs/phase_1_data_profiling/exp_007_text_spatial_alignment.md'
 MAX_WORKERS = 16
 

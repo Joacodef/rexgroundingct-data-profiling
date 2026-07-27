@@ -37,6 +37,6 @@
 
 ## 3. Generated Visual Artifacts
 
-* **`data/analysis_experiment_004/hu_distribution_violin.png`**: High-resolution violin plot showing complete HU distribution profiles for all 14 categories.
-* **`data/analysis_experiment_004/hu_contrast_delta_barplot.png`**: Bar plot quantifying contrast deltas ($\Delta \text{HU}$) between mask regions and surrounding tissue.
-* **`data/analysis_experiment_004/hu_summary_stats.csv` & `json`**: Raw CSV/JSON statistical data.
+* **`data/phase_1/analysis_experiment_004/hu_distribution_violin.png`**: High-resolution violin plot showing complete HU distribution profiles for all 14 categories.
+* **`data/phase_1/analysis_experiment_004/hu_contrast_delta_barplot.png`**: Bar plot quantifying contrast deltas ($\Delta \text{HU}$) between mask regions and surrounding tissue.
+* **`data/phase_1/analysis_experiment_004/hu_summary_stats.csv` & `json`**: Raw CSV/JSON statistical data.

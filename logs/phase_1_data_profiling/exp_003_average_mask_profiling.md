@@ -40,4 +40,4 @@
 
 ## 3. Generated Visual Artifacts
 
-For each of the 14 official pathology categories, high-resolution 2D Average Intensity Projections (AIP) comparing Train vs Validation in Coronal (R-L / I-S), Sagittal (A-P / I-S), and Axial (R-L / A-P) planes have been exported to `data/analysis_experiment_003/`.
+For each of the 14 official pathology categories, high-resolution 2D Average Intensity Projections (AIP) comparing Train vs Validation in Coronal (R-L / I-S), Sagittal (A-P / I-S), and Axial (R-L / A-P) planes have been exported to `data/phase_1/analysis_experiment_003/`.

@@ -71,6 +71,7 @@ Generate relative volume distributions, entity counts per finding, and 2D corona
 ```bash
 ./.venv-voxtell/bin/python scripts/data_analysis/dataset_stats.py
 ./.venv-voxtell/bin/python scripts/data_analysis/mask_heatmaps.py
+./.venv-voxtell/bin/python scripts/data_analysis/run_phase1_expanded_pipeline.py
 ```
 
 ### 2. NLP Prompt Text Shift Analysis

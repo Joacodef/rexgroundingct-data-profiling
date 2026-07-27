@@ -12,30 +12,23 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 DATA_JSON = 'data/dataset.json'
 IMG_DIR = 'data/raw/images'
 SEG_DIR = 'data/raw/segmentations'
-OUTPUT_DIR = 'data/analysis_experiment_004'
+OUTPUT_DIR = 'data/phase_1/analysis_experiment_004'
 LOG_FILE = 'logs/phase_1_data_profiling/exp_004_hu_radiodensity_profiling.md'
 MAX_WORKERS = 32
 MAX_SAMPLES_PER_MASK = 10000
 
+import sys
+from pathlib import Path
+
+ROOT_DIR = Path(__file__).resolve().parent.parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
+from scripts.config import CATEGORY_MAP
+
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
 
-CATEGORY_MAP = {
-    '1a': 'Bronchial wall thickening',
-    '1b': 'Bronchiectasis',
-    '1c': 'Emphysema',
-    '1d': 'Septal thickening',
-    '1e': 'Micronodules',
-    '1f': 'Other non-focal',
-    '2a': 'Linear opacities',
-    '2b': 'Atelectasis / consolidation',
-    '2c': 'Ground-glass opacity',
-    '2d': 'Pulmonary nodules / masses',
-    '2e': 'Pleural effusion / thickening',
-    '2f': 'Honeycombing',
-    '2g': 'Pneumothorax',
-    '2h': 'Other focal'
-}
 
 def process_single_scan(item_info):
     """Worker function to parse 3D CT scan and 4D mask, extracting HU values inside & around masks."""

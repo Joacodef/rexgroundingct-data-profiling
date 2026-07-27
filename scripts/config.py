@@ -41,3 +41,26 @@ TMP_PREP_DIR = Path(os.getenv("TMP_PREP_DIR") or "/tmp/rexgroundingct_preprocess
 # 7. Hardware & Hardware Isolation Settings
 DEFAULT_DEVICE = os.getenv("DEFAULT_DEVICE", "cuda:0")
 CUDA_VISIBLE_DEVICES = os.getenv("CUDA_VISIBLE_DEVICES", "0")
+
+# 8. Challenge 14-Category Definitions & Taxonomy
+CATEGORY_MAP = {
+    '1a': 'Bronchial wall thickening',
+    '1b': 'Bronchiectasis',
+    '1c': 'Emphysema',
+    '1d': 'Septal thickening',
+    '1e': 'Micronodules',
+    '1f': 'Other non-focal',
+    '2a': 'Linear opacities',
+    '2b': 'Atelectasis / consolidation',
+    '2c': 'Ground-glass opacity',
+    '2d': 'Pulmonary nodules / masses',
+    '2e': 'Pleural effusion / thickening',
+    '2f': 'Honeycombing',
+    '2g': 'Pneumothorax',
+    '2h': 'Other focal'
+}
+
+NON_FOCAL_CATEGORIES = {'1a', '1b', '1c', '1d', '1e', '1f'}
+FOCAL_CATEGORIES = {'2a', '2b', '2c', '2d', '2e', '2f', '2g', '2h'}
+REVERSE_CATEGORY_MAP = {v: k for k, v in CATEGORY_MAP.items()}
+

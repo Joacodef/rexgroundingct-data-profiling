@@ -11,29 +11,22 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 
 DATA_JSON = 'data/dataset.json'
 SEG_DIR = 'data/raw/segmentations'
-OUTPUT_DIR = 'data/analysis_experiment_006'
+OUTPUT_DIR = 'data/phase_1/analysis_experiment_006'
 LOG_FILE = 'logs/phase_1_data_profiling/exp_006_pu_overlap.md'
 MAX_WORKERS = 16
+
+import sys
+from pathlib import Path
+
+ROOT_DIR = Path(__file__).resolve().parent.parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
+from scripts.config import CATEGORY_MAP
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
 
-CATEGORY_MAP = {
-    '1a': 'Bronchial wall thickening',
-    '1b': 'Bronchiectasis',
-    '1c': 'Emphysema',
-    '1d': 'Septal thickening',
-    '1e': 'Micronodules',
-    '1f': 'Other non-focal',
-    '2a': 'Linear opacities',
-    '2b': 'Atelectasis / consolidation',
-    '2c': 'Ground-glass opacity',
-    '2d': 'Pulmonary nodules / masses',
-    '2e': 'Pleural effusion / thickening',
-    '2f': 'Honeycombing',
-    '2g': 'Pneumothorax',
-    '2h': 'Other focal'
-}
 
 def analyze_scan_voxel_overlap(item):
     name = item['name']
@@ -50,22 +43,22 @@ def analyze_scan_voxel_overlap(item):
 
     try:
         seg = nib.load(seg_path)
-        data = seg.get_fdata() > 0
-        if data.ndim == 4 and data.shape[3] > 1:
+        data = seg.get_fdata() > 0.5
+        if data.ndim == 4:
             channel_cats = []
-            for ch_idx in range(data.shape[3]):
-                ch_str = str(ch_idx)
-                if ch_str in cats_dict and cats_dict[ch_str] in CATEGORY_MAP:
-                    channel_cats.append((ch_idx, cats_dict[ch_str]))
+            for ch_str, cat_code in cats_dict.items():
+                ch_idx = int(ch_str)
+                if ch_idx < data.shape[0] and cat_code in CATEGORY_MAP:
+                    channel_cats.append((ch_idx, cat_code))
                     
             for i in range(len(channel_cats)):
                 ch_i, cat_i = channel_cats[i]
                 idx_i = cat_keys.index(cat_i)
-                mask_i = data[..., ch_i]
+                mask_i = data[ch_i]
                 for j in range(i, len(channel_cats)):
                     ch_j, cat_j = channel_cats[j]
                     idx_j = cat_keys.index(cat_j)
-                    mask_j = data[..., ch_j]
+                    mask_j = data[ch_j]
                     
                     inter = np.logical_and(mask_i, mask_j).sum()
                     union = np.logical_or(mask_i, mask_j).sum()
@@ -84,7 +77,7 @@ def run_experiment_006():
     with open(DATA_JSON, 'r') as f:
         ds = json.load(f)
         
-    val_items = ds.get('validation', [])
+    val_items = ds.get('val', [])
     train_items = ds.get('train', [])
     
     cat_keys = sorted(list(CATEGORY_MAP.keys()))
