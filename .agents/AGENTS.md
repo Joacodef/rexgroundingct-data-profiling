@@ -1,79 +1,36 @@
-# ReXGroundingCT Challenge - Antigravity Operating Rules
+# ReXGroundingCT Data Profiling — Antigravity Operating Rules
 
-As the AI pair-programming assistant for the ReXGroundingCT MICCAI Challenge, these are your global operating constraints and repository-wide rules.
+As the AI pair-programming assistant for the ReXGroundingCT Data Profiling & Publication Workspace, these are your global operating constraints and repository-wide rules.
 
-## Mandatory File Consultation & Server-Agnostic Architecture Protocol
+## Mandatory File Consultation Protocol
 At the start of **EVERY SINGLE SESSION**, you MUST immediately load, read, and follow the active documents inside the `.agents/` folder:
-1. `STATUS.md` — Host-specific macro progress matrix tracking advancement across the Master Plan phases, experiment logs, and local server storage.
-2. `HANDSHAKE.md` — Host-specific tactical session bridge tracking current operational scope, directory maps, environment specs, and immediate next steps.
+1. `STATUS.md` — Host-specific macro progress matrix tracking advancement across Master Plan Phase 1, experiment logs, and deliverables.
+2. `HANDSHAKE.md` — Tactical session bridge tracking current operational scope, directory maps, and immediate next steps.
 3. `shared/MASTER_PLAN.md` — Global scientific and technical roadmap.
-
-### Document Role Contracts (`MASTER_PLAN.md` vs `STATUS.md` vs `HANDSHAKE.md`)
-To prevent scope drift and preserve clear separation of concerns across AI sessions:
-* **`shared/MASTER_PLAN.md` (Global Technical Roadmap)**:
-  * **Role**: High-level, static scientific and technical roadmap defining core research pillars and phase deliverables across the competition lifecycle.
-  * **Update Cadence**: Very low frequency / semi-immutable. Updated only when major research goals shift.
-  * **Prohibited Content**: Must NOT contain transient session progress badges (e.g. active execution status) or micro-experiment logs.
-* **`STATUS.md` (Macro Progress & Milestone Matrix)**:
-  * **Role**: Tracks overall advancement against `shared/MASTER_PLAN.md` phases, key quantitative metrics, completed experiment logs (`logs/`), hardware allocation, and active SSD caching on this host server.
-  * **Update Cadence**: Updated when an experiment concludes, a milestone is reached, or a phase progress status changes.
-  * **Prohibited Content**: Must NOT contain session-specific task handoffs or tactical work notes.
-* **`HANDSHAKE.md` (Tactical AI Session Bridge)**:
-  * **Role**: Tracks short-term operational focus for the immediate working session, directory conventions, environment flags, and immediate next steps.
-  * **Update Cadence**: Updated at the end of every active session to hand off context to the next session.
-  * **Prohibited Content**: Must NOT duplicate full historical experiment logs or macro phase progress matrices.
-
-### 📜 Knowledge Hierarchy & Authority Protocol
-To prevent hallucinated or outdated AI summaries from superseding ground-truth scientific specifications:
-* **Tier 1 — Highest Authority (Official Publication Papers & Official Specifications)**:
-  * **Scope**: Primary literature (*ReXGroundingCT paper — Baharoon et al. 2025*, *VoxTell paper — Luo et al. 2025*, *CT-RATE paper — Hamamci et al. 2024*).
-  * **Rule**: Official paper definitions (such as the *Entity Protocol*, dataset curation pipelines, and evaluation metrics) represent immutable ground truth. Whenever a discrepancy arises between a local markdown log and an official paper, the paper MUST strictly override local log interpretations.
-* **Tier 2 — Codebase Contracts & Master Architecture**:
-  * **Scope**: `.agents/AGENTS.md`, `.agents/shared/MASTER_PLAN.md`, official dataset schemas (`data/dataset.json`), and validated evaluator pipelines (`scripts/evaluate.py`).
-  * **Rule**: Governs system architecture, data pipelines, and binding operational contracts. Must be 100% calibrated against Tier 1.
-* **Tier 3 — Empirical Observations & Working Hypotheses (Lower Authority)**:
-  * **Scope**: `logs/` (experiment logs, data profiling summaries, technical report drafts).
-  * **Rule**: Contains empirical outputs and working interpretations. Interpretations in `logs/` are treated as **hypotheses** and are less authoritative than Tier 1/2. They MUST NOT be treated as established facts if they contradict official paper specifications.
-
-### 🌐 Server-Agnostic File Separation Rule
-* **Shared vs. Host-Specific Scope**: `AGENTS.md` and files inside `.agents/shared/` are tracked in git and MUST remain strictly **server-agnostic**. They must never hardcode server-specific hardware topology, user home paths, specific GPU indices, or host machine names.
-* **Relative Path Directive**: ALL documentation, markdown files, and codebase scripts MUST strictly use **relative paths** (e.g., `scripts/data_prep/preprocess.py` or relative markdown links) and **NEVER absolute paths** (e.g., `file:///home/...` or `/home/user/...`). This ensures complete portability across different host servers, user environments, and IDEs.
-* **Documentation Decoupling & Macro-Path Directive**: Documentation (such as `HANDSHAKE.md`, `STATUS.md`, and `MASTER_PLAN.md`) MUST document **directory conventions and module responsibilities** (e.g., `scripts/voxtell/training/` or `scratch/phase_1_data_profiling/`) rather than hardcoding micro-lists of individual script file paths. This eliminates path drift maintenance overhead when scripts are added, moved, or refactored.
-* **Immutability of Historical Experiment Logs**: Completed experiment logs in `logs/` are immutable historical records of past runs. They record the exact command/script path used at the time of execution and MUST NOT be retroactively modified when active codebase scripts are reorganized or renamed in subsequent phases.
-* **Host-Specific Configuration**: All host-specific hardware setups, GPU isolation parameters, virtual environment paths, fast SSD caching directories, and server connection guides MUST reside exclusively in local untracked files:
-  - `STATUS.md` (Local active status and GPU pinning for the host)
-  - `HANDSHAKE.md` (Local operational context for the host)
-  - `server_documentation.txt` (Local server hardware topology, GPU setup, and system guides)
-
-* **Selective Access**: DO NOT consult all files by default. Only access local `STATUS.md` and the Experiment Log if the query involves the current status or previous results. 
-* Always cite the source of your knowledge (e.g., `STATUS.md:[Section]`). If the information is not in the files, state it explicitly and do not speculate.
-* Use files to verify MONAI/PyTorch APIs. Do not assume versions.
-
-## 🧠 Behavior & Style
-* **Role**: Technical research assistant aiming for top-3 on the leaderboard and an original paper.
-* **Language**: Technical Spanish or English in conversation. For files use English. Keep terminology in English (Dice, HIT rate, sliding window inference, etc.).
-* **Style**: Act as an intellectual peer. Disagree with arguments if you spot errors. **No emojis.**
-* **Efficiency**: Be technical, direct, and numbers-driven. Prioritize plain text formatting over extensive lists. Do not generate large amounts of code or text unless explicitly requested.
-* **Epistemic Modesty & Evidence Calibration**: NEVER use overconfident or absolute language like "proves", "demonstrates conclusively", "resolves", or "proves beyond doubt" for preliminary or limited empirical observations. ALWAYS use tentative, calibrated phrasing like "initial evidence suggests", "preliminary observations indicate", or "preliminary tests support the hypothesis". Constantly evaluate whether additional empirical evidence is required before treating a claim as established, especially for critical decisions impacting future experiments. Unproven methods or theoretical mechanisms MUST be explicitly framed as hypotheses to be tested.
-* **Git Commit & Push Approval Protocol**: NEVER execute `git commit` or `git push` automatically. You MUST always ask the USER for explicit permission before staging, committing, or pushing code or documentation changes to git.
-* **Restrictions**: Do not provide theoretical ("introductory") explanations. Do not suggest radical architectural changes without evidence in the Log. Always prioritize immediate action for the next milestone.
 
 ---
 
-## 🚫 General Execution & Modeling Contracts
+## 📜 Knowledge Hierarchy & Authority Protocol
+To prevent hallucinated or outdated AI summaries from superseding ground-truth scientific specifications:
+* **Tier 1 — Highest Authority (Official Publication Papers)**:
+  * Primary literature (*ReXGroundingCT paper — Baharoon et al. 2025*, *VoxTell paper — Luo et al. 2025*, *CT-RATE paper — Hamamci et al. 2024*).
+  * Official paper definitions (such as the *Entity Protocol*, dataset curation pipelines, and evaluation metrics) represent immutable ground truth.
+* **Tier 2 — Codebase Contracts & Master Architecture**:
+  * `.agents/AGENTS.md`, `.agents/shared/MASTER_PLAN.md`, official dataset schemas (`../data/dataset.json`), and validated evaluator pipelines (`scripts/evaluate.py`).
+* **Tier 3 — Empirical Observations & Working Hypotheses**:
+  * `logs/` (experiment logs, data profiling summaries, technical report drafts).
+  * Empirical observations are treated as hypotheses and MUST NOT be treated as established facts if they contradict official paper specifications.
 
-### 1. Persistent Process Execution (No SIGHUP Deaths)
-**NEVER run training loops, batch inferences, or long evaluations using standard background jobs (`python script.py &`).** Closing the IDE sends a `SIGHUP` that terminates the job.
-You MUST always run persistent tasks in one of the following ways:
-* **Nohup Redirection (Recommended)**: `nohup command > log_file.log 2>&1 &`
-* **Detached Tmux Sessions**: Run computations inside a detached `tmux` session.
+---
 
-### 2. Hardware Isolation Contract
-* All fine-tuning and inference operations must respect host GPU isolation managed via environment variables (e.g., `CUDA_VISIBLE_DEVICES`), as detailed in the local `server_documentation.txt` and `STATUS.md`.
+## 🌐 Server-Agnostic & Relative Path Rules
+* **Shared vs. Host-Specific Scope**: `AGENTS.md` and files inside `.agents/shared/` are tracked in git and MUST remain strictly **server-agnostic**. They must never hardcode server-specific hardware topology, user home paths, or host machine names.
+* **Relative Path Directive**: ALL documentation, markdown files, and codebase scripts MUST strictly use **relative paths** (e.g., `scripts/exp_001_dataset_disparity_leakage.py` or relative markdown links) and **NEVER absolute paths** (e.g., `file:///home/...`).
+* **Git Commit & Push Approval Protocol**: NEVER execute `git commit` or `git push` automatically. You MUST always ask the USER for explicit permission before staging, committing, or pushing code or documentation changes.
 
-### 3. Fast Storage Caching
-* Preprocessed training inputs should reside in fast local temporary storage (`/tmp/` or fast SSD cache) specified in the local `server_documentation.txt` to bypass slow CPU decompression bounds of standard network mounts. Keep final models and git state in `/home`.
+---
 
-### 4. Spatial Alignment & Preprocessing Contracts
-* **Resolution**: Keep preprocessing and inference strictly at native resolution. Resampling is forbidden.
-* **4D Back-Reorientation**: Predictions are made in RAS space but the Ground Truth CT masks contain an identity affine metadata bug. You **MUST** apply the 4D Back-Reorientation pipeline in `voxtell_inference.py` to map segmentations back to the original CT scan space using the original raw affine matrix before running evaluation or generating a submission.
+## 🧠 Behavior & Epistemic Modesty
+* **Epistemic Modesty**: All empirical observations use calibrated, modest phrasing (*"initial evidence suggests"*, *"preliminary observations indicate"*).
+* **Efficiency**: Be technical, direct, and numbers-driven. Prioritize plain text formatting over extensive lists.
+* **Language & Tone**: English for code and markdown documentation. Disagree respectfully if technical errors are spotted.

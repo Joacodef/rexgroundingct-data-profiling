@@ -14,12 +14,14 @@ from dotenv import load_dotenv
 load_dotenv(override=True)
 
 # 2. Determine Repository Root Directory dynamically
-# scripts/config.py -> parent is scripts/ -> parent is project root
+# scripts/config.py -> parent is scripts/ -> parent is sub-repo root
 ROOT_DIR = Path(__file__).resolve().parent.parent
+PARENT_DIR = ROOT_DIR.parent
 
 # 3. Base Directory Definitions
-DATA_DIR = ROOT_DIR / "data"
-MODELS_DIR = ROOT_DIR / "models"
+# Check parent container directory (/home/.../rex_project) for shared data and models folders
+DATA_DIR = Path(os.getenv("DATA_DIR") or (PARENT_DIR / "data" if (PARENT_DIR / "data").exists() else ROOT_DIR / "data"))
+MODELS_DIR = Path(os.getenv("MODELS_DIR") or (PARENT_DIR / "models" if (PARENT_DIR / "models").exists() else ROOT_DIR / "models"))
 LOGS_DIR = ROOT_DIR / "logs"
 SCRATCH_DIR = ROOT_DIR / "scratch"
 
