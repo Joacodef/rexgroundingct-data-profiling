@@ -28,7 +28,7 @@
 | **Micronodules** | 314 | `(0.481, 0.576, 0.537)` | 11 | `(0.446, 0.507, 0.58)` |
 | **Other non-focal** | 150 | `(0.497, 0.572, 0.545)` | 4 | `(0.621, 0.547, 0.479)` |
 | **Linear opacities** | 1120 | `(0.524, 0.498, 0.535)` | 69 | `(0.546, 0.495, 0.537)` |
-| **Atelectasis / consolidation** | 1367 | `(0.495, 0.565, 0.491)` | 49 | `(0.519, 0.56, 0.416)` |
+| **Atelectasis / consolidation** | 1367 | `(0.495, 0.560, 0.491)` | 49 | `(0.519, 0.56, 0.416)` |
 | **Ground-glass opacity** | 1507 | `(0.488, 0.591, 0.519)` | 60 | `(0.45, 0.622, 0.442)` |
 | **Pulmonary nodules / masses** | 1743 | `(0.458, 0.546, 0.556)` | 132 | `(0.454, 0.551, 0.554)` |
 | **Pleural effusion / thickening** | 237 | `(0.463, 0.684, 0.484)` | 11 | `(0.457, 0.668, 0.431)` |
@@ -38,6 +38,17 @@
 
 ---
 
-## 3. Generated Visual Artifacts
+## 3. Audit Notes & Methodological Nuances
 
-For each of the 14 official pathology categories, high-resolution 2D Average Intensity Projections (AIP) comparing Train vs Validation in Coronal (R-L / I-S), Sagittal (A-P / I-S), and Axial (R-L / A-P) planes have been exported to `data/phase_1/analysis_experiment_003/`.
+1. **Ground-Truth Data Verification**:
+   * Total mask counts ($7,687$ Train, $381$ Val) match `dataset.json` ground-truth 100%.
+   * All 14 category centroid coordinates in RAS normalized $[0, 1]$ space match `data/phase_1/analysis_experiment_003/centroids_summary.json` (corrected Cat `2b` A-P coordinate from `0.565` to `0.560`).
+2. **Validation Split Rare Pathology Sample Size Caveat**:
+   * For rare categories in the 200-scan validation split (e.g. `1a` Bronchial wall thickening $N=3$, `1d` Septal thickening $N=6$, `1f` Other non-focal $N=4$, `2g` Pneumothorax $N=1$, `2f` Honeycombing $N=0$), the validation centroid is computed over very small sample sizes ($N \le 6$).
+   * Inter-split centroid comparisons for these rare categories reflect single-case sample variance rather than true anatomical shift. High-prevalence categories ($N \ge 49$, e.g. Nodules `2d`, GGO `2c`, Atelectasis `2b`, Linear opacities `2a`) demonstrate tight spatial alignment between Train and Val.
+
+---
+
+## 4. Generated Visual Artifacts
+
+For each of the 14 official pathology categories, high-resolution 2D Average Intensity Projections (AIP) comparing Train vs Validation in Coronal (R-L / I-S), Sagittal (A-P / I-S), and Axial (R-L / A-P) planes have been exported to `data/phase_1/analysis_experiment_003/` (17 total files verified).

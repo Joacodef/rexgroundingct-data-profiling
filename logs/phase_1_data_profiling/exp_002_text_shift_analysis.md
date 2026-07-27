@@ -37,6 +37,20 @@
 
 ---
 
+## 3. Audit & Methodological Nuances
+
+1. **Length-Normalized Type-Token Ratio (TTR)**:
+   * Naive TTR ($\frac{\text{Unique Words}}{\text{Total Words}}$) drops from $0.1544$ to $0.0846$ ($-45.2\%$), but naive TTR is mathematically sample-size dependent (Heaps' Law). Because Cases 51–200 contain $3,193$ total words vs $1,263$ in Cases 1–50, stop words repeat more frequently.
+   * Calculating **Length-Normalized TTR at 1,000 tokens** via Monte Carlo sub-sampling yields **$0.1739$ (Cases 1–50)** vs **$0.1651$ (Cases 51–200)**—a true vocabulary richness shift of **$-5.1\%$**.
+2. **Subword BPE Tokenizer Dynamics**:
+   * Naive whitespace splitting (`len(p.split())`) measures a $+9.3\%$ word length increase ($10.98 \rightarrow 12.00$ words). However, compound clinical jargon introduced in Cases 51–200 (such as *"peribronchovascular"* or *"posterobasal"*) splits into multiple BPE subwords under neural encoders (BERT/CLIP), making the effective token sequence length shift higher for models.
+3. **Category Distribution Co-Factor**:
+   * The zero-shot Dice performance drop from $0.2139$ (Cases 1–50) to $0.0491$ (Cases 51–200) is co-driven by a pathology distribution shift towards smaller/harder focal targets:
+     * **Pulmonary Nodules (`2d`)**: Increases from $30.4\%$ of findings in Cases 1–50 to **$36.5\%$** in Cases 51–200 ($+6.1\%$ shift).
+     * **Linear Opacities (`2a`)**: Increases from $13.0\%$ to **$20.3\%$** ($+7.3\%$ shift).
+
+---
+
 ## 4. Full 200-Scan Quantitative Comparison: Raw vs Universal Normalized Prompts
 
 | Partition | Findings | Raw Prompts Dice | Raw Hit Rate | Normalized Prompts Dice | Normalized Hit Rate | Empty Preds (Norm) |

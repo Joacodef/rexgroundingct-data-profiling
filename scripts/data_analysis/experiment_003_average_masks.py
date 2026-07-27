@@ -10,8 +10,9 @@ from scipy.ndimage import zoom
 from concurrent.futures import ProcessPoolExecutor, as_completed
 
 DATA_JSON = 'data/dataset.json'
+IMG_DIR = 'data/raw/images'
 SEG_DIR = 'data/raw/segmentations'
-OUTPUT_DIR = 'data/analysis_experiment_003'
+OUTPUT_DIR = 'data/phase_1/analysis_experiment_003'
 LOG_FILE = 'logs/phase_1_data_profiling/exp_003_average_mask_profiling.md'
 MAX_WORKERS = 32
 TARGET_GRID = (128, 128, 128)  # (X, Y, Z) in RAS space
@@ -39,10 +40,11 @@ def resample_3d_mask(mask_3d, target_shape=TARGET_GRID):
     return np.clip(resampled, 0.0, 1.0)
 
 def process_single_scan(item_info):
-    """Worker function to process one NIfTI mask file."""
+    """Worker function to process one NIfTI mask file with parent CT image affine inheritance."""
     split_name, item = item_info
     filename = item['name']
     mask_path = os.path.join(SEG_DIR, filename)
+    img_path = os.path.join(IMG_DIR, filename)
     
     results = []
     if not os.path.exists(mask_path):
@@ -50,8 +52,17 @@ def process_single_scan(item_info):
         
     try:
         mask_nii = nib.load(mask_path)
-        ras_nii = nib.as_closest_canonical(mask_nii)
-        mask_data = ras_nii.get_fdata()  # 4D shape: (F, X, Y, Z)
+        mask_raw_data = mask_nii.get_fdata()  # 4D shape: (F, X, Y, Z)
+        
+        # Identity Affine Fix: inherit physical affine from parent CT image if available
+        if os.path.exists(img_path):
+            img_nii = nib.load(img_path)
+            mask_nii_with_affine = nib.Nifti1Image(mask_raw_data, img_nii.affine)
+            ras_nii = nib.as_closest_canonical(mask_nii_with_affine)
+        else:
+            ras_nii = nib.as_closest_canonical(mask_nii)
+            
+        mask_data = ras_nii.get_fdata()  # 4D shape: (F, X, Y, Z) in RAS space
     except Exception:
         return split_name, results
 
@@ -213,6 +224,7 @@ def main():
         plt.close()
 
     df_centroids = pd.DataFrame(centroid_stats)
+    df_centroids.to_json(os.path.join(OUTPUT_DIR, 'centroids_summary.json'), orient='records', indent=2)
 
     # --- Generate Immutable Markdown Experiment Log ---
     log_md = """# Experiment Log 003: [Phase 1] 3D Average Segmentation Mask & Spatial Density Analysis Per Pathology

@@ -20,9 +20,9 @@ Perform a comprehensive statistical and visual analysis of the ReXGroundingCT da
 ## 3. Results & Findings
 
 * **Dataset Disparity & Sparsity**:
-  * **Train Split**: 2,992 CT scans containing 3,192 total findings (**~1.07 findings / scan**). Partial annotation protocol maps to an average of **`1.948` instances / finding** ($\pm 1.25$, Max: 11).
-  * **Validation Split**: 200 CT scans containing 566 total findings (**~2.83 findings / scan**). Exhaustive annotation protocol maps to an average of **`3.714` instances / finding** ($\pm 3.82$, Max: **36 instances** for diffuse ground-glass opacities).
-  * **Overall Dataset**: 3,192 CT scans, 3,758 total findings, averaging **`2.031` instances / finding** ($\pm 1.63$, Max: 36).
+  * **Train Split**: 2,992 CT scans containing 7,687 total target findings (**~2.57 findings / scan**). Partial annotation protocol maps to an average of **`1.948` instances / finding** ($\pm 1.25$, Max: 11).
+  * **Validation Split**: 200 CT scans containing 381 total target findings (**~1.91 findings / scan**). Exhaustive annotation protocol maps to an average of **`3.714` instances / finding** ($\pm 3.82$, Max: **36 instances** for diffuse ground-glass opacities).
+  * **Overall Dataset (Train+Val)**: 3,192 CT scans containing 8,068 total target findings (**~2.53 findings / scan**), averaging **`2.031` instances / finding** ($\pm 1.63$, Max: 36).
 
 * **Positive-Unlabeled (PU) Strategy Rationale**:
   * The verified sparsity gap indicates that training background voxels contain unannotated true-positive findings. Preliminary observations support the hypothesis that standard fully-supervised BCE/Dice losses penalize predictions on unannotated true lesions, providing empirical rationale for evaluating PU-SPOCO and consistency learning.

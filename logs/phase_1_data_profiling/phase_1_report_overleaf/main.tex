@@ -64,8 +64,8 @@ To eliminate confusion across dataset metrics, we formally define the 4-tier dat
 \begin{itemize}
     \item \textbf{Tier 1: Physical NIfTI Scans (3,078 volumes)}: The underlying ground-truth image repository containing 2,578 Training scans, 200 Validation scans, and 300 Test scans acquired from physical CT scan acquisition sessions.
     \item \textbf{Tier 2: Dataset Record Entries (3,192 entries)}: The primary indexing entries stored in \texttt{dataset.json} (comprising 2,992 Training entries and 200 Validation entries). The total record entries (3,192) exceed physical scan acquisitions (3,078) because multiple reconstruction series (e.g., soft-tissue vs.\ high-resolution lung kernels, or thin vs.\ thick slice reconstructions \texttt{\_1.nii.gz}, \texttt{\_2.nii.gz}) derived from a single physical CT examination are indexed as separate records.
-    \item \textbf{Tier 3: Target Findings (3,758 findings)}: Discrete 3D target segmentation masks (3,192 in Train, 566 in Val). As specified in the official ReXGroundingCT paper (Baharoon et al., 2025), findings were extracted from radiology reports using GPT-4. Under the training set's \textit{Entity Protocol}, annotators were instructed to segment at most three representative instances per finding ($\le 3$ instances/finding, mean $1.95$) to manage annotation workload, whereas Validation and Test splits feature exhaustive annotation of all visible instances (mean $3.80$, reaching up to 36 instances).
-    \item \textbf{Tier 4: Radiology Report Prompts (8,650 prompts)}: Free-text sentence queries extracted across all findings (7,687 in Train, 381 in Val, 582 in Test), averaging $2.3$ prompt variations per annotated target finding mask ($\frac{8,650}{3,758} = 2.3018$).
+    \item \textbf{Tier 3: Target Findings (8,650 target findings total, 8,068 in indexed Train+Val)}: Discrete 3D target segmentation masks (7,687 in Train, 381 in Val, 582 in Test). As specified in the official ReXGroundingCT paper (Baharoon et al., 2025), findings were extracted from radiology reports using GPT-4. Under the training set's \textit{Entity Protocol}, annotators were instructed to segment at most three representative instances per finding ($\le 3$ instances/finding, mean $1.95$) to manage annotation workload, whereas Validation and Test splits feature exhaustive annotation of all visible instances (mean $3.71$, reaching up to 36 instances).
+    \item \textbf{Tier 4: Radiology Report Prompts (8,650 prompts)}: Free-text sentence queries extracted across all findings (7,687 in Train, 381 in Val, 582 in Test). Each radiology report prompt is paired 1-to-1 with a target finding mask (yielding an exact $1.0$ prompt-to-finding ratio), averaging $2.57$ findings/prompts per CT scan record in Train ($\frac{7,687}{2,992} = 2.5692$) and $2.53$ overall in Train+Val ($\frac{8,068}{3,192} = 2.5276$). Across the benchmark, 7,040 prompts ($81.4\%$) are unique verbatim text strings, while 1,610 ($18.6\%$) are exact duplicate sentences resulting from standardized clinical template descriptions and multi-kernel CT reconstruction series.
 \end{itemize}
 
 \subsubsection{Dataset Metadata Indexing Structure (\texttt{dataset.json})}
@@ -156,7 +156,7 @@ Supervised Baselines (Paper Val) & Off-the-shelf ($\sim0.00$ Dice) vs SAT-FT ($0
 Phase 1 establishes the empirical foundation for 3D text-to-segmentation grounding on the ReXGroundingCT benchmark. Across 3,192 CT volume entries and 8,650 radiology report finding prompts, this investigation addresses five core research questions:
 \begin{enumerate}
     \item \textbf{Annotation Disparity \& Instance Fragmentation (Q1)}: What is the quantitative gap between the training set Entity Protocol ($\le 3$ instances/finding, mean $1.95$) and exhaustively labeled validation/test scans (all visible instances, mean $3.80$)?
-    \item \textbf{Text Prompt Shift \& Syntactic Complexity (Q2)}: How does the free-text prompt structure shift from short paper queries (mean 11 words) to long multi-clause report sentences (up to 38 words, $+12.4\%$ commas, $-45.2\%$ TTR), multi-finding compound prompts ($18.77\%$), hedging ($0.38\%$), and spatial prepositions ($72.53\%$)?
+    \item \textbf{Text Prompt Shift \& Syntactic Complexity (Q2)}: How does the free-text prompt structure shift from short paper queries (mean 11 words) to long multi-clause report sentences (up to 38 words, $+12.4\%$ commas, $-5.1\%$ normalized TTR), multi-finding compound prompts ($18.77\%$), hedging ($0.38\%$), and spatial prepositions ($72.53\%$)?
     \item \textbf{Anatomical Spatial Priors \& Centroid Drift (Q3)}: What are the canonical RAS space ($128 \times 128 \times 128$) 3D spatial probability density distributions, centroid coordinates, and inter-split vertical shifts per pathology?
     \item \textbf{GT Mask Radiodensity (HU) Attenuation (Q4)}: What are the empirical Hounsfield Unit (HU) attenuation bounds ($\left[-1024, +400\right]$~HU) and contrast deltas ($\Delta\text{HU}$) inside mask regions versus healthy parenchymal tissue, and what do they reveal regarding annotation boundary precision?
     \item \textbf{Structural Topology, PU Sparsity \& Size Thresholds (Q5)}: How do physical voxel spacings ($\Delta x=\Delta y=0.710\text{ mm}, \Delta z=1.053\text{ mm}$), sphericity ($S \in \left[0.543, 0.942\right]$), and Partial Annotation prevalence gaps inform post-processing size floors and loss function design?
@@ -182,7 +182,7 @@ Table~\ref{tab:exp_index} maps each of the 11 Phase 1 profiling experiments to i
 \textbf{Exp ID} & \textbf{Research Focus} & \textbf{Scope Analyzed} & \textbf{Primary Research Finding} \\
 \midrule
 \texttt{exp\_001} & Mask Disparity \& Sparsity & 2,992 Train vs 200 Val entries & Quantified Entity Protocol ($\le 3$ instances/finding vs exhaustive) \\
-\texttt{exp\_002} & Prompt Text Shift & Paper split vs full MICCAI split & Measured prompt length spike (+9.3\%) and TTR drop (-45.2\%) \\
+\texttt{exp\_002} & Prompt Text Shift & Paper split vs full MICCAI split & Measured prompt length (+9.3\%) and normalized TTR shift (-5.1\%) \\
 \texttt{exp\_003} & 3D Spatial Density Maps & 3,192 3D GT masks in RAS space & Extracted 14 category centroids; identified upper lobe dominance \\
 \texttt{exp\_004} & HU Radiodensity Profiling & Mask vs parenchyma attenuation & Defined intensity windowing ($\left[-1024, +400\right]$~HU) and contrast $\Delta\text{HU}$ \\
 \texttt{exp\_005} & Co-occurrence \& Resolution & 3,192 3D CT volume entries & Measured voxel resolution ($\Delta z=1.05\text{ mm}$) \& co-occurrence \\
@@ -204,9 +204,9 @@ Table~\ref{tab:exp_index} maps each of the 11 Phase 1 profiling experiments to i
 \subsection{Split Disparity \& Annotation Sparsity}
 Quantitative analysis of the master dataset annotations demonstrates a fundamental structural disparity between training and validation annotation protocols as defined in the official ReXGroundingCT benchmark paper (Baharoon et al., 2025). Under the official \textit{Entity Protocol}, training record entries were annotated with a workload-management cap of \textbf{at most three representative instances per finding} (averaging \textbf{1.95 instances per finding} in Train), leaving any remaining unannotated instances of the same finding as background zeros. In contrast, validation and test entries required \textbf{exhaustive labeling of all visible instances} (averaging \textbf{3.80 instances per finding}, and reaching up to \textbf{36 instances} per finding for diffuse lesions).
 
-It is crucial to distinguish between \textit{Annotated Finding Targets} ($3,758$ total findings in Table~\ref{tab:split_disparity}) and \textit{3D Connected Component Blobs} ($27,136$ total blobs in Table~\ref{tab:category_prevalence} and Table~\ref{tab:morphology}). In 3D medical image segmentation, a single annotated finding target mask (e.g., multifocal ground-glass opacities or emphysema) frequently comprises multiple spatially disconnected 3D lesion components. Topological extraction via 3D connected-component labeling (\texttt{scipy.ndimage.label}) yields $27,136$ discrete 3D blobs across the dataset (averaging $3.364$ connected blobs per pathology-scan occurrence across the 8,067 category-scan instances in Table~\ref{tab:category_prevalence}).
+It is crucial to distinguish between \textit{Annotated Finding Targets} ($8,068$ total findings in Train+Val in Table~\ref{tab:split_disparity}) and \textit{3D Connected Component Blobs} ($27,136$ total blobs in Table~\ref{tab:category_prevalence} and Table~\ref{tab:morphology}). In 3D medical image segmentation, a single annotated finding target mask (e.g., multifocal ground-glass opacities or emphysema) frequently comprises multiple spatially disconnected 3D lesion components. Topological extraction via 3D connected-component labeling (\texttt{scipy.ndimage.label}) yields $27,136$ discrete 3D blobs across the dataset (averaging $3.364$ connected blobs per pathology-scan occurrence across the 8,067 category-scan instances in Table~\ref{tab:category_prevalence}).
 
-Furthermore, summing the \textit{Scans with Pathology} column across all 14 categories in Table~\ref{tab:category_prevalence} yields $8,067$ category-scan instances. This figure exceeds the $3,758$ annotated target findings in Table~\ref{tab:split_disparity} because CT scans in ReXGroundingCT frequently exhibit multi-label pathology co-occurrences. Under the abnormality extraction pipeline, GPT-4 extracted eligible lung/pleural findings from report texts, which were paired 1-to-1 with 3D segmentation masks.
+Furthermore, summing the \textit{Scans with Pathology} column across all 14 categories in Table~\ref{tab:category_prevalence} yields $8,067$ category-scan instances. This figure closely aligns with the $8,068$ annotated target findings in Table~\ref{tab:split_disparity}. Under the abnormality extraction pipeline, GPT-4 extracted eligible lung/pleural findings from report texts, which were paired 1-to-1 with 3D segmentation masks.
 
 This instance-level partial annotation protocol ($\le 3$ instances in Train) has profound implications for supervised model training. Standard supervised segmentation losses (such as Binary Cross-Entropy or Dice Loss) assume that unannotated background voxels represent true negative healthy tissue. When a model predicts unannotated real instances of a finding in the training set, standard BCE/Dice losses actively penalize the model, inducing severe \textit{Instance Suppression Bias} during gradient backpropagation.
 
@@ -235,9 +235,9 @@ This dual-protocol workflow accounts for why certain report findings lack corres
 \toprule
 \textbf{Partition Tier} & \textbf{Record Entries} & \textbf{Total Findings} & \textbf{Mean Findings/Entry} & \textbf{Mean Inst./Finding} & \textbf{Max Inst.} & \textbf{Protocol} \\
 \midrule
-\textbf{Training Split} & 2,992 & 3,192 & \textbf{1.07} & \textbf{1.948 $\pm$ 1.25} & 11 & Partial \\
-\textbf{Validation Split} & 200 & 566 & \textbf{2.83} & \textbf{3.714 $\pm$ 3.82} & \textbf{36} & Exhaustive \\
-\textbf{Overall Dataset} & 3,192 & 3,758 & \textbf{1.18} & \textbf{2.031 $\pm$ 1.63} & \textbf{36} & Mixed \\
+\textbf{Training Split} & 2,992 & 7,687 & \textbf{2.57} & \textbf{1.948 $\pm$ 1.25} & 11 & Partial \\
+\textbf{Validation Split} & 200 & 381 & \textbf{1.91} & \textbf{3.714 $\pm$ 3.82} & \textbf{36} & Exhaustive \\
+\textbf{Overall Dataset (Train+Val)} & 3,192 & 8,068 & \textbf{2.53} & \textbf{2.031 $\pm$ 1.63} & \textbf{36} & Mixed \\
 \bottomrule
 \end{tabular}%
 }
@@ -312,8 +312,8 @@ Figure~\ref{fig:volume_boxplot} presents the relative volume occupancy distribut
 \subsection{Quantitative NLP Text Metrics}
 Profiling free-text radiology prompts across all 8,650 queries reveals substantial syntactic complexity (Table~\ref{tab:nlp_summary}). Comparing the initial 50-scan paper queries against the full 150-scan new MICCAI validation prompts demonstrates a significant domain text shift:
 \begin{itemize}
-    \item \textbf{Word Count Increase}: Mean prompt length increased from \textbf{10.98 words} in paper cases 1--50 to \textbf{12.00 words} in cases 51--200 ($+9.3\%$), with maximum sentence length spiking to \textbf{38 words}.
-    \item \textbf{Lexical Diversity Drop}: Type-Token Ratio (TTR) dropped from \textbf{0.1544} down to \textbf{0.0846} (a \textbf{--45.2\% reduction}), indicating highly repetitive clinical vocabulary across complex report descriptions.
+    \item \textbf{Word Count Increase}: Mean prompt length increased from \textbf{10.98 words} in paper cases 1--50 to \textbf{12.00 words} in cases 51--200 ($+9.3\%$), with maximum sentence length spiking to \textbf{38 words}. Under BPE subword tokenization (BERT/CLIP encoders), compound clinical terms (\textit{"peribronchovascular"}, \textit{"posterobasal"}) expand further into multi-subword sequences.
+    \item \textbf{Lexical Diversity \& Length-Normalized TTR}: While naive Type-Token Ratio (TTR) drops from \textbf{0.1544} down to \textbf{0.0846} (a \textbf{--45.2\% reduction}), naive TTR is sample-size dependent. Evaluating **Length-Normalized TTR at 1,000 tokens** via Monte Carlo sub-sampling reveals a true vocabulary shift of **--5.1\%** (\textbf{0.1739} vs \textbf{0.1651}), confirming high vocabulary consistency alongside longer multi-clause descriptions.
     \item \textbf{Syntactic Punctuation}: Comma punctuation prevalence doubled, increasing by \textbf{+12.4 percentage points} from \textbf{11.3\%} up to \textbf{23.7\%} (a \textbf{+109.7\% relative increase}), reflecting long multi-clause clinical descriptions with stacked diagnostic modifiers.
 \end{itemize}
 
@@ -401,21 +401,22 @@ To complement free-text report prompts, the benchmark includes an \textbf{Anatom
 
 \section{Anatomical Spatial Density \& Centroid Distributions (Exp 003)}
 
-\subsection{Canonical RAS Grid Resampling}
-To establish spatial priors independent of scanner orientation or slice thickness, all ground-truth masks were reoriented to canonical Right-Anterior-Superior (RAS) spatial axes and resampled onto a normalized $128 \times 128 \times 128$ isotropic reference grid. Normalized 3D probability density maps $P(\mathbf{x}' \in \text{mask} \mid c)$ and 2D Average Intensity Projections (AIP) were computed per category.
+\subsection{Canonical RAS Grid Resampling \& Affine Inheritance Protocol}
+To establish spatial priors independent of scanner orientation or slice thickness, all ground-truth masks were reoriented to canonical Right-Anterior-Superior (RAS) spatial axes and resampled onto a normalized $128 \times 128 \times 128$ isotropic reference grid. Because ground-truth NIfTI segmentation headers contain an identity affine metadata format, each segmentation mask array inherits the physical affine matrix of its parent CT scan (\texttt{nib.Nifti1Image(mask\_data, img\_nii.affine)}) prior to invoking canonical reorientation (\texttt{nib.as_closest_canonical}). Normalized 3D probability density maps $P(\mathbf{x}' \in \text{mask} \mid c)$ and 2D Average Intensity Projections (AIP) were computed per category across Train and Val splits.
 
 \subsection{Category Spatial Priors \& Centroid Analysis}
-Table~\ref{tab:centroids} lists the spatial centroids $(R\text{-}L, A\text{-}P, I\text{-}S)$ normalized to $[0, 1]^3$. Figure~\ref{fig:spatial_density} displays representative 2D AIP projections:
+Table~\ref{tab:centroids} lists the spatial centroids $(R\text{-}L, A\text{-}P, I\text{-}S)$ normalized to $[0, 1]^3$ across all 14 official categories. Figure~\ref{fig:spatial_density} displays representative 2D AIP projections:
 \begin{itemize}
     \item \textbf{Emphysema (\texttt{1c})}: Demonstrates strong \textit{upper lobe apical dominance} ($Z_{\text{IS}} = 0.667$ in Train, $0.789$ in Val), reflecting centrilobular emphysematous parenchymal destruction in superior apical segments.
     \item \textbf{Atelectasis / Consolidation (\texttt{2b})}: Demonstrates \textit{basal dependent lung preference} ($Z_{\text{IS}} = 0.491$ in Train, $0.416$ in Val), consistent with gravitational fluid accumulation and lower lobe lung collapse.
     \item \textbf{Pleural Effusion (\texttt{2e})}: Concentrated along the \textit{posterior-basal pleural boundary} ($Y_{\text{AP}} = 0.684, Z_{\text{IS}} = 0.484$), matching dependent fluid collection in pleural cavities.
     \item \textbf{Pulmonary Nodules (\texttt{2d})}: Exhibits an \textit{isotropic parenchymal distribution} centered near $(0.458, 0.546, 0.556)$, reflecting uniform nodular distribution throughout lung tissue.
+    \item \textbf{Validation Sample Size Variance}: For low-prevalence validation categories ($N \le 6$, e.g., Pneumothorax \texttt{2g} $N=1$, Septal thickening \texttt{1d} $N=6$, Bronchial wall thickening \texttt{1a} $N=3$), centroid shifts reflect single-case sample variance. High-prevalence categories ($N \ge 49$, e.g., Nodules \texttt{2d}, GGO \texttt{2c}, Atelectasis \texttt{2b}) confirm tight spatial agreement between Train and Val.
 \end{itemize}
 
 \begin{table}[H]
 \centering
-\caption{Canonical RAS space normalized spatial centroids $(R\text{-}L, A\text{-}P, I\text{-}S)$ for Train and Val splits.}
+\caption{Canonical RAS space normalized spatial centroids $(R\text{-}L, A\text{-}P, I\text{-}S)$ across all 14 official categories for Train and Val splits.}
 \label{tab:centroids}
 \small
 \resizebox{\linewidth}{!}{%
@@ -423,16 +424,20 @@ Table~\ref{tab:centroids} lists the spatial centroids $(R\text{-}L, A\text{-}P, 
 \toprule
 \textbf{Category Name} & \textbf{Train Centroid} & \textbf{Val Centroid} & \textbf{Spatial Localization Characteristics} \\
 \midrule
-Bronchial wall thickening & (0.490, 0.559, 0.541) & (0.453, 0.572, 0.478) & Peribronchial / Hilar concentration \\
-Bronchiectasis & (0.488, 0.549, 0.545) & (0.435, 0.532, 0.548) & Bilateral central \& lower lobe preference \\
-Emphysema & (0.494, 0.556, 0.667) & (0.462, 0.554, 0.789) & \textbf{Upper lobe apical dominance} ($Z_{\text{IS}} > 0.65$) \\
-Septal thickening & (0.479, 0.578, 0.563) & (0.398, 0.572, 0.469) & Interstitial / Peripherally distributed \\
-Micronodules & (0.481, 0.576, 0.537) & (0.446, 0.507, 0.580) & Diffuse bilateral parenchymal spread \\
-Linear opacities & (0.524, 0.498, 0.535) & (0.546, 0.495, 0.537) & Subpleural \& basal parenchymal bands \\
-Atelectasis / consolidation & (0.495, 0.565, 0.491) & (0.519, 0.560, 0.416) & \textbf{Basal \& dependent lung preference} ($Z_{\text{IS}} < 0.50$) \\
-Ground-glass opacity & (0.488, 0.591, 0.519) & (0.450, 0.622, 0.442) & Multifocal peripheral \& lower lobe spread \\
-Pulmonary nodules / masses & (0.458, 0.546, 0.556) & (0.454, 0.551, 0.554) & \textbf{Isotropic parenchymal distribution} ($\sim 0.50$) \\
-Pleural effusion / thickening & (0.463, 0.684, 0.484) & (0.457, 0.668, 0.431) & \textbf{Posterior-basal boundary} ($Y_{\text{AP}} > 0.65$) \\
+Bronchial wall thickening (\texttt{1a}) & (0.490, 0.559, 0.541) & (0.453, 0.572, 0.478) & Peribronchial / Hilar concentration \\
+Bronchiectasis (\texttt{1b}) & (0.488, 0.549, 0.545) & (0.435, 0.532, 0.548) & Bilateral central \& lower lobe preference \\
+Emphysema (\texttt{1c}) & (0.494, 0.556, 0.667) & (0.462, 0.554, 0.789) & \textbf{Upper lobe apical dominance} ($Z_{\text{IS}} > 0.65$) \\
+Septal thickening (\texttt{1d}) & (0.479, 0.578, 0.563) & (0.398, 0.572, 0.469) & Interstitial / Peripherally distributed \\
+Micronodules (\texttt{1e}) & (0.481, 0.576, 0.537) & (0.446, 0.507, 0.580) & Diffuse bilateral parenchymal spread \\
+Other non-focal (\texttt{1f}) & (0.497, 0.572, 0.545) & (0.621, 0.547, 0.479) & Diffuse non-focal distribution \\
+Linear opacities (\texttt{2a}) & (0.524, 0.498, 0.535) & (0.546, 0.495, 0.537) & Subpleural \& basal parenchymal bands \\
+Atelectasis / consolidation (\texttt{2b}) & (0.495, 0.560, 0.491) & (0.519, 0.560, 0.416) & \textbf{Basal \& dependent lung preference} ($Z_{\text{IS}} < 0.50$) \\
+Ground-glass opacity (\texttt{2c}) & (0.488, 0.591, 0.519) & (0.450, 0.622, 0.442) & Multifocal peripheral \& lower lobe spread \\
+Pulmonary nodules / masses (\texttt{2d}) & (0.458, 0.546, 0.556) & (0.454, 0.551, 0.554) & \textbf{Isotropic parenchymal distribution} ($\sim 0.50$) \\
+Pleural effusion / thickening (\texttt{2e}) & (0.463, 0.684, 0.484) & (0.457, 0.668, 0.431) & \textbf{Posterior-basal boundary} ($Y_{\text{AP}} > 0.65$) \\
+Honeycombing (\texttt{2f}) & (0.541, 0.516, 0.498) & N/A & Subpleural basal fibrotic distribution \\
+Pneumothorax (\texttt{2g}) & (0.501, 0.482, 0.522) & (0.304, 0.443, 0.622) & Pleural space / Peripheral collection \\
+Other focal (\texttt{2h}) & (0.477, 0.556, 0.536) & (0.447, 0.580, 0.578) & Focal parenchymal distribution \\
 \bottomrule
 \end{tabular}%
 }
@@ -559,7 +564,7 @@ Figure~\ref{fig:pu_iou} presents the inter-class voxel-level IoU matrix estimati
 
 \section{3D Morphological Topology \& Size Thresholds (Exp 008)}
 
-Connected-component analysis across all \textbf{27,136 discrete 3D connected components} (topologically extracted via \texttt{scipy.ndimage.label} and summed across the 14 official categories in Table~\ref{tab:morphology}) extracts sphericity indices ($S$) and derives recommended minimum component size noise-filtering floors. As established in Section 3.1, discrete 3D connected blobs measure spatial mask fragmentation across pathology categories, contrasting with the $3,758$ higher-level annotated finding target entries. Geometric sphericity is calculated as:
+Connected-component analysis across all \textbf{27,136 discrete 3D connected components} (topologically extracted via \texttt{scipy.ndimage.label} and summed across the 14 official categories in Table~\ref{tab:morphology}) extracts sphericity indices ($S$) and derives recommended minimum component size noise-filtering floors. As established in Section 3.1, discrete 3D connected blobs measure spatial mask fragmentation across pathology categories, contrasting with the $8,068$ higher-level annotated finding target entries in Train+Val. Geometric sphericity is calculated as:
 \begin{equation}
 S = \frac{\pi^{1/3} (6 V)^{2/3}}{A}
 \end{equation}
