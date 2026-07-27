@@ -8,10 +8,14 @@ At the start of **EVERY SINGLE SESSION**, you MUST immediately load, read, and f
 2. `HANDSHAKE.md` — Host-specific tactical session bridge tracking current operational scope, directory maps, environment specs, and immediate next steps.
 3. `shared/MASTER_PLAN.md` — Global scientific and technical roadmap.
 
-### Document Role Contracts (`STATUS.md` vs `HANDSHAKE.md`)
+### Document Role Contracts (`MASTER_PLAN.md` vs `STATUS.md` vs `HANDSHAKE.md`)
 To prevent scope drift and preserve clear separation of concerns across AI sessions:
+* **`shared/MASTER_PLAN.md` (Global Technical Roadmap)**:
+  * **Role**: High-level, static scientific and technical roadmap defining core research pillars and phase deliverables across the competition lifecycle.
+  * **Update Cadence**: Very low frequency / semi-immutable. Updated only when major research goals shift.
+  * **Prohibited Content**: Must NOT contain transient session progress badges (e.g. active execution status) or micro-experiment logs.
 * **`STATUS.md` (Macro Progress & Milestone Matrix)**:
-  * **Role**: Tracks overall advancement against `shared/MASTER_PLAN.md` phases, key quantitative metrics, completed experiment logs (`logs/`), hardware allocation, and active SSD caching.
+  * **Role**: Tracks overall advancement against `shared/MASTER_PLAN.md` phases, key quantitative metrics, completed experiment logs (`logs/`), hardware allocation, and active SSD caching on this host server.
   * **Update Cadence**: Updated when an experiment concludes, a milestone is reached, or a phase progress status changes.
   * **Prohibited Content**: Must NOT contain session-specific task handoffs or tactical work notes.
 * **`HANDSHAKE.md` (Tactical AI Session Bridge)**:

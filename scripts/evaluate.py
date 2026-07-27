@@ -19,6 +19,23 @@ from dotenv import load_dotenv
 
 import config
 
+CATEGORY_NAMES = {
+    "1a": "Bronchial wall thickening",
+    "1b": "Bronchiectasis",
+    "1c": "Emphysema",
+    "1d": "Septal thickening",
+    "1e": "Micronodules",
+    "1f": "Other non-focal",
+    "2a": "Linear opacities",
+    "2b": "Atelectasis / consolidation",
+    "2c": "Ground-glass opacity",
+    "2d": "Pulmonary nodules / masses",
+    "2e": "Pleural effusion / thickening",
+    "2f": "Honeycombing",
+    "2g": "Pneumothorax",
+    "2h": "Other focal"
+}
+
 def compute_dice(pred_mask, gt_mask):
     """Computes the Dice Coefficient between two binary masks."""
     pred_bool = pred_mask > 0
@@ -63,6 +80,7 @@ def main():
     hits_01 = 0
     total_findings = 0
     missing_cases = 0
+    category_metrics = {}
 
     for entry in tqdm(entries, desc=f"Evaluating {args.split} Scans"):
         scan_id = entry["name"].replace(".nii.gz", "")
@@ -112,13 +130,21 @@ def main():
             continue
             
         # Compute finding-level metrics
+        categories_dict = entry.get("categories", {})
         for f_idx in range(num_gt_findings):
             dice = compute_dice(pred_img[f_idx], gt_img[f_idx])
             all_dices.append(dice)
             
+            # Category extraction
+            cat_code = str(categories_dict.get(str(f_idx), "unknown"))
+            if cat_code not in category_metrics:
+                category_metrics[cat_code] = {"dices": [], "hits_01": 0}
+            category_metrics[cat_code]["dices"].append(dice)
+            
             # Challenge specific Hit Rate threshold (Dice >= 0.1)
             if dice >= 0.1:
                 hits_01 += 1
+                category_metrics[cat_code]["hits_01"] += 1
             total_findings += 1
 
     if total_findings == 0:
@@ -129,20 +155,37 @@ def main():
     avg_dice = np.mean(all_dices)
     hit_rate = hits_01 / total_findings
 
+    category_breakdown = {}
+    for cat_code, stats in sorted(category_metrics.items()):
+        c_dices = stats["dices"]
+        c_count = len(c_dices)
+        category_breakdown[cat_code] = {
+            "name": CATEGORY_NAMES.get(cat_code, "Unknown"),
+            "count": c_count,
+            "average_dice": float(np.mean(c_dices)) if c_count > 0 else 0.0,
+            "hit_rate_0.1": float(stats["hits_01"] / c_count) if c_count > 0 else 0.0
+        }
+
     results = {
         "split": args.split,
         "total_cases_evaluated": len(entries) - missing_cases,
         "total_findings_evaluated": total_findings,
         "average_dice": float(avg_dice),
-        "hit_rate_0.1": float(hit_rate)
+        "hit_rate_0.1": float(hit_rate),
+        "category_breakdown": category_breakdown
     }
 
-    print("\n" + "="*40)
+    print("\n" + "="*60)
     print("          EVALUATION RESULTS")
-    print("="*40)
+    print("="*60)
     print(f"Average Dice (Primary Metric): {avg_dice:.4f}")
     print(f"Hit Rate (Dice >= 0.1)       : {hit_rate:.4f}")
-    print("="*40)
+    print("="*60)
+    print(f"{'Code':<5} {'Category Name':<32} {'Count':<7} {'Dice':<8} {'HitRate':<8}")
+    print("-" * 60)
+    for cat_code, cat_stats in category_breakdown.items():
+        print(f"{cat_code:<5} {cat_stats['name']:<32} {cat_stats['count']:<7} {cat_stats['average_dice']:.4f}   {cat_stats['hit_rate_0.1']:.4f}")
+    print("="*60)
     print(f"Missing/Skipped Cases        : {missing_cases}")
     
     # Save to JSON

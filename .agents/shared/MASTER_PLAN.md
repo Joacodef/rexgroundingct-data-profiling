@@ -32,23 +32,23 @@
 
 ## 🗓️ 2. Project Roadmap
 
-### Phase 1: Deep Data Profiling of ReXGroundingCT 🟢 ACTIVE
+### Phase 1: Deep Data Profiling of ReXGroundingCT
 * **Core Focus**: Comprehensive statistics on CT scans, 3D GT masks, free-text prompts, PU noise, and topological boundary features.
 * **Expected Deliverables & Outputs**:
-  1. *Statistical & Annotation Disparity Analysis*: Quantitative profiling of sparse vs. exhaustive mask distributions in Train (~1 mask/scan) vs Val (~3 masks/scan) (`exp_001`).
-  2. *3D Average Mask & Spatial Density Maps*: Canonical RAS ($128 \times 128 \times 128$) probability density maps $P(\mathbf{x}' \in \text{mask} \mid c)$, 2D AIP projections, and spatial centroids for all 14 categories (`exp_003`).
-  3. *Free-Text Prompt & NLP Shift Analysis*: Quantitative analysis of word counts, punctuation shifts, syntactic complexity, TTR (-45.2%), and prompt normalization trade-offs (`exp_002`).
+  1. *Statistical & Annotation Disparity Analysis*: Quantitative profiling of sparse vs. exhaustive mask distributions in Train (~1 mask/scan) vs Val (~3 masks/scan).
+  2. *3D Average Mask & Spatial Density Maps*: Canonical RAS ($128 \times 128 \times 128$) probability density maps $P(\mathbf{x}' \in \text{mask} \mid c)$, 2D AIP projections, and spatial centroids for all 14 categories.
+  3. *Free-Text Prompt & NLP Shift Analysis*: Quantitative analysis of word counts, punctuation shifts, syntactic complexity, TTR (-45.2%), and prompt normalization trade-offs.
   4. *Hounsfield Unit (HU) Radiodensity Profiling*: Category-level HU intensity distributions inside mask regions vs. healthy lung parenchyma to define optimal preprocessing intensity windowing (`[min_HU, max_HU]`).
   5. *Physical Resolution & Voxel Spacing Profiling*: Distribution of slice thickness ($\Delta z$) and in-plane voxel dimensions ($\Delta x, \Delta y$) across Train and Val splits.
-  6. *3D Bounding Box Scale & Aspect Ratio Profiling*: Spatial extents ($\Delta X, \Delta Y, \Delta Z$) and volume aspect ratios per pathology for tile/patch size selection and spatial filtering.
+  6. *3D Bounding Box Scale & Aspect Ratio Profiling*: Spatial extents ($\Delta X, \Delta Y, \Delta Z$) and volume aspect ratios per pathology.
   7. *Multi-Finding Co-Occurrence Matrix*: Pairwise co-occurrence matrix $P(c_i \text{ present} \mid c_j \text{ present})$ across CT scans.
-  8. *Multi-Instance Component Profiling*: Connected-component analysis of mask fragmentation and instance count distributions (`entity_counts`).
-  9. *PU Background Contamination & Inter-Class Overlap Profiling*: Empirical unannotated true-positive rate $P(\text{cat}_c \in \text{bg} \mid \text{cat}_k \text{ annotated})$ and voxel-level inter-class IoU overlap matrix.
-  10. *Text-Spatial Directive Parsing & Alignment*: Parsing of spatial locators vs entity terms and correlation between prompt locators and 3D mask centroids.
-  11. *Morphological Topology & Lung FOV Profiling*: Sphericity index, surface area-to-volume ratio distributions, and longitudinal CT scan FOV extents.
-  12. *Comprehensive Phase 1 Technical Report*: Consolidated technical report detailing dataset architecture, spatial priors, prompt syntax, topology, and actionable recommendations.
+  8. *Multi-Instance Component Profiling*: Connected-component analysis of mask fragmentation and instance count distributions.
+  9. *PU Background Contamination & Inter-Class Overlap Profiling*: Empirical unannotated true-positive rate and voxel-level inter-class IoU overlap matrix.
+  10. *Text-Spatial Directive & Syntax Parsing*: Parsing of spatial prepositions, compound prompts, and hedging.
+  11. *Patient & Series Reconstruction Hierarchy*: 3-tier ID decomposition and cross-split patient leakage audit.
+  12. *Comprehensive Phase 1 Technical Report*: Consolidated technical report detailing dataset architecture, spatial priors, prompt syntax, topology, and actionable recommendations (`logs/phase_1_data_profiling/phase_1_technical_report.md`).
 
-### Phase 2: VoxTell Zero-Shot Inference & Preprocessing Audit ⏳ UPCOMING
+### Phase 2: VoxTell Zero-Shot Inference & Preprocessing Audit
 * **Core Focus**: Zero-shot evaluation, sliding window sensitivity, continuous logit analysis, and 14-category error profiling.
 * **Expected Deliverables & Outputs**:
   1. *Zero-Shot Baseline Benchmark*: Full 200-scan validation evaluation of VoxTell v1.1 using official `NibabelIOWithReorient` and 4D Back-Reorientation pipeline.
@@ -57,7 +57,7 @@
   4. *Continuous Logit & Threshold Profiling*: Pre-sigmoid logit probability distribution analysis and category-specific binarization threshold optimization.
   5. *Phase 2 Failure Mode Audit Report*: Comprehensive failure analysis mapping root causes (text shift, spatial misalignment, low logit magnitude, or suppression bias) per category.
 
-### Phase 3: Fine-Tuning & Model Adaptations ⏳ UPCOMING
+### Phase 3: Fine-Tuning & Model Adaptations
 * **Core Focus**: Model weight adaptation using partial-annotation and consistency loss formulations.
 * **Expected Deliverables & Outputs**:
   1. *Stabilized Fine-Tuning Pipeline*: Robust trainer supporting float32 loss upcasting, L2 gradient clipping, and fast RAID SSD volume caching.
