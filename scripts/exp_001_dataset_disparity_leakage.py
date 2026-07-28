@@ -12,7 +12,7 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-from scripts.config import DATASET_JSON, DATA_DIR, CATEGORY_MAP
+from scripts.config import DATASET_JSON, DATA_DIR, CATEGORY_MAP, NON_FOCAL_CATEGORIES, FOCAL_CATEGORIES
 
 # Load paths relative to environment via centralized scripts.config
 DATA_JSON = str(DATASET_JSON)
@@ -42,6 +42,7 @@ def main():
     # Category-level breakdown accumulators
     cat_split_instances = defaultdict(lambda: {'train': [], 'val': [], 'test': []})
     cat_split_findings = defaultdict(lambda: {'train': 0, 'val': 0, 'test': 0})
+    cat_split_scans = defaultdict(lambda: {'train': set(), 'val': set(), 'test': set()})
     findings_per_scan_counts = {'train': [], 'val': [], 'test': []}
     
     # Scan-level co-occurrence matrix accumulators
@@ -80,6 +81,7 @@ def main():
                 instance_counts.append(ecount)
                 cat_split_instances[cat_code][split_name].append(ecount)
                 cat_split_findings[cat_code][split_name] += 1
+                cat_split_scans[cat_code][split_name].add(fname)
                 scan_cats_present.add(cat_code)
 
             # Update scan-level co-occurrence matrix across all splits
@@ -108,30 +110,111 @@ def main():
     train_test_leak = sorted(list(patient_map['train'].intersection(patient_map['test'])))
     val_test_leak = sorted(list(patient_map['val'].intersection(patient_map['test'])))
 
-    # Category-level disparity breakdown
+    tot_train_f = split_stats['train']['TotalFindings']
+    tot_val_f = split_stats['val']['TotalFindings']
+    tot_test_f = split_stats['test']['TotalFindings']
+
+    tot_train_scans = split_stats['train']['TotalScans']
+    tot_val_scans = split_stats['val']['TotalScans']
+    tot_test_scans = split_stats['test']['TotalScans']
+
+    # Category-level detailed label distribution & disparity breakdown
     category_disparity = {}
     for code in sorted_cat_codes:
         cat_name = CATEGORY_MAP[code]
+        is_focal = code in FOCAL_CATEGORIES
+        pathology_type = "Focal" if is_focal else "Non-Focal"
+
         tr_inst = cat_split_instances[code]['train']
         vl_inst = cat_split_instances[code]['val']
         ts_inst = cat_split_instances[code]['test']
-        
-        tr_mean = float(np.mean(tr_inst)) if tr_inst else 0.0
-        vl_mean = float(np.mean(vl_inst)) if vl_inst else 0.0
-        ts_mean = float(np.mean(ts_inst)) if ts_inst else 0.0
-        
-        disparity_ratio = round(vl_mean / tr_mean, 2) if tr_mean > 0 else 0.0
+
+        tr_cnt = cat_split_findings[code]['train']
+        vl_cnt = cat_split_findings[code]['val']
+        ts_cnt = cat_split_findings[code]['test']
+
+        # Prevalence (% of scans in split)
+        tr_prev = round(len(cat_split_scans[code]['train']) / tot_train_scans * 100, 2) if tot_train_scans > 0 else 0.0
+        vl_prev = round(len(cat_split_scans[code]['val']) / tot_val_scans * 100, 2) if tot_val_scans > 0 else 0.0
+        ts_prev = round(len(cat_split_scans[code]['test']) / tot_test_scans * 100, 2) if tot_test_scans > 0 else 0.0
+
+        # Finding proportions (%)
+        tr_prop = round(tr_cnt / tot_train_f * 100, 2) if tot_train_f > 0 else 0.0
+        vl_prop = round(vl_cnt / tot_val_f * 100, 2) if tot_val_f > 0 else 0.0
+        ts_prop = round(ts_cnt / tot_test_f * 100, 2) if tot_test_f > 0 else 0.0
+
+        # Detailed instance stats (Mean, Std, Median, IQR, Max, CV)
+        def calc_inst_stats(inst_list):
+            if not inst_list:
+                return {'Mean': 0.0, 'Std': 0.0, 'Median': 0.0, 'Q1': 0.0, 'Q3': 0.0, 'IQR': 0.0, 'Var': 0.0, 'CV': 0.0, 'Max': 0}
+            arr = np.array(inst_list)
+            mean_v = float(np.mean(arr))
+            std_v = float(np.std(arr))
+            med_v = float(np.median(arr))
+            q1_v = float(np.percentile(arr, 25))
+            q3_v = float(np.percentile(arr, 75))
+            iqr_v = round(q3_v - q1_v, 3)
+            var_v = float(np.var(arr))
+            cv_v = round(std_v / mean_v, 3) if mean_v > 0 else 0.0
+            max_v = int(np.max(arr))
+            return {
+                'Mean': round(mean_v, 3),
+                'Std': round(std_v, 3),
+                'Median': round(med_v, 3),
+                'Q1': round(q1_v, 3),
+                'Q3': round(q3_v, 3),
+                'IQR': iqr_v,
+                'Var': round(var_v, 3),
+                'CV': cv_v,
+                'Max': max_v
+            }
+
+        tr_stats = calc_inst_stats(tr_inst)
+        vl_stats = calc_inst_stats(vl_inst)
+        ts_stats = calc_inst_stats(ts_inst)
+
+        disparity_ratio = round(vl_stats['Mean'] / tr_stats['Mean'], 2) if tr_stats['Mean'] > 0 else 0.0
 
         category_disparity[code] = {
             'CategoryName': cat_name,
-            'TrainFindingsCount': cat_split_findings[code]['train'],
-            'ValFindingsCount': cat_split_findings[code]['val'],
-            'TestFindingsCount': cat_split_findings[code]['test'],
-            'TrainMeanInstancesPerFinding': round(tr_mean, 3),
-            'ValMeanInstancesPerFinding': round(vl_mean, 3),
-            'TestMeanInstancesPerFinding': round(ts_mean, 3),
+            'PathologyType': pathology_type,
+            'TrainFindingsCount': tr_cnt,
+            'ValFindingsCount': vl_cnt,
+            'TestFindingsCount': ts_cnt,
+            'TrainFindingProportionPct': tr_prop,
+            'ValFindingProportionPct': vl_prop,
+            'TestFindingProportionPct': ts_prop,
+            'TrainScanPrevalencePct': tr_prev,
+            'ValScanPrevalencePct': vl_prev,
+            'TestScanPrevalencePct': ts_prev,
+            'TrainInstanceStats': tr_stats,
+            'ValInstanceStats': vl_stats,
+            'TestInstanceStats': ts_stats,
             'DisparityRatio_Val_vs_Train': disparity_ratio
         }
+
+    # Grouped Pathology Aggregates (Focal vs Non-Focal)
+    non_focal_tr_inst = [i for code in NON_FOCAL_CATEGORIES for i in cat_split_instances[code]['train']]
+    non_focal_vl_inst = [i for code in NON_FOCAL_CATEGORIES for i in cat_split_instances[code]['val']]
+    focal_tr_inst = [i for code in FOCAL_CATEGORIES for i in cat_split_instances[code]['train']]
+    focal_vl_inst = [i for code in FOCAL_CATEGORIES for i in cat_split_instances[code]['val']]
+
+    grouped_taxonomy = {
+        'NonFocal_1a_to_1f': {
+            'TrainTotalFindings': sum(cat_split_findings[c]['train'] for c in NON_FOCAL_CATEGORIES),
+            'ValTotalFindings': sum(cat_split_findings[c]['val'] for c in NON_FOCAL_CATEGORIES),
+            'TrainMeanInstances': round(float(np.mean(non_focal_tr_inst)), 3) if non_focal_tr_inst else 0.0,
+            'ValMeanInstances': round(float(np.mean(non_focal_vl_inst)), 3) if non_focal_vl_inst else 0.0,
+            'DisparityRatio': round(float(np.mean(non_focal_vl_inst)) / float(np.mean(non_focal_tr_inst)), 2) if non_focal_tr_inst else 0.0
+        },
+        'Focal_2a_to_2h': {
+            'TrainTotalFindings': sum(cat_split_findings[c]['train'] for c in FOCAL_CATEGORIES),
+            'ValTotalFindings': sum(cat_split_findings[c]['val'] for c in FOCAL_CATEGORIES),
+            'TrainMeanInstances': round(float(np.mean(focal_tr_inst)), 3) if focal_tr_inst else 0.0,
+            'ValMeanInstances': round(float(np.mean(focal_vl_inst)), 3) if focal_vl_inst else 0.0,
+            'DisparityRatio': round(float(np.mean(focal_vl_inst)) / float(np.mean(focal_tr_inst)), 2) if focal_tr_inst else 0.0
+        }
+    }
 
     # Calculate conditional co-occurrence probability matrix P(Cat_J | Cat_I)
     cooccurrence_prob = np.zeros((num_cats, num_cats), dtype=float)
@@ -151,6 +234,7 @@ def main():
             'Val_Test_Overlap_Count': len(val_test_leak),
             'Val_Test_Overlap_Patients': val_test_leak,
         },
+        'GroupedPathologyTaxonomy': grouped_taxonomy,
         'CategoryLevelDisparity': category_disparity,
         'ScanLevelCoOccurrenceMatrix': {
             'CategoryOrder': [CATEGORY_MAP[c] for c in sorted_cat_codes],
@@ -171,10 +255,6 @@ def main():
 
     # --- Plot 1: Category Frequency Proportion (%) Across Splits ---
     cat_prop_data = []
-    tot_train_f = split_stats['train']['TotalFindings']
-    tot_val_f = split_stats['val']['TotalFindings']
-    tot_test_f = split_stats['test']['TotalFindings']
-
     for code in sorted_cat_codes:
         cat_label = f"{code}: {CATEGORY_MAP[code]}"
         tr_cnt = cat_split_findings[code]['train']
@@ -217,7 +297,6 @@ def main():
     plt.ylabel('Proportion of Split Findings (%)', fontsize=12, fontweight='bold')
     plt.ylim(0, max(df_cat_prop['Proportion']) * 1.15)
     
-    # Custom x-tick labels with category codes and full category names rotated at 35 degrees
     labels = [f"{code}: {CATEGORY_MAP[code]}" for code in sorted_cat_codes]
     ax1.set_xticks(range(len(sorted_cat_codes)))
     ax1.set_xticklabels(labels, rotation=35, ha='right', fontsize=9.5)
@@ -269,7 +348,6 @@ def main():
     plt.ylabel('Proportion of CT Scans in Split (%)', fontsize=12, fontweight='bold')
     plt.ylim(0, max(df_fps['Proportion']) * 1.15)
 
-    # Add bar labels
     for p in ax2.patches:
         height = p.get_height()
         if height > 0:
@@ -288,7 +366,44 @@ def main():
     plt.close()
     print(f"Successfully generated Findings per Scan Distribution figure at {fig2_path_1} and {fig2_path_2}")
 
-    # --- Plot 3: Co-Occurrence Heatmap ---
+    # --- Plot 3: Instance Count Distribution Boxplot (Train vs Validation) ---
+    inst_boxplot_data = []
+    for code in sorted_cat_codes:
+        cat_lbl = f"{code}: {CATEGORY_MAP[code]}"
+        for val in cat_split_instances[code]['train']:
+            inst_boxplot_data.append({'CategoryCode': code, 'CategoryLabel': cat_lbl, 'Instances': val, 'Split': 'Train (Partial)'})
+        for val in cat_split_instances[code]['val']:
+            inst_boxplot_data.append({'CategoryCode': code, 'CategoryLabel': cat_lbl, 'Instances': val, 'Split': 'Val (Exhaustive)'})
+
+    df_inst_box = pd.DataFrame(inst_boxplot_data)
+    plt.figure(figsize=(15, 7))
+    box_palette = {'Train (Partial)': '#2b5c8f', 'Val (Exhaustive)': '#d95f02'}
+    ax3 = sns.boxplot(
+        data=df_inst_box,
+        x='CategoryCode',
+        y='Instances',
+        hue='Split',
+        palette=box_palette,
+        fliersize=3.5,
+        linewidth=1.2
+    )
+
+    plt.title('Connected Component Instance Count per Finding Query: Train (Partial) vs. Validation (Exhaustive)', fontsize=14, fontweight='bold', pad=15)
+    plt.xlabel('Finding Category', fontsize=12, fontweight='bold')
+    plt.ylabel('Instances per Finding (3D Connected Components)', fontsize=12, fontweight='bold')
+    ax3.set_xticks(range(len(sorted_cat_codes)))
+    ax3.set_xticklabels(labels, rotation=35, ha='right', fontsize=9.5)
+    plt.legend(title='Annotation Protocol', title_fontsize='11', fontsize='10', loc='upper right')
+    plt.tight_layout()
+
+    fig3_path_1 = os.path.join(OUTPUT_DIR, 'exp001_instance_count_boxplot.png')
+    fig3_path_2 = os.path.join(FIG_DIR, 'exp001_instance_count_boxplot.png')
+    plt.savefig(fig3_path_1, dpi=300)
+    plt.savefig(fig3_path_2, dpi=300)
+    plt.close()
+    print(f"Successfully generated Instance Count Boxplot figure at {fig3_path_1} and {fig3_path_2}")
+
+    # --- Plot 4: Co-Occurrence Heatmap ---
     try:
         labels = [f"{code}: {CATEGORY_MAP[code]}" for code in sorted_cat_codes]
         plt.figure(figsize=(14, 12))
@@ -310,3 +425,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+

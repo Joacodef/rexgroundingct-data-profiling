@@ -172,6 +172,47 @@ Test  & 300 (300)$^*$ & 582   & 1.94 & 1.000$^\dagger$ & $\pm 0.000$ & 1 \\
 
 Under the Training set's \textit{Entity Protocol}, annotators segment representative instances per finding query ($\le 3$ annotated instances in typical findings, mean $1.948 \pm 0.962$, peaking at 11 in rare multi-focal entries). Conversely, the Validation split features unconstrained exhaustive annotation ($\max=36$, $\mu=3.714 \pm 4.441$). Standard binary cross-entropy (BCE) or Dice losses treat unannotated true-positive voxels as negative background, introducing instance suppression bias. This empirically justifies Positive-Unlabeled (PU) loss formulations (such as PU SPOCO) during fine-tuning.
 
+\subsection{Fine-Grained 14-Category Distribution \& Instance Variance}
+To evaluate how finding prevalence and mask instance counts vary across clinical categories, we compiled fine-grained statistics across all 14 pathology classes, reported in Table~\ref{tab:category_breakdown}.
+
+\begin{table}[htbp]
+\centering
+\caption{Comprehensive 14-category breakdown across Train (sparse) and Validation (exhaustive) splits, detailing scan prevalence (\%), finding count proportions, mean/median/IQR instances, coefficient of variation ($CV$), and disparity ratios ($\text{Val}/\text{Train}$).}
+\label{tab:category_breakdown}
+\scriptsize
+\setlength{\tabcolsep}{2.5pt}
+\begin{tabularx}{\linewidth}{clcccccc cc cc}
+\toprule
+\textbf{Code} & \textbf{Category Name} & \textbf{Type} & \makecell{\textbf{Train}\\\textbf{Prev (\%)}} & \makecell{\textbf{Val}\\\textbf{Prev (\%)}} & \makecell{\textbf{Train}\\\textbf{Count (\%)}} & \makecell{\textbf{Val}\\\textbf{Count (\%)}} & \makecell{\textbf{Train Mean}\\\textbf{(Med / IQR)}} & \makecell{\textbf{Val Mean}\\\textbf{(Med / IQR)}} & \makecell{\textbf{Val}\\\textbf{Max}} & \makecell{\textbf{Val}\\\textbf{$CV$}} & \makecell{\textbf{Disparity}\\\textbf{Ratio}} \\
+\midrule
+\texttt{1a} & Bronchial wall thickening & Non-Focal & 7.09 & 1.50 & 236 (3.1\%) & 3 (0.8\%) & 2.05 (2.0 / 1.25) & 4.00 (5.0 / 2.50) & 6 & 0.54 & 1.95x \\
+\texttt{1b} & Bronchiectasis           & Non-Focal & 8.26 & 4.50 & 282 (3.7\%) & 11 (2.9\%) & 2.10 (2.0 / 2.00) & 3.27 (2.0 / 3.00) & 10 & 0.85 & 1.56x \\
+\texttt{1c} & Emphysema                & Non-Focal & 13.97 & 7.50 & 446 (5.8\%) & 17 (4.5\%) & 2.39 (2.0 / 1.00) & 2.82 (2.0 / 2.00) & 12 & 0.94 & 1.18x \\
+\texttt{1d} & Septal thickening        & Non-Focal & 6.15 & 3.00 & 194 (2.5\%) & 6 (1.6\%) & 2.22 (2.0 / 1.00) & 5.50 (4.0 / 4.50) & 10 & 0.52 & 2.48x \\
+\texttt{1e} & Micronodules             & Non-Focal & 7.99 & 5.50 & 314 (4.1\%) & 11 (2.9\%) & 2.21 (2.0 / 2.00) & 5.18 (4.0 / 4.00) & 12 & 0.61 & 2.35x \\
+\texttt{1f} & Other non-focal          & Non-Focal & 4.75 & 2.00 & 150 (2.0\%) & 4 (1.1\%) & 2.08 (2.0 / 2.00) & 2.75 (1.5 / 2.25) & 7 & 0.91 & 1.32x \\
+\midrule
+\texttt{2a} & Linear opacities         & Focal & 26.77 & 31.50 & 1,120 (14.6\%) & 69 (18.1\%) & 1.71 (2.0 / 1.00) & 2.25 (2.0 / 1.00) & 7 & 0.75 & 1.31x \\
+\texttt{2b} & Atelectasis / consolid.  & Focal & 30.45 & 20.00 & 1,367 (17.8\%) & 49 (12.9\%) & 1.78 (1.0 / 2.00) & 2.78 (2.0 / 2.00) & 14 & 1.03 & 1.56x \\
+\texttt{2c} & Ground-glass opacity     & Focal & 37.73 & 26.50 & 1,507 (19.6\%) & 60 (15.8\%) & 2.23 (2.0 / 2.00) & 7.13 (4.0 / 9.25) & \textbf{36} & \textbf{1.13} & \textbf{3.20x} \\
+\texttt{2d} & Pulmonary nodules/masses & Focal & 43.62 & 59.50 & 1,743 (22.7\%) & 132 (34.7\%) & 1.83 (1.0 / 2.00) & 3.53 (2.0 / 3.00) & 22 & 0.98 & 1.93x \\
+\texttt{2e} & Pleural effusion/thick.  & Focal & 6.08 & 5.50 & 237 (3.1\%) & 11 (2.9\%) & 1.43 (1.0 / 1.00) & 2.00 (2.0 / 1.50) & 5 & 0.60 & 1.40x \\
+\texttt{2f} & Honeycombing             & Focal & 0.50 & 0.00 & 16 (0.2\%) & 0 (0.0\%) & 2.06 (2.0 / 1.00) & N/A & N/A & N/A & N/A \\
+\texttt{2g} & Pneumothorax             & Focal & 1.20 & 2.50 & 36 (0.5\%) & 5 (1.3\%) & 1.19 (1.0 / 0.00) & 1.40 (1.0 / 1.00) & 2 & 0.39 & 1.17x \\
+\texttt{2h} & Other focal              & Focal & 0.97 & 1.50 & 29 (0.4\%) & 3 (0.8\%) & 1.28 (1.0 / 0.00) & 2.00 (2.0 / 1.00) & 3 & 0.43 & 1.57x \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+The empirical results reveal strong cross-pathology structural divergence:
+\begin{enumerate}
+    \item \textbf{High-Disparity Diffuse Pathologies}: Ground-glass opacity (\texttt{2c}) exhibits the highest instance fragmentation in exhaustive validation ($\mu = 7.13$, $\text{IQR} = 9.25$, $\max = 36$, $CV = 1.13$), yielding a \textbf{3.20x disparity ratio} relative to Train ($\mu = 2.23$). Septal thickening (\texttt{1d}, 2.48x) and Micronodules (\texttt{1e}, 2.35x) similarly show high instance disparity.
+    \item \textbf{High-Prevalence Focal Pathologies}: Pulmonary nodules/masses (\texttt{2d}) is the most prevalent finding overall (43.62\% Train, 59.50\% Val, 53.67\% Test scan prevalence), averaging 3.53 instances in validation (max 22, $CV = 0.98$).
+    \item \textbf{Low-Variance Focal Pathologies}: Highly localized pathologies such as Pneumothorax (\texttt{2g}) ($\mu = 1.40$, $\max = 2$, $CV = 0.39$) and Pleural effusion (\texttt{2e}) ($\mu = 2.00$, $\max = 5$, $CV = 0.60$) exhibit tightly bounded instance counts with minimal split disparity.
+\end{enumerate}
+
+Figures~\ref{fig:exp001_composition} and~\ref{fig:exp001_boxplot} illustrate the category distribution and connected-component instance boxplot comparing Train (partial) and Validation (exhaustive) annotations.
+
 \begin{figure}[htbp]
 \centering
 \begin{subfigure}[b]{0.48\textwidth}
@@ -187,6 +228,13 @@ Under the Training set's \textit{Entity Protocol}, annotators segment representa
 \end{subfigure}
 \caption{Experiment 001 dataset category proportion breakdown and findings per scan distribution across Train, Validation, and Test splits.}
 \label{fig:exp001_composition}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.88\textwidth]{fig/exp001_instance_count_boxplot.png}
+\caption{Connected component instance count distribution per finding query comparing Train (sparse, capped $\le 3$) vs.\ Validation (exhaustive) annotations across all 14 categories.}
+\label{fig:exp001_boxplot}
 \end{figure}
 
 \subsection{Scan-Level Pathology Co-Occurrence Structure}
