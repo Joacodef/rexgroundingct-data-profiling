@@ -15,6 +15,9 @@
 \usepackage{listings}
 \usepackage{adjustbox}
 \usepackage{makecell}
+\usepackage{tabularx}
+\usepackage{siunitx}
+\DeclareSIUnit\HU{HU}
 
 \definecolor{codegray}{rgb}{0.5,0.5,0.5}
 \definecolor{backcolour}{rgb}{0.96,0.96,0.96}
@@ -30,6 +33,28 @@
     showstringspaces=false,
     showtabs=false,
     tabsize=2
+}
+
+\lstdefinelanguage{json}{
+    basicstyle=\ttfamily\small,
+    showstringspaces=false,
+    breaklines=true,
+    string=[s]{"}{"},
+    stringstyle=\color{blue!80!black},
+    comment=[l]{//},
+    morecomment=[s]{/*}{*/},
+    commentstyle=\color{codegray},
+    literate=
+     *{0}{{{\color{black}0}}}{1}
+      {1}{{{\color{black}1}}}{1}
+      {2}{{{\color{black}2}}}{1}
+      {3}{{{\color{black}3}}}{1}
+      {4}{{{\color{black}4}}}{1}
+      {5}{{{\color{black}5}}}{1}
+      {6}{{{\color{black}6}}}{1}
+      {7}{{{\color{black}7}}}{1}
+      {8}{{{\color{black}8}}}{1}
+      {9}{{{\color{black}9}}}{1}
 }
 
 \hypersetup{
@@ -51,7 +76,7 @@
 \maketitle
 
 \begin{abstract}
-This technical report synthesizes the quantitative results of the consolidated Phase 1 profiling suite (\texttt{exp\_001} through \texttt{exp\_005}) conducted for the ReXGroundingCT MICCAI 2026 Challenge~\cite{baharoon2025rexgroundingct}. Analyzing 3,192 3D thoracic CT scan entries (representing 3,078 physical NIfTI volumes derived from the CT-RATE repository~\cite{hamamci2024ctrate}) and 8,650 radiology report finding prompts across 14 official finding categories, we investigate annotation disparity between training and validation splits, patient hierarchy and cross-split leakage, free-text prompt syntax shift, canonical RAS 3D spatial probability density distributions, physical Hounsfield Unit (HU) radiodensity attenuation bounds, and 3D morphological topology across 27,138 discrete connected components. We establish calibrated actionable modeling and post-processing directives to guide downstream zero-shot baseline evaluation with VoxTell~\cite{luo2025voxtell} and model fine-tuning.
+This technical report synthesizes the quantitative results of the consolidated Phase 1 profiling suite (\texttt{exp\_001} through \texttt{exp\_005}) conducted for the ReXGroundingCT MICCAI 2026 Challenge~\cite{baharoon2025rexgroundingct}. Analyzing 3,192 3D thoracic CT scan entries (representing 3,078 physical NIfTI volumes derived from the CT-RATE repository~\cite{hamamci2024ctrate}) and 8,650 radiology report finding prompts across 14 official finding categories, we investigate annotation disparity between training and validation splits, patient hierarchy and cross-split leakage, free-text prompt syntax shift, canonical RAS 3D spatial probability density distributions, physical Hounsfield Unit (HU) radiodensity attenuation bounds, and 3D morphological topology across 27,138 discrete connected components. We establish calibrated actionable modeling and post-processing directives to guide downstream zero-shot baseline evaluation with VoxTell~\cite{luo2025voxtell} and model fine-tuning via Positive-Unlabeled (PU) SPOCO loss and Multi-Planar Reconstruction (MPR) consistency learning.
 \end{abstract}
 
 \tableofcontents
@@ -67,7 +92,7 @@ To eliminate confusion across dataset metrics, we formally define the 4-tier dat
     \item \textbf{Tier 1: Physical NIfTI Scans (3,078 volumes)}: The underlying physical ground-truth image repository containing 2,578 Training scans, 200 Validation scans, and 300 Test scans acquired from distinct CT scan acquisition sessions.
     \item \textbf{Tier 2: Dataset Record Entries (3,192 entries)}: The primary indexing entries stored in \texttt{dataset.json} (comprising 2,992 Training entries and 200 Validation entries). The total indexed record entries (3,192) exceed physical scan acquisitions (3,078) because multiple reconstruction series (e.g., soft-tissue vs.\ high-resolution lung kernels, or thin vs.\ thick slice reconstructions \texttt{\_1.nii.gz}, \texttt{\_2.nii.gz}) derived from a single physical CT examination are indexed as separate entries in \texttt{dataset.json}. Test split entries (300 physical scans) are withheld from \texttt{dataset.json} pending official challenge submission.
     \item \textbf{Tier 3: Target Findings (8,650 target findings total, 8,068 in indexed Train+Val)}: Discrete 3D target segmentation masks (7,687 in Train, 381 in Val, 582 in Test). As specified in the official ReXGroundingCT paper~\cite{baharoon2025rexgroundingct}, findings were extracted from radiology reports using GPT-4. Under the training set's \textit{Entity Protocol}, annotators were instructed to segment at most three representative instances per finding ($\le 3$ instances/finding, mean $1.95$) to manage annotation workload. Conversely, the Validation split features unconstrained exhaustive annotation of all visible instances (mean $3.71$, reaching up to 36 instances). Test split ground-truth instance masks are withheld from challenge participants for evaluation integrity, resulting in placeholder values ($\text{mean} = 1.000 \pm 0.000$, $\text{max} = 1$) in raw benchmark metadata.
-    \item \textbf{Tier 4: Radiology Report Prompts (8,650 prompts)}: Free-text sentence queries extracted across all findings (7,687 in Train, 381 in Val, 582 in Test). Each radiology report prompt is paired 1-to-1 with a target finding mask, averaging $2.57$ findings/prompts per CT scan record in Train ($\frac{7,687}{2,992} = 2.5692$) and $2.53$ overall in Train+Val ($\frac{8,068}{3,192} = 2.5276$). Across the benchmark, 7,040 prompts ($81.4\%$) are unique verbatim text strings, while 1,610 ($18.6\%$) are exact duplicate sentences resulting from standardized clinical template descriptions and multi-kernel CT reconstruction series.
+    \item \textbf{Tier 4: Radiology Report Prompts (8,650 prompts)}: Free-text sentence queries extracted across all findings (7,687 in Train, 381 in Val, 582 in Test). Each radiology report prompt is paired 1-to-1 with a target finding mask, averaging $2.57$ findings/prompts per CT scan record in Train ($7,687 / 2,992 = 2.5692$) and $2.53$ overall in Train+Val ($8,068 / 3,192 = 2.5276$). Across the benchmark, 7,040 prompts ($81.4\%$) are unique verbatim text strings, while 1,610 ($18.6\%$) are exact duplicate sentences resulting from standardized clinical template descriptions and multi-kernel CT reconstruction series.
 \end{itemize}
 
 \subsection{Dataset Metadata Indexing Structure (\texttt{dataset.json})}
@@ -108,8 +133,6 @@ Master dataset metadata is organized in \texttt{dataset.json} as a dictionary in
 }
 \end{lstlisting}
 
-\bigskip
-
 \section{Phase 1 Consolidated 5-Experiment Mapping Index}
 
 To establish clean modular boundaries and maintain reproducible computation, the Phase 1 profiling suite was consolidated into five standardized experiments, each pairing a computational Python script, a structured output JSON artifact, and a documentation report:
@@ -117,24 +140,21 @@ To establish clean modular boundaries and maintain reproducible computation, the
 \begin{enumerate}
     \item \textbf{Experiment 001 (\texttt{exp\_001\_dataset\_disparity\_leakage})}: Dataset composition, sparse Train vs.\ exhaustive Val mask disparity, positive-unlabeled (PU) loss justification, 3-tier patient hierarchy, and cross-split leakage audit.
     \item \textbf{Experiment 002 (\texttt{exp\_002\_nlp\_prompt\_syntax})}: Free-text NLP prompt syntax shift (Cases 1--50 vs.\ 51--200), BPE subword tokenization dynamics (+34.7\% expansion, 1.347x ratio), spatial preposition locators (64.39\%), and diagnostic hedging pruning (0.38\%).
-    \item \textbf{Experiment 003 (\texttt{exp\_003\_spatial\_density\_priors})}: 3D RAS spatial centroids $(RL, AP, IS)$, 4-tier spatial density prior taxonomy (Apical, Basal, Hilar, Isotropic), cosine similarity $S_{cos}$, centroid shift $\Delta d$, and 4-panel population density prior figure across all 14 categories ($128 \times 128 \times 128$ grid).
+    \item \textbf{Experiment 003 (\texttt{exp\_003\_spatial\_density\_priors})}: 3D RAS spatial centroids $(\text{RL}, \text{AP}, \text{IS})$, 4-tier spatial density prior taxonomy (Apical, Basal, Hilar, Isotropic), cosine similarity $S_{\text{cos}}$, centroid shift $\Delta d$, and 4-panel population density prior figure across all 14 categories ($128 \times 128 \times 128$ grid).
     \item \textbf{Experiment 004 (\texttt{exp\_004\_hu\_radiodensity})}: Hounsfield Unit (HU) attenuation profiling inside mask regions vs.\ surrounding parenchyma across all 14 categories, contrast deltas ($\Delta \text{HU}$), and category intensity windowing bounds \texttt{[min\_HU, max\_HU]}.
-    \item \textbf{Experiment 005 (\texttt{exp\_005\_morphology\_noise\_pruning})}: 3D connected-component morphology across 27,138 blobs, sphericity index ($S$), surface area-to-volume ($SA/V$) ratios, volume quantiles, and recommended noise pruning thresholds (\texttt{recommended\_min\_size\_voxels}).
+    \item \textbf{Experiment 005 (\texttt{exp\_005\_morphology\_noise\_pruning})}: 3D connected-component morphology across 27,138 blobs, sphericity index ($S$), surface area-to-volume ($\text{SA}/\text{V}$) ratios, volume quantiles, and recommended noise pruning thresholds (\texttt{recommended\_min\_size\_voxels}).
 \end{enumerate}
-
-\bigskip
 
 \section{Exp 001: Statistical Mask Analysis, Entity Counts \& Patient Leakage}
 
 \subsection{Split Composition \& Annotation Disparity}
 A key empirical finding of Experiment 001 is the quantitative disparity between the partially annotated Training split and the exhaustively annotated Validation split, summarized in Table~\ref{tab:split_summary}.
 
-\begin{table}[H]
+\begin{table}[htbp]
 \centering
 \caption{Dataset split overview highlighting the annotation disparity between Train (Entity Protocol $\le 3$), Val (Exhaustive), and Test (Withheld ground truth).}
 \label{tab:split_summary}
-\begin{adjustbox}{max width=\linewidth}
-\small
+\footnotesize
 \setlength{\tabcolsep}{6pt}
 \begin{tabular}{lcccccc}
 \toprule
@@ -145,14 +165,14 @@ Val   & 200 (200)     & 381   & 1.91 & 3.714 & $\pm 4.441$ & 36 \\
 Test  & 300 (300)$^*$ & 582   & 1.94 & 1.000$^\dagger$ & $\pm 0.000$ & 1 \\
 \bottomrule
 \end{tabular}
-\end{adjustbox}
+
 \vspace{2mm}
-\raggedright \footnotesize $^*$Test split records are withheld from \texttt{dataset.json} during Phase 1. $^\dagger$Test split instance masks are withheld for official benchmark evaluation, displaying single placeholder instance metadata ($1.000 \pm 0.000$).
+\raggedright \footnotesize $^*$Test split records are withheld from \texttt{dataset.json} during Phase 1. $^\dagger$Test split instance metadata ($1.000 \pm 0.000$) reflects placeholder counts resulting from unreleased/withheld test masks pending official benchmark evaluation, rather than physical ground-truth single-instance annotations.
 \end{table}
 
-Under the Training set's \textit{Entity Protocol}, annotators segment representative instances per finding query ($\le 3$ annotated instances in typical findings, mean $1.948 \pm 0.962$, peaking at 11 in rare multi-focal entries). Conversely, the Validation split features unconstrained exhaustive annotation ($\text{Max}=36$, $\mu=3.714 \pm 4.441$). Standard binary cross-entropy (BCE) or Dice losses treat unannotated true-positive voxels as negative background, introducing instance suppression bias. This empirically justifies Positive-Unlabeled (PU) loss formulations (such as PU SPOCO) during fine-tuning.
+Under the Training set's \textit{Entity Protocol}, annotators segment representative instances per finding query ($\le 3$ annotated instances in typical findings, mean $1.948 \pm 0.962$, peaking at 11 in rare multi-focal entries). Conversely, the Validation split features unconstrained exhaustive annotation ($\max=36$, $\mu=3.714 \pm 4.441$). Standard binary cross-entropy (BCE) or Dice losses treat unannotated true-positive voxels as negative background, introducing instance suppression bias. This empirically justifies Positive-Unlabeled (PU) loss formulations (such as PU SPOCO) during fine-tuning.
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{subfigure}[b]{0.48\textwidth}
     \centering
@@ -172,7 +192,7 @@ Under the Training set's \textit{Entity Protocol}, annotators segment representa
 \subsection{Scan-Level Pathology Co-Occurrence Structure}
 To understand multi-finding pathology dependence across multi-label CT volumes, we computed the $14 \times 14$ scan-level conditional probability co-occurrence matrix $P(c_j \text{ present} \mid c_i \text{ present})$, visualized in Figure~\ref{fig:cooccurrence_heatmap}.
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=0.82\textwidth]{fig/exp001_cooccurrence_heatmap.png}
 \caption{Scan-level $14 \times 14$ pathology co-occurrence probability matrix $P(c_j \text{ present} \mid c_i \text{ present})$ across multi-label CT scans.}
@@ -196,21 +216,18 @@ Our systematic cross-split patient leakage audit identified:
 
 Val-Test patient overlap presents the highest risk to evaluation integrity: if model tuning hyper-parameters implicitly exploit patient-level anatomical features learned during validation on these 5 patients, performance on the corresponding Test scans may be artificially inflated. Strict split isolation is mandatory during local validation.
 
-\bigskip
-
 \section{Exp 002: Free-Text Prompt Syntax \& NLP Text Shift Analysis}
 
 \subsection{Validation Prompt Text Shift (Cases 1--50 vs.\ Cases 51--200)}
 Experiment 002 evaluates the clinical text characteristics across all 8,650 prompts in the benchmark. Critically, we identified a significant syntactic prompt shift between the first 50 validation cases (used in the original VoxTell paper benchmark~\cite{luo2025voxtell}) and cases 51--200 (the expanded MICCAI competition validation set), detailed in Table~\ref{tab:nlp_shift}.
 
-\begin{table}[H]
+\begin{table}[htbp]
 \centering
 \caption{NLP syntactic prompt shift analysis on Validation Cases 1--50 vs.\ Cases 51--200.}
 \label{tab:nlp_shift}
-\begin{adjustbox}{max width=\linewidth}
-\small
-\setlength{\tabcolsep}{5pt}
-\begin{tabular}{lccccc}
+\footnotesize
+\setlength{\tabcolsep}{4.5pt}
+\begin{tabularx}{\linewidth}{Xccccc}
 \toprule
 \textbf{Metric / Parameter} & \makecell{\textbf{Cases 1--50}\\\textbf{(Paper)}} & \makecell{\textbf{Cases 51--200}\\\textbf{(MICCAI)}} & \textbf{Ratio} & \makecell{\textbf{Percentage}\\\textbf{Change}} & \textbf{Combined Val} \\
 \midrule
@@ -223,8 +240,8 @@ Prompts with Comma Punctuation & 11.30\% & \textbf{23.68\%} & \textbf{2.10x} & \
 Type-Token Ratio (TTR, Naive)$^*$ & 0.1544 & 0.0817 & 0.53x & -47.1\% & 0.0741 \\
 LN-TTR (1,000 Tokens Monte Carlo) & 0.1740 & 0.1651 & 0.95x & -5.11\% & 0.1746 \\
 \bottomrule
-\end{tabular}
-\end{adjustbox}
+\end{tabularx}
+
 \vspace{2mm}
 \raggedright \footnotesize $^*$Naive TTR is inherently biased by corpus token size due to Heaps' Law (as total token count expands, vocabulary saturation reduces naive TTR). Log-Normal TTR (LN-TTR) controls for corpus length, confirming stable lexicon diversity.
 \end{table}
@@ -233,17 +250,15 @@ Prompts in cases 51--200 exhibit longer, highly clause-heavy sentences with a 1.
 
 \subsection{Subword Tokenization Dynamics, Spatial Directives \& Hedging}
 \begin{itemize}
-    \item \textbf{Subword BPE Tokenization Dynamics}: Tokenizing prompts with standard medical BERT/CLIP tokenizers yields an average of $13.75$ subword BPE tokens per prompt compared to $10.21$ raw words, representing a $+34.7\%$ BPE tokenization expansion factor ($1.347\text{x}$). Maximum prompt token length remains strictly below 128 tokens across all splits, resulting in a $0.0\%$ context truncation rate.
+    \item \textbf{Subword BPE Tokenization Dynamics}: Tokenizing prompts with standard medical BERT/CLIP tokenizers yields an average of $13.75$ subword BPE tokens per prompt compared to $10.21$ raw words, representing a $+34.7\%$ BPE tokenization expansion factor ($1.347\times$). Maximum prompt token length remains strictly below 128 tokens across all splits, resulting in a $0.0\%$ context truncation rate.
     \item \textbf{Spatial Locators}: 64.39\% of all prompts contain explicit anatomical position locators (\textit{"right"}, \textit{"upper lobe"}, \textit{"subpleural"}, \textit{"peribronchovascular"}).
     \item \textbf{Diagnostic Hedging}: Hedging language (\textit{"possible"}, \textit{"equivocal"}, \textit{"cannot be excluded"}) was identified in only 0.38\% of prompts (33 prompts dataset-wide), demonstrating that hedging noise is negligible and does not require complex NLP text pruning.
 \end{itemize}
 
-\bigskip
-
 \section{Exp 003: Anatomical Spatial Density Priors \& 4-Tier Taxonomy}
 
 \subsection{Canonical RAS Coordinate Centroids \& 4-Tier Taxonomy}
-Experiment 003 resamples all 3D ground-truth masks into a canonical $128 \times 128 \times 128$ RAS spatial coordinate grid to compute canonical 3D spatial probability density volumes $\mathbf{P}_{\text{train}}, \mathbf{P}_{\text{val}} \in \mathbb{R}^{128 \times 128 \times 128}$ and average spatial centroids $\mathbf{c} = (RL, AP, IS) \in [0.0, 1.0]^3$. 
+Experiment 003 resamples all 3D ground-truth masks into a canonical $128 \times 128 \times 128$ RAS spatial coordinate grid to compute canonical 3D spatial probability density volumes $\mathbf{P}_{\text{train}}, \mathbf{P}_{\text{val}} \in \mathbb{R}^{128 \times 128 \times 128}$ and average spatial centroids $\mathbf{c} = (\text{RL}, \text{AP}, \text{IS}) \in [0.0, 1.0]^3$. 
 
 To quantify 3D spatial probability density alignment across splits, Cosine Similarity $S_{\text{cos}}$ is calculated as the normalized Frobenius inner product between the resampled 3D spatial probability density maps:
 \begin{equation}
@@ -253,22 +268,21 @@ while Centroid Distance Shift $\Delta d$ measures the Euclidean distance between
 
 Based on population 3D spatial probability density distributions $\mathbf{P}_{\text{train}}(\mathbf{x})$ (visualized in Figure~\ref{fig:exp003_priors}) and anatomical clinical domain priors, findings are categorized into a 4-tier spatial prior taxonomy detailed in Table~\ref{tab:spatial_centroids}:
 \begin{enumerate}
-    \item \textbf{Apical Dominant Prior} (\texttt{1c} Emphysema): Population 3D probability density is heavily concentrated in superior lung zones ($IS = 0.667$ in Train, $IS = 0.789$ in Val).
-    \item \textbf{Basal / Dependent Prior} (\texttt{2b} Atelectasis, \texttt{2e} Pleural effusion, \texttt{2f} Honeycombing$^*$): Density maps localize in inferior and posterior gravitational regions ($IS \approx 0.416$--$0.491, AP \approx 0.314$).
-    \item \textbf{Hilar / Peribronchial Prior} (\texttt{1a} Bronchial wall thickening, \texttt{1b} Bronchiectasis): Density maps cluster tightly around central bronchovascular tree structures ($RL \approx 0.508$--$0.510, IS \approx 0.541$--$0.545$).
-    \item \textbf{Isotropic / Parenchymal Prior} (\texttt{2d} Nodules, \texttt{1e} Micronodules, \texttt{2c} GGO, \texttt{2a} Linear opacities): Broad parenchymal distribution across pulmonary fields without focal gravitational or apical confinement ($IS \approx 0.52$--$0.56, RL \approx 0.47$--$0.54$).
+    \item \textbf{Apical Dominant Prior} (\texttt{1c} Emphysema): Population 3D probability density is heavily concentrated in superior lung zones ($\text{IS} = 0.667$ in Train, $\text{IS} = 0.789$ in Val).
+    \item \textbf{Basal / Dependent Prior} (\texttt{2b} Atelectasis, \texttt{2e} Pleural effusion, \texttt{2f} Honeycombing$^*$): Density maps localize in inferior and posterior gravitational regions ($\text{IS} \approx 0.416$--$0.491, \text{AP} \approx 0.314$).
+    \item \textbf{Hilar / Peribronchial Prior} (\texttt{1a} Bronchial wall thickening, \texttt{1b} Bronchiectasis): Density maps cluster tightly around central bronchovascular tree structures ($\text{RL} \approx 0.508$--$0.510, \text{IS} \approx 0.541$--$0.545$).
+    \item \textbf{Isotropic / Parenchymal Prior} (\texttt{2d} Nodules, \texttt{1e} Micronodules, \texttt{2c} GGO, \texttt{2a} Linear opacities): Broad parenchymal distribution across pulmonary fields without focal gravitational or apical confinement ($\text{IS} \approx 0.52$--$0.56, \text{RL} \approx 0.47$--$0.54$).
 \end{enumerate}
 
-\begin{table}[H]
+\begin{table}[htbp]
 \centering
-\caption{Canonical 3D RAS spatial centroids $(RL, AP, IS) \in [0.0, 1.0]^3$, centroid distance shift $\Delta d$, 3D spatial density cosine similarity $S_{cos}$, and 4-tier spatial density prior taxonomy across all 14 finding categories.}
+\caption{Canonical 3D RAS spatial centroids $(\text{RL}, \text{AP}, \text{IS}) \in [0.0, 1.0]^3$, centroid distance shift $\Delta d$, 3D spatial density cosine similarity $S_{\text{cos}}$, and 4-tier spatial density prior taxonomy across all 14 finding categories.}
 \label{tab:spatial_centroids}
-\begin{adjustbox}{max width=\linewidth}
-\small
-\setlength{\tabcolsep}{3.5pt}
-\begin{tabular}{lcccccc}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\linewidth}{c X c c c c X}
 \toprule
-\textbf{Code} & \textbf{Finding Category} & \makecell{\textbf{Train Centroid}\\\textbf{$(RL, AP, IS)$}} & \makecell{\textbf{Val Centroid}\\\textbf{$(RL, AP, IS)$}} & $\Delta d$ & $S_{cos}$ & \makecell{\textbf{Spatial Prior}\\\textbf{Taxonomy}} \\
+\textbf{Code} & \textbf{Finding Category} & \makecell{\textbf{Train Centroid}\\\textbf{$(\text{RL}, \text{AP}, \text{IS})$}} & \makecell{\textbf{Val Centroid}\\\textbf{$(\text{RL}, \text{AP}, \text{IS})$}} & $\Delta d$ & $S_{\text{cos}}$ & \makecell{\textbf{Spatial Prior}\\\textbf{Taxonomy}} \\
 \midrule
 \texttt{1a} & Bronchial wall thickening & $(0.508, 0.439, 0.541)$ & $(0.495, 0.491, 0.478)$ & 0.0825 & 0.0412 & Hilar / Peribronchial \\
 \texttt{1b} & Bronchiectasis & $(0.510, 0.449, 0.545)$ & $(0.471, 0.489, 0.548)$ & 0.0563 & 0.2059 & Hilar / Peribronchial \\
@@ -285,13 +299,13 @@ Based on population 3D spatial probability density distributions $\mathbf{P}_{\t
 \texttt{2g} & Pneumothorax & $(0.497, 0.516, 0.522)$ & $(0.304, 0.443, 0.622)$ & 0.2293 & 0.0717 & Isotropic / Parenchymal \\
 \texttt{2h} & Other focal & $(0.521, 0.442, 0.536)$ & $(0.513, 0.488, 0.578)$ & 0.0633 & 0.0101 & Isotropic / Parenchymal \\
 \bottomrule
-\end{tabular}
-\end{adjustbox}
+\end{tabularx}
+
 \vspace{2mm}
-\raggedright \footnotesize $^*$Honeycombing (\texttt{2f}) contains 0 instances in the Validation split ($N_{\text{val}}=0$); its spatial prior taxonomy is assigned based on Train split spatial distribution ($N_{\text{train}}=16$) and clinical domain priors.
+\raggedright \footnotesize $^*$Honeycombing (\texttt{2f}) contains 0 instances in the Validation split ($N_{\text{val}}=0$); zero-count validation categories require reliance on Training split spatial distribution priors ($N_{\text{train}}=16$), anatomical domain knowledge, and data-augmentation sampling during model fine-tuning.
 \end{table}
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=0.95\textwidth]{fig/exp003_population_spatial_priors_4panel.png}
 \caption{Canonical 3D spatial probability density priors across key taxonomy categories (Coronal projections, $128 \times 128 \times 128$ RAS grid).}
@@ -300,13 +314,11 @@ Based on population 3D spatial probability density distributions $\mathbf{P}_{\t
 
 High spatial density stability is observed in focal pathologies (e.g., nodules $\Delta d = 0.101$). Conversely, dependent and pleural pathologies (Pleural effusion $\Delta d = 0.243$, Pneumothorax $\Delta d = 0.229$) exhibit noticeable centroid shifts between splits due to anatomical gravity variation and sparse vs.\ exhaustive sampling, highlighting the need for spatial prior masking during search space pruning.
 
-\bigskip
-
 \section{Exp 004: Hounsfield Unit (HU) Radiodensity Attenuation Profiling}
 
 Experiment 004 extracts physical Hounsfield Unit (HU) intensity values inside ground-truth pathology masks vs.\ surrounding healthy parenchyma across 3,192 CT volumes.
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{subfigure}[b]{0.48\textwidth}
     \centering
@@ -323,14 +335,13 @@ Experiment 004 extracts physical Hounsfield Unit (HU) intensity values inside gr
 \label{fig:exp004_hu}
 \end{figure}
 
-\begin{table}[H]
+\begin{table}[htbp]
 \centering
 \caption{Category-level Hounsfield Unit (HU) attenuation statistics, mask sample counts ($N_{\text{masks}}$), contrast deltas ($\Delta \text{HU} = \text{Mean HU} - \text{Bg Mean HU}$), and recommended windowing bounds \texttt{[min\_HU, max\_HU]}.}
 \label{tab:hu_stats}
-\begin{adjustbox}{max width=\linewidth}
-\small
-\setlength{\tabcolsep}{4pt}
-\begin{tabular}{lm{3.2cm}cccccc}
+\footnotesize
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabularx}{\linewidth}{c X c c c c c c}
 \toprule
 \textbf{Cat Code} & \textbf{Category Name} & \textbf{$N_{\text{masks}}$} & \textbf{Mean HU} & \textbf{P5 HU} & \textbf{P95 HU} & \makecell{\textbf{Contrast}\\\textbf{$\Delta\text{HU}$}} & \makecell{\textbf{Rec Window}\\\textbf{[Min, Max]}} \\
 \midrule
@@ -349,68 +360,61 @@ Experiment 004 extracts physical Hounsfield Unit (HU) intensity values inside gr
 \texttt{2g} & Pneumothorax & 19 & -306.85 & -961.0 & +148.0 & -54.68 & [-961.0, +148.0] \\
 \texttt{2h} & Other focal & 64 & -156.62 & -915.0 & +201.0 & -16.21 & [-915.0, +201.0] \\
 \bottomrule
-\end{tabular}
-\end{adjustbox}
+\end{tabularx}
 \end{table}
 
 Key radiodensity observations:
 \begin{itemize}
-    \item \textbf{Radiodensity Attenuation Range}: Mean attenuation ranges from \texttt{2h} Other focal ($-156.62\text{ HU}$) and \texttt{2a} Linear opacities ($-286.55\text{ HU}$) to air-filled airway wall pathologies like \texttt{1a} Bronchial wall thickening ($-486.35\text{ HU}$) and \texttt{1b} Bronchiectasis ($-477.93\text{ HU}$). Low sample size categories (\texttt{2f} Honeycombing $N=16$, \texttt{2g} Pneumothorax $N=19$) exhibit higher statistical variance.
-    \item \textbf{Contrast Deltas ($\Delta \text{HU}$)}: Soft-tissue focal lesions (micronodules $+15.16\text{ HU}$, linear opacities $+4.68\text{ HU}$, consolidation $+2.43\text{ HU}$) exhibit positive contrast deltas against immediate background, whereas nodules ($-49.15\text{ HU}$) and pneumothorax ($-54.68\text{ HU}$) show distinct negative boundary deltas against surrounding parenchyma.
+    \item \textbf{Radiodensity Attenuation Range}: Mean attenuation ranges from \texttt{2h} Other focal ($-156.62~\text{HU}$) and \texttt{2a} Linear opacities ($-286.55~\text{HU}$) to air-filled airway wall pathologies like \texttt{1a} Bronchial wall thickening ($-486.35~\text{HU}$) and \texttt{1b} Bronchiectasis ($-477.93~\text{HU}$). Low sample size categories (\texttt{2f} Honeycombing $N=16$, \texttt{2g} Pneumothorax $N=19$) exhibit higher statistical variance.
+    \item \textbf{Contrast Deltas ($\Delta \text{HU}$)}: Soft-tissue focal lesions (micronodules $+15.16~\text{HU}$, linear opacities $+4.68~\text{HU}$, consolidation $+2.43~\text{HU}$) exhibit positive contrast deltas against immediate background, whereas nodules ($-49.15~\text{HU}$) and pneumothorax ($-54.68~\text{HU}$) show distinct negative boundary deltas against surrounding parenchyma.
     \item \textbf{Optimal Windowing Bounds}: Preprocessing CT volumes with category-tailored intensity windowing \texttt{[min\_HU, max\_HU]} (e.g. \texttt{[-995, +194] HU} for nodules vs \texttt{[-933, +69] HU} for bronchial thickening) enhances feature contrast during model training.
 \end{itemize}
 
-\bigskip
-
 \section{Exp 005: 3D Morphological Topology \& Size Thresholds}
 
-Experiment 005 profiles 3D connected component morphology, geometric sphericity index ($S = \frac{\pi^{1/3}(6V)^{2/3}}{A}$), surface area-to-volume ratio ($SA/V$), component physical volume quantiles (P5, Median, P95 in $\text{mm}^3$), and voxel volume distributions across 27,138 discrete connected components extracted across Train+Val finding masks.
+Experiment 005 profiles 3D connected component morphology, geometric sphericity index ($S = \pi^{1/3}(6V)^{2/3} / A$), surface area-to-volume ratio ($\text{SA}/\text{V}$), component physical volume quantiles (P5, Median, P95 in $\text{mm}^3$), and voxel volume distributions across 27,138 discrete connected components extracted across Train+Val finding masks.
 
-\begin{table}[H]
+\begin{table}[htbp]
 \centering
 \caption{3D connected component topology, sphericity, physical volume quantiles (P5, Median, P95 in $\text{mm}^3$), and recommended post-processing noise pruning thresholds.}
 \label{tab:morphology_stats}
-\begin{adjustbox}{max width=\linewidth}
-\small
-\setlength{\tabcolsep}{3.5pt}
-\begin{tabular}{lccccccccc}
+\footnotesize
+\setlength{\tabcolsep}{2.5pt}
+\begin{tabularx}{\linewidth}{c X c c c c c c c c}
 \toprule
 \textbf{Cat Code} & \textbf{Category Name} & \textbf{Blobs} & \makecell{\textbf{Blobs/}\\\textbf{Find}} & \makecell{\textbf{Sphericity}\\\textbf{($S$)}} & \makecell{\textbf{P5 Vol}\\\textbf{($\text{mm}^3$)}} & \makecell{\textbf{Median Vol}\\\textbf{($\text{mm}^3$)}} & \makecell{\textbf{P95 Vol}\\\textbf{($\text{mm}^3$)}} & \makecell{\textbf{Rec Min Size}\\\textbf{(voxels)}} & \makecell{\textbf{Equiv Vol}\\\textbf{($\text{mm}^3$)}} \\
 \midrule
-\texttt{1a} & Bronchial wall thickening & 1,539 & 6.44 & 0.7249 & 1.0 & 90.0 & 88,920.0 & \textbf{10 voxels} & $\sim 12.5\text{ mm}^3$ \\
-\texttt{1b} & Bronchiectasis & 1,007 & 3.44 & 0.6063 & 1.0 & 1,453.0 & 185,597.3 & \textbf{10 voxels} & $\sim 12.5\text{ mm}^3$ \\
-\texttt{1c} & Emphysema & 2,279 & 4.92 & 0.7155 & 1.0 & 578.0 & 193,390.3 & \textbf{10 voxels} & $\sim 12.5\text{ mm}^3$ \\
-\texttt{1d} & Septal thickening & 726 & 3.63 & 0.5434 & 1.0 & 2,844.5 & 197,179.8 & \textbf{10 voxels} & $\sim 12.5\text{ mm}^3$ \\
-\texttt{1e} & Micronodules & 1,210 & 3.72 & 0.7502 & 1.0 & 236.0 & 148,146.1 & \textbf{10 voxels} & $\sim 12.5\text{ mm}^3$ \\
-\texttt{1f} & Other non-focal & 469 & 3.05 & 0.6177 & 47.6 & 2,664.0 & 305,819.8 & \textbf{47 voxels} & $\sim 58.8\text{ mm}^3$ \\
-\texttt{2a} & Linear opacities & 3,248 & 2.73 & 0.6141 & 1.0 & 1,402.0 & 34,399.5 & \textbf{10 voxels} & $\sim 12.5\text{ mm}^3$ \\
-\texttt{2b} & Atelectasis / consolidation & 5,662 & 4.00 & 0.6453 & 1.0 & 943.0 & 126,002.1 & \textbf{10 voxels} & $\sim 12.5\text{ mm}^3$ \\
-\texttt{2c} & Ground-glass opacity & 6,080 & 3.88 & 0.6638 & 1.0 & 1,942.5 & 152,727.0 & \textbf{10 voxels} & $\sim 12.5\text{ mm}^3$ \\
-\texttt{2d} & Pulmonary nodules / masses & 3,836 & 2.05 & \textbf{0.9416} & 15.0 & 192.0 & 3,204.0 & \textbf{15 voxels} & $\sim 18.8\text{ mm}^3$ \\
-\texttt{2e} & Pleural effusion / thickening & 749 & 3.02 & 0.5712 & 1.0 & 1,863.0 & 602,883.4 & \textbf{10 voxels} & $\sim 12.5\text{ mm}^3$ \\
-\texttt{2f} & Honeycombing & 55 & 3.44 & 0.6378 & 1.0 & 4,990.0 & 189,603.9 & \textbf{10 voxels} & $\sim 12.5\text{ mm}^3$ \\
-\texttt{2g} & Pneumothorax & 84 & 4.42 & 0.6807 & 1.0 & 42.0 & 261,443.2 & \textbf{10 voxels} & $\sim 12.5\text{ mm}^3$ \\
-\texttt{2h} & Other focal & 194 & 3.03 & 0.6434 & 1.0 & 1,245.0 & 225,928.0 & \textbf{10 voxels} & $\sim 12.5\text{ mm}^3$ \\
+\texttt{1a} & Bronchial wall thickening & 1,539 & 6.44 & 0.7249 & 1.0 & 90.0 & 88,920.0 & \textbf{10 voxels} & $\sim 12.5~\text{mm}^3$ \\
+\texttt{1b} & Bronchiectasis & 1,007 & 3.44 & 0.6063 & 1.0 & 1,453.0 & 185,597.3 & \textbf{10 voxels} & $\sim 12.5~\text{mm}^3$ \\
+\texttt{1c} & Emphysema & 2,279 & 4.92 & 0.7155 & 1.0 & 578.0 & 193,390.3 & \textbf{10 voxels} & $\sim 12.5~\text{mm}^3$ \\
+\texttt{1d} & Septal thickening & 726 & 3.63 & 0.5434 & 1.0 & 2,844.5 & 197,179.8 & \textbf{10 voxels} & $\sim 12.5~\text{mm}^3$ \\
+\texttt{1e} & Micronodules & 1,210 & 3.72 & 0.7502 & 1.0 & 236.0 & 148,146.1 & \textbf{10 voxels} & $\sim 12.5~\text{mm}^3$ \\
+\texttt{1f} & Other non-focal & 469 & 3.05 & 0.6177 & 47.6 & 2,664.0 & 305,819.8 & \textbf{47 voxels} & $\sim 58.8~\text{mm}^3$ \\
+\texttt{2a} & Linear opacities & 3,248 & 2.73 & 0.6141 & 1.0 & 1,402.0 & 34,399.5 & \textbf{10 voxels} & $\sim 12.5~\text{mm}^3$ \\
+\texttt{2b} & Atelectasis / consolidation & 5,662 & 4.00 & 0.6453 & 1.0 & 943.0 & 126,002.1 & \textbf{10 voxels} & $\sim 12.5~\text{mm}^3$ \\
+\texttt{2c} & Ground-glass opacity & 6,080 & 3.88 & 0.6638 & 1.0 & 1,942.5 & 152,727.0 & \textbf{10 voxels} & $\sim 12.5~\text{mm}^3$ \\
+\texttt{2d} & Pulmonary nodules / masses & 3,836 & 2.05 & \textbf{0.9416} & 15.0 & 192.0 & 3,204.0 & \textbf{15 voxels} & $\sim 18.8~\text{mm}^3$ \\
+\texttt{2e} & Pleural effusion / thickening & 749 & 3.02 & 0.5712 & 1.0 & 1,863.0 & 602,883.4 & \textbf{10 voxels} & $\sim 12.5~\text{mm}^3$ \\
+\texttt{2f} & Honeycombing & 55 & 3.44 & 0.6378 & 1.0 & 4,990.0 & 189,603.9 & \textbf{10 voxels} & $\sim 12.5~\text{mm}^3$ \\
+\texttt{2g} & Pneumothorax & 84 & 4.42 & 0.6807 & 1.0 & 42.0 & 261,443.2 & \textbf{10 voxels} & $\sim 12.5~\text{mm}^3$ \\
+\texttt{2h} & Other focal & 194 & 3.03 & 0.6434 & 1.0 & 1,245.0 & 225,928.0 & \textbf{10 voxels} & $\sim 12.5~\text{mm}^3$ \\
 \bottomrule
-\end{tabular}
-\end{adjustbox}
+\end{tabularx}
 \end{table}
 
 Key topological observations:
 \begin{enumerate}
     \item \textbf{Highest Sphericity}: \texttt{2d} Pulmonary nodules / masses ($S = 0.9416$) exhibit near-spherical focal geometry, making 3D bounding spheres highly suitable post-filtering priors.
     \item \textbf{Lowest Sphericity}: \texttt{1d} Septal thickening ($S = 0.5434$) and \texttt{2e} Pleural effusion ($S = 0.5712$) exhibit planar, sheet-like interstitial geometries along interlobular septa and pleural surfaces.
-    \item \textbf{Noise Pruning Size Thresholds}: Empirical noise-filtering thresholds (\texttt{recommended\_min\_size\_voxels}) are directly derived from the 5th percentile (P5) component volume distributions listed in Table~\ref{tab:morphology_stats}. For \texttt{1f} Other non-focal, diffuse non-focal patterns yield a P5 volume bound of $47.6\text{ mm}^3$ (47 voxels, $\sim 58.8\text{ mm}^3$). For \texttt{2d} Pulmonary nodules, small focal nodular lesions yield a P5 volume bound of $15.0\text{ mm}^3$ (15 voxels, $\sim 18.8\text{ mm}^3$). All other categories exhibit P5 bounds of $1.0\text{ mm}^3$ and adopt a 10-voxel ($\sim 12.5\text{ mm}^3$) baseline threshold to eliminate 1-voxel to 9-voxel noise artifacts without discarding genuine clinical lesions. CT slice thickness variations (thin $1.0\text{ mm}$ vs.\ thick $5.0\text{ mm}$ reconstructions, median voxel volume $\approx 1.25\text{ mm}^3$) are accounted for by reporting physical volume equivalents.
+    \item \textbf{Noise Pruning Size Thresholds}: Empirical noise-filtering thresholds (\texttt{recommended\_min\_size\_voxels}) are directly derived from the 5th percentile (P5) component volume distributions listed in Table~\ref{tab:morphology_stats}. For \texttt{1f} Other non-focal, diffuse non-focal patterns yield a P5 volume bound of $47.6~\text{mm}^3$ (47 voxels, $\sim 58.8~\text{mm}^3$). For \texttt{2d} Pulmonary nodules, small focal nodular lesions yield a P5 volume bound of $15.0~\text{mm}^3$ (15 voxels, $\sim 18.8~\text{mm}^3$). All other categories exhibit P5 bounds of $1.0~\text{mm}^3$ and adopt a 10-voxel ($\sim 12.5~\text{mm}^3$) baseline threshold to eliminate 1-voxel to 9-voxel noise artifacts without discarding genuine clinical lesions. CT slice thickness variations (thin $1.0~\text{mm}$ vs.\ thick $5.0~\text{mm}$ reconstructions, median voxel volume $\approx 1.25~\text{mm}^3$) are accounted for by reporting physical volume equivalents.
 \end{enumerate}
-
-\bigskip
 
 \section{Calibrated Directives for Model Training \& Fine-Tuning}
 
 Based on the quantitative empirical findings across \texttt{exp\_001} through \texttt{exp\_005}, we establish five mandatory directives for baseline evaluation and fine-tuning:
 
 \begin{enumerate}
-    \item \textbf{Positive-Unlabeled (PU) Loss Formulations}: Use PU SPOCO + MPR consistency loss to prevent instance suppression bias caused by the Training set's $\le 3$ instance annotation cap.
+    \item \textbf{Positive-Unlabeled (PU) Loss Formulations}: Use Positive-Unlabeled (PU) SPOCO + Multi-Planar Reconstruction (MPR) consistency loss to prevent instance suppression bias caused by the Training set's $\le 3$ instance annotation cap.
     \item \textbf{Category Intensity Windowing}: Preprocess CT volumes using category-specific HU bounds \texttt{[min\_HU, max\_HU]} (Exp 004) rather than naive default windowing.
     \item \textbf{Spatial Prior Probability Masking}: Integrate 3D RAS spatial probability priors $P(\mathbf{x}' \in \text{mask} \mid c)$ (Exp 003) to constrain search spaces for category-specific findings (e.g., Apical prior for Emphysema, Basal prior for Effusion).
     \item \textbf{Connected Component Noise Pruning}: Filter post-binarization predictions using \texttt{recommended\_min\_size\_voxels} (Exp 005) to eliminate small false-positive instance artifacts.

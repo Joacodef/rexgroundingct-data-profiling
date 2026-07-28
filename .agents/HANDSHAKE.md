@@ -81,6 +81,12 @@ Any incoming AI assistant starting a new session to revise the report MUST follo
   * Formulated exact 3D grid Frobenius inner product equation for $S_{\text{cos}}$ matching `exp_003_spatial_density_priors.py`, softened spatial stability claims, and defined spatial prior taxonomy rules.
   * Added `P5 Vol (mm³)` column to Table 5 (`47.6 mm³` for `1f`, `15.0 mm³` for `2d`), sample counts ($N_{\text{masks}}$) to Table 4, and exact 3-decimal BPE token dynamics (`1.347x` / `+34.7%`) to Section 4.
   * Added in-text `\cite{hamamci2024ctrate}` citation in Section 1.1, replaced Markdown `---` lines with `\bigskip`, formatted itemize/enumerate lists, and added `\begin{thebibliography}` section with citations.
+* **July 28, 2026**: Peer-review typesetting & technical clarity refinement in [logs/phase_1_report_overleaf/main.tex](file://logs/phase_1_report_overleaf/main.tex):
+  * **Math & Units**: Re-rendered coordinate axes `$(\text{RL}, \text{AP}, \text{IS})$` and operators (`\max`, `\text{SA}/\text{V}`) with explicit text mode; converted tall inline fractions (`7,687 / 2,992`) to slash notation; added `siunitx` package with non-breaking spaces `~` for units (`\text{HU}`, `\text{mm}^3`).
+  * **Layout & Tables**: Replaced rigid `adjustbox` table scaling with `tabularx` and uniform `\footnotesize` font size across all 5 tables; tightened column padding (`\tabcolsep{2.5pt}`) to guarantee zero page margin overflow; replaced `[H]` float specifiers with flexible `[htbp]`; removed hardcoded `\bigskip` overrides.
+  * **Code Listing**: Added explicit `json` language definition (`\lstdefinelanguage{json}{...}`) to preamble.
+  * **Technical Clarity**: Explicitly defined MPR (Multi-Planar Reconstruction) and PU (Positive-Unlabeled) acronyms; added zero-count validation methodology note for Honeycombing (`2f`); expanded Table 1 footnote clarifying test split placeholder instance metadata ($1.000 \pm 0.000$).
+
 
 
 
