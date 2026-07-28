@@ -7,6 +7,7 @@ At the start of **EVERY SINGLE SESSION**, you MUST immediately load, read, and f
 1. `STATUS.md` — Host-specific macro progress matrix tracking advancement across Master Plan Phase 1, experiment logs, and deliverables.
 2. `HANDSHAKE.md` — Tactical session bridge tracking current operational scope, directory maps, and immediate next steps.
 3. `shared/MASTER_PLAN.md` — Global scientific and technical roadmap.
+4. `shared/PHASE_1_DATA_ANALYSIS_SUMMARY.md` — Consolidated Phase 1 empirical data distributions, spatial coordinates, HU radiodensity spectrum, morphological topology, and multi-label co-occurrences.
 
 ---
 
