@@ -10,12 +10,12 @@
 
 ## 1. Operational Scope & Working Context
 
-The active focus in this workspace is **Beamer Presentation Slides & Report Dissemination**:
+The active focus in this workspace is **Beamer Speaker Script Refinement & Presentation Dissemination**:
 
-* **Immediate Next Objectives for Upcoming Session**:
-  1. **Beamer Slide Deck Development ([presentation.tex](file://logs/phase_1_report_overleaf/presentation.tex))**: Work on the Beamer slide deck associated with the Phase 1 profiling report (`logs/phase_1_report_overleaf/main.tex`), ensuring high visual impact, concise slide content, clean figure embedding, and structured presentation of dataset composition, spatial priors, NLP prompt syntax shift, HU intensity windowing, morphology, and actionable challenge utility.
-  2. **Slide Content & Layout Refinement**: Verify slide frame formatting, table compactness, visual layout hierarchy, and alignment with the audited Phase 1 empirical findings.
-* **Primary Objective**: Finalize the Beamer presentation (`logs/phase_1_report_overleaf/presentation.tex`) accompanying the technical manuscript.
+* **Immediate Next Objectives for Upcoming Sessions**:
+  1. **Iterative Speaker Script Revisions ([presentation.tex](file://logs/phase_1_report_overleaf/presentation.tex))**: Revise and polish the speaker scripts (`\note{...}`) embedded inside each Beamer frame across multiple chat iterations. Focus on natural spoken flow, presentation timing, clarity of technical explanations, and smooth transitions between slides.
+  2. **Slide Script Delivery Tuning**: Fine-tune specific slide notes (e.g., explaining dataset hierarchy, prompt syntax shift, 3D RAS spatial priors, HU radiodensity windowing, component morphology, and actionable modeling directives) based on user feedback.
+* **Primary Objective**: Finalize the complete Beamer presentation script deck (`logs/phase_1_report_overleaf/presentation.tex`) for oral presentation delivery.
 
 ---
 
@@ -99,6 +99,14 @@ Any incoming AI assistant starting a new session to revise the report MUST follo
 * **July 28, 2026**: Beamer Presentation Theme & Layout Update in [logs/phase_1_report_overleaf/presentation.tex](file://logs/phase_1_report_overleaf/presentation.tex):
   * Transitioned theme from default `seahorse` to modern `metropolis` with frametitle progress bar (`progressbar=frametitle`), filled block styling (`block=fill`), dark blue headers (`#142850`), teal progress accents (`#008080`), and clean light gray card backgrounds (`#F5F7FA`).
   * Refactored **Slide 2 (Dataset Hierarchy)** into 4 separate vertical card blocks (Tier 1 $\rightarrow$ Tier 4) connected by downward teal transition arrows ($\downarrow$), removing table markup and bottom utility card.
+* **July 28, 2026**: Speaker Script Integration & Table Column Specifier Fixes in [logs/phase_1_report_overleaf/presentation.tex](file://logs/phase_1_report_overleaf/presentation.tex):
+  * **Complete Speaker Scripts (`\note{...}`)**: Embedded spoken presenter scripts inside `\note{...}` blocks across all 15 frames of `presentation.tex`.
+  * **Slide 2b (Dataset Record Anatomy)**: Added dedicated continuation slide showing a formatted `dataset.json` record entry (`train_1935_a_1.nii.gz`) alongside a structured schema card breakdown.
+  * **Technical Clarifications**: Specified prompt uniqueness (81.4% unique vs 18.6% duplicate phrases due to standardized clinical templates & multi-kernel series), `dataset.json` `"pixels"` property (total foreground voxel count), and replaced Test split instance placeholders with dashes (`-- & -- & --`).
+* **July 28, 2026**: Slide Title Refinement & Speaker Script Polish in [logs/phase_1_report_overleaf/presentation.tex](file://logs/phase_1_report_overleaf/presentation.tex):
+  * **Frame Title Cleanup**: Removed all `Table X:` and `Figure X:` hardcoded prefixes from slide frame titles (e.g. `\begin{frame}{HU Radiodensity \& Contrast Deltas}`), eliminating title clutter and preventing mismatches with LaTeX's auto-generated figure/table captions.
+  * **Spoken Script Alignment**: Updated embedded `\note{...}` presenter scripts across all slides to refer directly and naturally to slide content without referencing hardcoded table or figure numbers.
+
 
 
 
