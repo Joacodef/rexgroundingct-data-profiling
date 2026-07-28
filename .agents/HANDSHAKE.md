@@ -3,77 +3,69 @@
 > [!NOTE]
 > **DOCUMENT ROLE CONTRACT: TACTICAL SESSION BRIDGE**
 > This document serves as the tactical session handoff bridge for **rexgroundingct-data-profiling** (designed to onboard any AI assistant, e.g. Antigravity or Claude, in a new chat).
-> It tracks active operational focus, experiment mappings, and immediate audit steps prior to re-executing scripts or compiling reports.
+> It tracks active operational focus, experiment mappings, and immediate handoff steps for LaTeX report compilation.
 > For long-term progress matrix, consult `.agents/STATUS.md`. For model fine-tuning, consult sibling workspace `rexgroundingct-model-training`.
 
 ---
 
 ## 1. Operational Scope & Working Context
 
-The active focus in this workspace is **Systematic Audit & Consolidation of the 5-Experiment Profiling Suite**:
+The active focus in this workspace is **Phase 1 Overleaf Group Technical Report Compilation & Priors Export**:
 
-* **Goal**: Conduct a rigorous, code-and-output audit of all 5 profiling experiments (`exp_001` through `exp_005`), consolidate output priors (`phase_1_priors_bundle.json`), and prepare the final Overleaf group technical report update.
-* **Architecture**: Standalone decoupled workspace for data analysis. Resolves shared dataset paths (`../data/dataset.json` and `../data/raw/`) dynamically via `scripts/config.py`.
-* **5 Core Experiments Scope**:
-  1. `exp_001`: Dataset Disparity (14-category Train vs Val mask density), $14 \times 14$ Scan-Level Multi-Finding Co-Occurrence Matrix ($P(c_j \mid c_i)$), Patient Hierarchy & Cross-Split Leakage Audit.
-  2. `exp_002`: Free-Text NLP Syntax Shift, Subword BPE Tokenization Dynamics, Truncation Rates (77 & 128 tokens), & Spatial Directives.
-  3. `exp_003`: 3D RAS Spatial Coordinate Centroids & 4-Panel Density Prior Figures ($128 \times 128 \times 128$).
-  4. `exp_004`: Hounsfield Unit (HU) Radiodensity Attenuation, Contrast Deltas ($\Delta \text{HU}$) & Category Windowing.
-  5. `exp_005`: 3D Connected-Component Topology, Sphericity, Physical Bounding Box Extents ($\Delta X, \Delta Y, \Delta Z$ in mm) & Noise Pruning Size Thresholds.
+* **Current Baseline State**: All 5 Phase 1 data profiling experiments (`exp_001` through `exp_005`) are **100% completed, audited, and reconciled** with their raw JSON summaries in `../data/phase_1/` and markdown logs in `logs/`.
+* **Primary Handoff Goal**: Update and compile the group LaTeX technical report in [logs/phase_1_report_overleaf/main.tex](file://logs/phase_1_report_overleaf/main.tex), incorporating all 5-experiment quantitative tables, figures, and empirical priors export.
+* **Architecture**: Standalone decoupled workspace for data analysis. LaTeX manuscript resides in `logs/phase_1_report_overleaf/`.
 
 ---
 
-## 2. Directory & Artifact Map
+## 2. Completed 5-Experiment Audit Baseline
 
-* `scripts/`: Execution scripts (`exp_001_...py` through `exp_005_...py`), path manager (`config.py`), local evaluator (`evaluate.py`).
-* `logs/`: Individual experiment markdown reports (`exp_001_...md` to `exp_005_...md`) and LaTeX technical report source (`phase_1_report_overleaf/main.tex`).
-* `../data/phase_1/`: Generated JSON summaries and figures (`analysis_experiment_001` to `005`).
-* `.agents/`: Agent operating rules (`AGENTS.md`), macro status matrix (`STATUS.md`), and shared roadmap (`shared/MASTER_PLAN.md`).
-
----
-
-## 3. Environment & Execution Setup
-
-Virtual Environment:
-```bash
-source .venv/bin/activate  # or call ./.venv/bin/python
-```
-
-Run test check:
-```bash
-./.venv/bin/python -c "import scripts.config as cfg; print('DATA_DIR:', cfg.DATA_DIR)"
-```
+1. **Exp 001 (Disparity, Co-Occurrence & Leakage)** — **[AUDITED & RECONCILED]**:
+   - [logs/exp_001_dataset_disparity_leakage.md](file://logs/exp_001_dataset_disparity_leakage.md) & [../data/phase_1/analysis_experiment_001/exp001_disparity_leakage_summary.json](file://../data/phase_1/analysis_experiment_001/exp001_disparity_leakage_summary.json).
+   - 3,063 unique patients (2,603 Train / 190 Val / 281 Test); 1.91x overall Train vs Val disparity; 4 Train-Test leakage patient IDs (`['302', '3357', '3675', '39']`); $14 \times 14$ co-occurrence matrix ($P(c_j \mid c_i)$).
+2. **Exp 002 (NLP Syntax & Tokenization Shift)** — **[AUDITED & RECONCILED]**:
+   - [logs/exp_002_nlp_prompt_syntax.md](file://logs/exp_002_nlp_prompt_syntax.md) & [../data/phase_1/analysis_experiment_002/exp002_nlp_prompt_syntax_summary.json](file://../data/phase_1/analysis_experiment_002/exp002_nlp_prompt_syntax_summary.json).
+   - 8,650 prompts; subword BPE expansion factor `1.346x`; 0.0% truncation at 77/128 tokens; 64.39% spatial preposition locators.
+3. **Exp 003 (3D RAS Spatial Density Priors)** — **[AUDITED & RECONCILED]**:
+   - [logs/exp_003_spatial_density_priors.md](file://logs/exp_003_spatial_density_priors.md) & [../data/phase_1/analysis_experiment_003/exp003_spatial_density_priors_summary.json](file://../data/phase_1/analysis_experiment_003/exp003_spatial_density_priors_summary.json).
+   - 3D RAS spatial centroids $[RL, AP, IS] \in [0.0, 1.0]^3$; cosine similarity $S_{cos}$ & shift $\Delta d$; 4-tier spatial prior taxonomy (Apical, Basal, Hilar, Isotropic).
+4. **Exp 004 (HU Radiodensity & Intensity Windowing)** — **[AUDITED & RECONCILED]**:
+   - [logs/exp_004_hu_radiodensity.md](file://logs/exp_004_hu_radiodensity.md) & [../data/phase_1/analysis_experiment_004/exp004_hu_radiodensity_summary.json](file://../data/phase_1/analysis_experiment_004/exp004_hu_radiodensity_summary.json).
+   - HU spectrum (Emphysema `-307.95 HU` to Bronchial Wall Thickening `-486.35 HU`); contrast deltas $\Delta \text{HU}$; category window bounds `[min_HU, max_HU]`.
+5. **Exp 005 (Topology & Morphological Noise Pruning)** — **[AUDITED & RECONCILED]**:
+   - [logs/exp_005_morphology_noise_pruning.md](file://logs/exp_005_morphology_noise_pruning.md) & [../data/phase_1/analysis_experiment_005/exp005_morphology_noise_pruning_summary.json](file://../data/phase_1/analysis_experiment_005/exp005_morphology_noise_pruning_summary.json).
+   - 33,058 blobs; sphericity index $S$ ($S=0.9416$ for Nodules vs $S=0.5434$ for Septal Thickening); physical bounding box extents ($\Delta X, \Delta Y, \Delta Z$ in mm); empirical noise pruning thresholds (`recommended_min_size_voxels`).
 
 ---
 
-## 4. Tactical Agenda for New Session (Systematic 5-Experiment Audit)
+## 3. Directory & Artifact Map for Technical Report
 
-The new AI session will execute a systematic, step-by-step audit of all 5 profiling experiments before final technical report compilation:
+* `logs/phase_1_report_overleaf/`: Main Overleaf LaTeX manuscript source ([main.tex](file://logs/phase_1_report_overleaf/main.tex)) and figure directory (`fig/`).
+* `../data/phase_1/`:
+  * `phase_1_priors_bundle.json`: Consolidated empirical priors export for Phase 2/3 downstream pipelines.
+  * `analysis_experiment_001/` to `005/`: Individual raw JSON summaries and high-resolution figures.
+* `logs/`: Reconciled markdown logs ([exp_001](file://logs/exp_001_dataset_disparity_leakage.md) to [exp_005](file://logs/exp_005_morphology_noise_pruning.md)).
+* `.agents/`: Operating constraints ([AGENTS.md](file://.agents/AGENTS.md)), status matrix ([STATUS.md](file://.agents/STATUS.md)), and master plan ([shared/MASTER_PLAN.md](file://.agents/shared/MASTER_PLAN.md)).
 
-1. **Audit Exp 001 (Disparity, Co-Occurrence & Patient Leakage)** — **[COMPLETED & AUDITED]**:
-   - Reviewed code logic in `scripts/exp_001_dataset_disparity_leakage.py` & findings in `logs/exp_001_dataset_disparity_leakage.md`.
-   - Verified 14-category density disparity ($1.91\times$ overall, $3.20\times$ ground-glass peak), $14 \times 14$ co-occurrence matrix ($P(c_j \mid c_i)$), and patient ID leakage list (2 Train-Val, 4 Train-Test: `['302', '3357', '3675', '39']`, 5 Val-Test overlaps). Re-executed script, validated output JSON/heatmap PNG, and cleaned up legacy `heatmaps_raw.pkl` files in `../data/phase_1/`.
+---
 
-2. **Audit Exp 002 (NLP Syntax & Tokenization Shift)** — **[COMPLETED & AUDITED]**:
-   - Reviewed code logic in `scripts/exp_002_nlp_prompt_syntax.py` & findings in `logs/exp_002_nlp_prompt_syntax.md`.
-   - Verified free-text prompt syntax (8,650 total prompts), validation syntax shift (Cases 1–50 vs 51–200), subword BPE tokenization expansion factor (`1.346x`), 0% truncation rates at 77/128 tokens, spatial prepositions (`64.39%`), and aligned script entrypoint path references. Re-executed script and validated output JSON schema.
+## 4. Tactical Agenda for New Session (Overleaf Technical Report Compilation)
 
-3. **Audit Exp 003 (3D RAS Spatial Density Priors)** — **[COMPLETED & AUDITED]**:
-   - Reviewed code logic in `scripts/exp_003_spatial_density_priors.py` & findings in `logs/exp_003_spatial_density_priors.md`.
-   - Verified 3D RAS spatial centroids $[RL, AP, IS] \in [0.0, 1.0]^3$, cosine similarities $S_{cos}$, centroid shifts $\Delta d$, 4-tier spatial prior taxonomy (Apical Dominant, Basal/Dependent, Hilar/Peribronchial, Isotropic/Parenchymal), 4-panel population prior figure (`exp003_population_spatial_priors_4panel.png`), and aligned script entrypoint path references. Initiated script re-execution.
+The new AI session will execute the following steps to finalize the Overleaf group technical report:
 
-4. **Audit Exp 004 (HU Radiodensity & Intensity Windowing)** — **[IMMEDIATE NEXT STEP FOR NEW SESSION]**:
-   - Re-execute and verify `scripts/exp_004_hu_radiodensity.py` using `.venv/bin/python`.
-   - Reconcile findings with `logs/exp_004_hu_radiodensity.md` and output summary `../data/phase_1/analysis_experiment_004/exp004_hu_radiodensity_summary.json`.
-   - Verify HU contrast deltas ($\Delta \text{HU}$), tissue boundary dilation margins, and category intensity window bounds (`[min_HU, max_HU]`).
-   - Fix script entrypoint header reference in `logs/exp_004_hu_radiodensity.md` to point to `scripts/exp_004_hu_radiodensity.py`.
+1. **Priors Bundle Export**:
+   - Verify/update `../data/phase_1/phase_1_priors_bundle.json` incorporating all category disparity ratios, $14 \times 14$ co-occurrence probabilities, spatial centroids, HU windowing bounds, and physical 3D extents.
 
-5. **Audit Exp 005 (Topology & Morphological Noise Pruning)** — **[IMMEDIATE NEXT STEP FOR NEW SESSION]**:
-   - Re-execute and verify `scripts/exp_005_morphology_noise_pruning.py` using `.venv/bin/python`.
-   - Reconcile findings with `logs/exp_005_morphology_noise_pruning.md` and output summary `../data/phase_1/analysis_experiment_005/exp005_morphology_noise_pruning_summary.json`.
-   - Verify 3D connected-component size distributions (33,058 blobs), sphericity metrics ($S$), physical bounding box extents ($\Delta X, \Delta Y, \Delta Z$ in mm), aspect ratios, and noise pruning thresholds (`recommended_min_size_voxels`).
-   - Align script entrypoint path references in `logs/exp_005_morphology_noise_pruning.md` to `scripts/exp_005_morphology_noise_pruning.py`.
+2. **Inspect Overleaf LaTeX Source**:
+   - Read [logs/phase_1_report_overleaf/main.tex](file://logs/phase_1_report_overleaf/main.tex).
+   - Verify document class, preamble packages, section structure, table schemas, figure environments, and references.
 
-6. **Priors Bundle Export & Technical Report Compilation**:
-   - Update exported priors bundle (`../data/phase_1/phase_1_priors_bundle.json`).
-   - Finalize and compile Overleaf group technical report (`logs/phase_1_report_overleaf/main.tex`).
+3. **Integrate 5-Experiment Findings into LaTeX Sections**:
+   - Update text, mathematical formulations, and LaTeX tables across all sections to reflect the exact reconciled numbers from `exp_001` through `exp_005`.
+   - Ensure all figure paths in `main.tex` properly reference graphics from `fig/` or `../data/phase_1/`.
+
+4. **Compile & Validate LaTeX Manuscript**:
+   - Compile [logs/phase_1_report_overleaf/main.tex](file://logs/phase_1_report_overleaf/main.tex) using `pdflatex` or `latexmk`.
+   - Inspect output log for any compilation warnings, missing citations, broken reference keys, or layout errors.
+
+

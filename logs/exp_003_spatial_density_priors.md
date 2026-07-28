@@ -1,9 +1,9 @@
 # Experiment Log 003: [Phase 1] 3D Spatial Centroids & Population Density Priors
 
 **Date**: July 2026 (Consolidated July 27, 2026)  
-**Status**: Completed  
-**Primary Output**: `data/phase_1/analysis_experiment_003/exp003_spatial_density_priors_summary.json`  
-**Consolidated Script**: `scripts/exp_003_spatial_density_priors.py`
+**Status**: Completed & Audited  
+**Execution Script**: [scripts/exp_003_spatial_density_priors.py](file://scripts/exp_003_spatial_density_priors.py)  
+**Primary Output**: [../data/phase_1/analysis_experiment_003/exp003_spatial_density_priors_summary.json](file://../data/phase_1/analysis_experiment_003/exp003_spatial_density_priors_summary.json)  
 
 ---
 
@@ -54,6 +54,7 @@ Relative centroid coordinates $(RL, AP, IS) \in [0.0, 1.0]^3$ represent normaliz
 
 ## 4. Artifact & Script References
 
-* **Summary Output JSON**: `data/phase_1/analysis_experiment_003/exp003_spatial_density_priors_summary.json`
-* **Canonical Population 4-Panel Figure**: `data/phase_1/analysis_experiment_003/exp003_population_spatial_priors_4panel.png`
-* **Analysis Entrypoint**: `scripts/exp_003_spatial_density_priors.py`
+* **Summary Output JSON**: [../data/phase_1/analysis_experiment_003/exp003_spatial_density_priors_summary.json](file://../data/phase_1/analysis_experiment_003/exp003_spatial_density_priors_summary.json)
+* **Canonical Population 4-Panel Figure**: [../data/phase_1/analysis_experiment_003/exp003_population_spatial_priors_4panel.png](file://../data/phase_1/analysis_experiment_003/exp003_population_spatial_priors_4panel.png)
+* **Execution Script**: [scripts/exp_003_spatial_density_priors.py](file://scripts/exp_003_spatial_density_priors.py)
+

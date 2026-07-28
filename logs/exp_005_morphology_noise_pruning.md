@@ -1,10 +1,10 @@
 # Experiment Log 005: [Phase 1] 3D Connected Component Morphology & Post-Processing Size Thresholds
 
-**Status**: Completed  
+**Status**: Completed & Audited  
 **Date**: July 2026 (Consolidated July 27, 2026)  
 **Execution Time**: 47 minutes 04 seconds (32 parallel CPU workers, 3,192 scans)  
-**Primary Output**: `data/phase_1/analysis_experiment_005/exp005_morphology_noise_pruning_summary.json`  
-**Consolidated Script**: `scripts/data_analysis/exp_005_morphology_noise_pruning.py`
+**Execution Script**: [scripts/exp_005_morphology_noise_pruning.py](file://scripts/exp_005_morphology_noise_pruning.py)  
+**Primary Output**: [../data/phase_1/analysis_experiment_005/exp005_morphology_noise_pruning_summary.json](file://../data/phase_1/analysis_experiment_005/exp005_morphology_noise_pruning_summary.json)  
 
 ---
 
@@ -57,11 +57,12 @@ The core objective is to derive empirically grounded **noise-filtering size thre
 
 ## 4. Actionable Modeling & Post-Processing Rules
 
-1. **Instance F1 Post-Processing Pruning**: Integrate `recommended_min_size_voxels` into `scripts/evaluate.py` and `scripts/voxtell/voxtell_inference.py`. Remove connected components strictly below the category-specific threshold after binarization.
+1. **Instance F1 Post-Processing Pruning**: Integrate `recommended_min_size_voxels` into evaluation and inference scripts. Remove connected components strictly below the category-specific threshold after binarization.
 2. **Sphericity-Guided Morphological Filters**: Use high sphericity ($S \ge 0.90$) as a shape descriptor feature for `2d` Nodule candidate filtering to discard irregular low-probability edge artifacts.
 
 ---
 
 ## 5. Artifact References
-* Full quantitative summary JSON: `data/phase_1/analysis_experiment_005/exp005_morphology_noise_pruning_summary.json`
-* Consolidated execution script: `scripts/data_analysis/exp_005_morphology_noise_pruning.py`
+* Full quantitative summary JSON: [../data/phase_1/analysis_experiment_005/exp005_morphology_noise_pruning_summary.json](file://../data/phase_1/analysis_experiment_005/exp005_morphology_noise_pruning_summary.json)
+* Execution script: [scripts/exp_005_morphology_noise_pruning.py](file://scripts/exp_005_morphology_noise_pruning.py)
+

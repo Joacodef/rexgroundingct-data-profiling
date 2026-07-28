@@ -1,9 +1,9 @@
 # Experiment Log 001: [Phase 1] Dataset Disparity, Hierarchy & Patient Leakage Audit
 
 **Date**: July 2026 (Consolidated July 27, 2026)  
-**Status**: Completed  
-**Primary Output**: `data/phase_1/analysis_experiment_001/exp001_disparity_leakage_summary.json`  
-**Consolidated Script**: `scripts/exp_001_dataset_disparity_leakage.py`
+**Status**: Completed & Audited  
+**Execution Script**: [scripts/exp_001_dataset_disparity_leakage.py](file://scripts/exp_001_dataset_disparity_leakage.py)  
+**Primary Output**: [../data/phase_1/analysis_experiment_001/exp001_disparity_leakage_summary.json](file://../data/phase_1/analysis_experiment_001/exp001_disparity_leakage_summary.json)  
 
 ---
 
@@ -46,5 +46,7 @@ A 3-tier ID decomposition was performed across all 3,192 scans to identify longi
 
 ## 4. Artifact & Script References
 
-* **Summary Output JSON**: `data/phase_1/analysis_experiment_001/exp001_disparity_leakage_summary.json`
-* **Analysis Entrypoint**: `scripts/data_analysis/exp_001_dataset_disparity_leakage.py`
+* **Summary Output JSON**: [../data/phase_1/analysis_experiment_001/exp001_disparity_leakage_summary.json](file://../data/phase_1/analysis_experiment_001/exp001_disparity_leakage_summary.json)
+* **Heatmap Visualization Figure**: [../data/phase_1/analysis_experiment_001/exp001_cooccurrence_heatmap.png](file://../data/phase_1/analysis_experiment_001/exp001_cooccurrence_heatmap.png)
+* **Execution Script**: [scripts/exp_001_dataset_disparity_leakage.py](file://scripts/exp_001_dataset_disparity_leakage.py)
+

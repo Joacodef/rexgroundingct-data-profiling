@@ -1,9 +1,9 @@
 # Experiment Log 002: [Phase 1] NLP Clinical Text Syntax, Prompt Shift & Spatial Alignment Analysis
 
 **Date**: July 2026 (Consolidated July 27, 2026)  
-**Status**: Completed  
-**Primary Output**: `data/phase_1/analysis_experiment_002/exp002_nlp_prompt_syntax_summary.json`  
-**Consolidated Script**: `scripts/exp_002_nlp_prompt_syntax.py`
+**Status**: Completed & Audited  
+**Execution Script**: [scripts/exp_002_nlp_prompt_syntax.py](file://scripts/exp_002_nlp_prompt_syntax.py)  
+**Primary Output**: [../data/phase_1/analysis_experiment_002/exp002_nlp_prompt_syntax_summary.json](file://../data/phase_1/analysis_experiment_002/exp002_nlp_prompt_syntax_summary.json)  
 
 ---
 
@@ -94,5 +94,6 @@ Experiment 002 consolidates NLP clinical text profiling across all 8,650 finding
 
 ## 6. Artifact & Script References
 
-* **Summary Output JSON**: `data/phase_1/analysis_experiment_002/exp002_nlp_prompt_syntax_summary.json`
-* **Analysis Entrypoint**: `scripts/exp_002_nlp_prompt_syntax.py`
+* **Summary Output JSON**: [../data/phase_1/analysis_experiment_002/exp002_nlp_prompt_syntax_summary.json](file://../data/phase_1/analysis_experiment_002/exp002_nlp_prompt_syntax_summary.json)
+* **Execution Script**: [scripts/exp_002_nlp_prompt_syntax.py](file://scripts/exp_002_nlp_prompt_syntax.py)
+
