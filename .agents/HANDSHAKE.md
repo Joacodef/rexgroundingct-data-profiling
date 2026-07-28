@@ -72,10 +72,17 @@ Any incoming AI assistant starting a new session to revise the report MUST follo
 
 ## 5. Recent Revisions Log
 
-* **July 27, 2026**: Resolved table width page overflow across all five tables in [logs/phase_1_report_overleaf/main.tex](file://logs/phase_1_report_overleaf/main.tex):
-  * Added `adjustbox` and `makecell` packages to preamble.
-  * Wrapped all table environments in `\begin{adjustbox}{max width=\linewidth}`.
-  * Multi-line column headers using `\makecell` and tightened column separation (`\tabcolsep`).
+* **July 27, 2026**: Resolved table width page overflow across all five tables in [logs/phase_1_report_overleaf/main.tex](file://logs/phase_1_report_overleaf/main.tex).
+* **July 28, 2026**: Comprehensive side-by-side audit resolution in [logs/phase_1_report_overleaf/main.tex](file://logs/phase_1_report_overleaf/main.tex):
+  * Reconciled headline 3D connected component total to **27,138** across Abstract, Section 2, and Section 7.
+  * Corrected Table 4 Row `2h` (*Other focal*) HU window bound to `[-915.0, +201.0]`.
+  * Clarified Tier 1 physical scans (3,078) vs Tier 2 `dataset.json` records (3,192), exhaustive validation scope, and test mask withholding.
+  * Corrected Honeycombing (`2f`) co-occurrence citation to Atelectasis (`2b`, $P=0.467$) and Pulmonary nodules (`2d`, $P=0.467$).
+  * Formulated exact 3D grid Frobenius inner product equation for $S_{\text{cos}}$ matching `exp_003_spatial_density_priors.py`, softened spatial stability claims, and defined spatial prior taxonomy rules.
+  * Added `P5 Vol (mm³)` column to Table 5 (`47.6 mm³` for `1f`, `15.0 mm³` for `2d`), sample counts ($N_{\text{masks}}$) to Table 4, and exact 3-decimal BPE token dynamics (`1.347x` / `+34.7%`) to Section 4.
+  * Added in-text `\cite{hamamci2024ctrate}` citation in Section 1.1, replaced Markdown `---` lines with `\bigskip`, formatted itemize/enumerate lists, and added `\begin{thebibliography}` section with citations.
+
+
 
 
 
