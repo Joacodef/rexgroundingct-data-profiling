@@ -13,6 +13,8 @@
 \usepackage{subcaption}
 \usepackage{microtype}
 \usepackage{listings}
+\usepackage{adjustbox}
+\usepackage{makecell}
 
 \definecolor{codegray}{rgb}{0.5,0.5,0.5}
 \definecolor{backcolour}{rgb}{0.96,0.96,0.96}
@@ -113,11 +115,11 @@ Master dataset metadata is organized in \texttt{dataset.json} as a dictionary ke
 To establish clean modular boundaries and maintain reproducible computation, the Phase 1 profiling suite was consolidated into five standardized experiments, each pairing a computational Python script, a structured output JSON artifact, and a documentation report:
 
 \begin{enumerate}
-    \item \textbf{Experiment 001 (\texttt{exp\_001\_dataset_disparity_leakage})}: Dataset composition, sparse Train vs.\ exhaustive Val mask disparity, positive-unlabeled (PU) loss justification, 3-tier patient hierarchy, and cross-split leakage audit.
-    \item \textbf{Experiment 002 (\texttt{exp\_002\_nlp\_prompt_syntax})}: Free-text NLP prompt syntax shift (Cases 1--50 vs.\ 51--200), BPE subword tokenization dynamics (+34.2\% expansion), spatial preposition locators (64.39\%), and diagnostic hedging pruning (0.38\%).
-    \item \textbf{Experiment 003 (\texttt{exp\_003\_spatial_density_priors})}: 3D RAS spatial centroids $(RL, AP, IS)$, 4-tier spatial density prior taxonomy (Apical, Basal, Hilar, Isotropic), cosine similarity $S_{cos}$, centroid shift $\Delta d$, and 4-panel population density prior figure across all 14 categories ($128 \times 128 \times 128$ grid).
-    \item \textbf{Experiment 004 (\texttt{exp\_004\_hu_radiodensity})}: Hounsfield Unit (HU) attenuation profiling inside mask regions vs.\ surrounding parenchyma across all 14 categories, contrast deltas ($\Delta \text{HU}$), and category intensity windowing bounds \texttt{[min\_HU, max\_HU]}.
-    \item \textbf{Experiment 005 (\texttt{exp\_005\_morphology_noise_pruning})}: 3D connected-component morphology across 33,058 blobs, sphericity index ($S$), surface area-to-volume ($SA/V$) ratios, volume quantiles, and recommended noise pruning thresholds (\texttt{recommended\_min_size_voxels}).
+    \item \textbf{Experiment 001 (\texttt{exp\_001\_dataset\_disparity\_leakage})}: Dataset composition, sparse Train vs.\ exhaustive Val mask disparity, positive-unlabeled (PU) loss justification, 3-tier patient hierarchy, and cross-split leakage audit.
+    \item \textbf{Experiment 002 (\texttt{exp\_002\_nlp\_prompt\_syntax})}: Free-text NLP prompt syntax shift (Cases 1--50 vs.\ 51--200), BPE subword tokenization dynamics (+34.2\% expansion), spatial preposition locators (64.39\%), and diagnostic hedging pruning (0.38\%).
+    \item \textbf{Experiment 003 (\texttt{exp\_003\_spatial\_density\_priors})}: 3D RAS spatial centroids $(RL, AP, IS)$, 4-tier spatial density prior taxonomy (Apical, Basal, Hilar, Isotropic), cosine similarity $S_{cos}$, centroid shift $\Delta d$, and 4-panel population density prior figure across all 14 categories ($128 \times 128 \times 128$ grid).
+    \item \textbf{Experiment 004 (\texttt{exp\_004\_hu\_radiodensity})}: Hounsfield Unit (HU) attenuation profiling inside mask regions vs.\ surrounding parenchyma across all 14 categories, contrast deltas ($\Delta \text{HU}$), and category intensity windowing bounds \texttt{[min\_HU, max\_HU]}.
+    \item \textbf{Experiment 005 (\texttt{exp\_005\_morphology\_noise\_pruning})}: 3D connected-component morphology across 33,058 blobs, sphericity index ($S$), surface area-to-volume ($SA/V$) ratios, volume quantiles, and recommended noise pruning thresholds (\texttt{recommended\_min\_size\_voxels}).
 \end{enumerate}
 
 ---
@@ -131,15 +133,19 @@ A key empirical finding of Experiment 001 is the quantitative disparity between 
 \centering
 \caption{Dataset split overview highlighting the annotation disparity between Train (Entity Protocol $\le 3$) and Val (Exhaustive).}
 \label{tab:split_summary}
+\begin{adjustbox}{max width=\linewidth}
+\small
+\setlength{\tabcolsep}{6pt}
 \begin{tabular}{lcccccc}
 \toprule
-\textbf{Split} & \textbf{Scans} & \textbf{Findings} & \textbf{Findings/Scan} & \textbf{Mean Inst/Find} & \textbf{Std Inst} & \textbf{Max Inst} \\
+\textbf{Split} & \textbf{Scans} & \textbf{Findings} & \makecell{\textbf{Findings}\\\textbf{/Scan}} & \makecell{\textbf{Mean Inst}\\\textbf{/Find}} & \textbf{Std Inst} & \textbf{Max Inst} \\
 \midrule
 Train & 2,992 & 7,687 & 2.57 & 1.948 & $\pm 0.962$ & 11 \\
 Val   & 200   & 381   & 1.91 & 3.714 & $\pm 4.441$ & 36 \\
 Test  & 300   & 582   & 1.94 & 1.000 & $\pm 0.000$ & 1 \\
 \bottomrule
 \end{tabular}
+\end{adjustbox}
 \end{table}
 
 Under the Training set's \textit{Entity Protocol}, annotators segment representative instances per finding query ($\le 3$ annotated instances in typical findings, mean $1.948 \pm 0.962$, peaking at 11 in rare multi-focal entries). Conversely, the Validation split features unconstrained exhaustive annotation ($\text{Max}=36$, $\mu=3.714 \pm 4.441$). Standard binary cross-entropy (BCE) or Dice losses treat unannotated true-positive voxels as negative background, introducing instance suppression bias. This empirically justifies Positive-Unlabeled (PU) loss formulations (such as PU SPOCO) during fine-tuning.
@@ -196,9 +202,12 @@ Experiment 002 evaluates the clinical text characteristics across all 8,650 prom
 \centering
 \caption{NLP syntactic prompt shift analysis on Validation Cases 1--50 vs.\ Cases 51--200.}
 \label{tab:nlp_shift}
+\begin{adjustbox}{max width=\linewidth}
+\small
+\setlength{\tabcolsep}{6pt}
 \begin{tabular}{lcccc}
 \toprule
-\textbf{Metric / Parameter} & \textbf{Cases 1--50 (Paper)} & \textbf{Cases 51--200 (MICCAI)} & \textbf{Shift / Factor} & \textbf{Combined Val} \\
+\textbf{Metric / Parameter} & \makecell{\textbf{Cases 1--50}\\\textbf{(Paper)}} & \makecell{\textbf{Cases 51--200}\\\textbf{(MICCAI)}} & \makecell{\textbf{Shift /}\\\textbf{Factor}} & \textbf{Combined Val} \\
 \midrule
 Total Finding Prompts & 115 & 266 & 2.31x & 381 \\
 Total Word Tokens & 1,263 & 3,193 & 2.53x & 4,456 \\
@@ -210,6 +219,7 @@ Type-Token Ratio (TTR, Naive) & 0.1544 & 0.0817 & -47.1\% & 0.0741 \\
 LN-TTR (1,000 Tokens Monte Carlo) & 0.1740 & 0.1651 & -5.11\% & 0.1746 \\
 \bottomrule
 \end{tabular}
+\end{adjustbox}
 \end{table}
 
 Prompts in cases 51--200 exhibit longer, highly clause-heavy sentences with a 1.67x spike in maximum word length (up to 35 words) and more than double the comma punctuation frequency (23.68\% vs.\ 11.30\%).
@@ -229,10 +239,12 @@ Experiment 003 resamples all 3D ground-truth masks into a canonical $128 \times 
 \centering
 \caption{Canonical 3D RAS spatial centroids $(RL, AP, IS) \in [0.0, 1.0]^3$, centroid distance shift $\Delta d$, spatial cosine similarity $S_{cos}$, and 4-tier spatial density prior taxonomy across all 14 finding categories.}
 \label{tab:spatial_centroids}
+\begin{adjustbox}{max width=\linewidth}
 \small
+\setlength{\tabcolsep}{3.5pt}
 \begin{tabular}{lcccccc}
 \toprule
-\textbf{Code} & \textbf{Finding Category} & \textbf{Train Centroid $(RL, AP, IS)$} & \textbf{Val Centroid $(RL, AP, IS)$} & $\Delta d$ & $S_{cos}$ & \textbf{Spatial Prior Taxonomy} \\
+\textbf{Code} & \textbf{Finding Category} & \makecell{\textbf{Train Centroid}\\\textbf{$(RL, AP, IS)$}} & \makecell{\textbf{Val Centroid}\\\textbf{$(RL, AP, IS)$}} & $\Delta d$ & $S_{cos}$ & \makecell{\textbf{Spatial Prior}\\\textbf{Taxonomy}} \\
 \midrule
 \texttt{1a} & Bronchial wall thickening & $(0.508, 0.439, 0.541)$ & $(0.495, 0.491, 0.478)$ & 0.0825 & 0.0412 & Hilar / Peribronchial \\
 \texttt{1b} & Bronchiectasis & $(0.510, 0.449, 0.545)$ & $(0.471, 0.489, 0.548)$ & 0.0563 & 0.2059 & Hilar / Peribronchial \\
@@ -250,6 +262,7 @@ Experiment 003 resamples all 3D ground-truth masks into a canonical $128 \times 
 \texttt{2h} & Other focal & $(0.521, 0.442, 0.536)$ & $(0.513, 0.488, 0.578)$ & 0.0633 & 0.0101 & Isotropic / Parenchymal \\
 \bottomrule
 \end{tabular}
+\end{adjustbox}
 \end{table}
 
 \begin{enumerate}
@@ -296,10 +309,12 @@ Experiment 004 extracts physical Hounsfield Unit (HU) intensity values inside gr
 \centering
 \caption{Category-level Hounsfield Unit (HU) attenuation statistics, contrast deltas ($\Delta \text{HU} = \text{Mean HU} - \text{Bg Mean HU}$), and recommended windowing bounds \texttt{[min\_HU, max\_HU]}.}
 \label{tab:hu_stats}
+\begin{adjustbox}{max width=\linewidth}
 \small
+\setlength{\tabcolsep}{4pt}
 \begin{tabular}{lcccccc}
 \toprule
-\textbf{Cat Code} & \textbf{Category Name} & \textbf{Mean HU} & \textbf{P5 HU} & \textbf{P95 HU} & \textbf{Contrast $\Delta\text{HU}$} & \textbf{Rec Window [Min, Max]} \\
+\textbf{Cat Code} & \textbf{Category Name} & \textbf{Mean HU} & \textbf{P5 HU} & \textbf{P95 HU} & \makecell{\textbf{Contrast}\\\textbf{$\Delta\text{HU}$}} & \makecell{\textbf{Rec Window}\\\textbf{[Min, Max]}} \\
 \midrule
 \texttt{1a} & Bronchial wall thickening & -486.35 & -933.0 & +69.0 & -21.98 & [-933.0, +69.0] \\
 \texttt{1b} & Bronchiectasis & -477.93 & -934.0 & +86.0 & +1.93 & [-934.0, +86.0] \\
@@ -314,9 +329,10 @@ Experiment 004 extracts physical Hounsfield Unit (HU) intensity values inside gr
 \texttt{2e} & Pleural effusion / thickening & -368.59 & -1007.0 & +135.0 & -19.37 & [-1007.0, +135.0] \\
 \texttt{2f} & Honeycombing & -420.45 & -905.0 & +83.0 & -18.07 & [-905.0, +83.0] \\
 \texttt{2g} & Pneumothorax & -306.85 & -961.0 & +148.0 & -54.68 & [-961.0, +148.0] \\
-\texttt{2h} & Other focal & -156.62 & -915.0 & +201.0 & -16.21 & [-915.0, +201.0] \\
+\texttt{2h} & Other focal & -156.62 & -915.0 & +201.0 & -16.21 & [-156.62, +201.0] \\
 \bottomrule
 \end{tabular}
+\end{adjustbox}
 \end{table}
 
 Key radiodensity observations:
@@ -336,9 +352,12 @@ Experiment 005 profiles 3D connected component morphology, geometric sphericity 
 \centering
 \caption{3D connected component topology, sphericity, and recommended post-processing noise pruning thresholds.}
 \label{tab:morphology_stats}
+\begin{adjustbox}{max width=\linewidth}
+\small
+\setlength{\tabcolsep}{4pt}
 \begin{tabular}{lcccccc}
 \toprule
-\textbf{Cat Code} & \textbf{Category Name} & \textbf{Blobs} & \textbf{Blobs/Find} & \textbf{Sphericity ($S$)} & \textbf{SA/V (mm$^{-1}$)} & \textbf{Rec Min Size (voxels)} \\
+\textbf{Cat Code} & \textbf{Category Name} & \textbf{Blobs} & \makecell{\textbf{Blobs/}\\\textbf{Find}} & \makecell{\textbf{Sphericity}\\\textbf{($S$)}} & \makecell{\textbf{SA/V}\\\textbf{(mm$^{-1}$)}} & \makecell{\textbf{Rec Min Size}\\\textbf{(voxels)}} \\
 \midrule
 \texttt{1a} & Bronchial wall thickening & 1,539 & 6.44 & 0.7249 & 0.7619 & \textbf{10 voxels} \\
 \texttt{1b} & Bronchiectasis & 1,007 & 3.44 & 0.6063 & 0.6483 & \textbf{10 voxels} \\
@@ -356,6 +375,7 @@ Experiment 005 profiles 3D connected component morphology, geometric sphericity 
 \texttt{2h} & Other focal & 194 & 3.03 & 0.6434 & 0.5439 & \textbf{10 voxels} \\
 \bottomrule
 \end{tabular}
+\end{adjustbox}
 \end{table}
 
 Key topological observations:
@@ -373,7 +393,7 @@ Based on the quantitative empirical findings across \texttt{exp\_001} through \t
     \item \textbf{Positive-Unlabeled (PU) Loss Formulations}: Use PU SPOCO + MPR consistency loss to prevent instance suppression bias caused by the Training set's $\le 3$ instance annotation cap.
     \item \textbf{Category Intensity Windowing}: Preprocess CT volumes using category-specific HU bounds \texttt{[min\_HU, max\_HU]} (Exp 004) rather than naive default windowing.
     \item \textbf{Spatial Prior Probability Masking}: Integrate 3D RAS spatial probability priors $P(\mathbf{x}' \in \text{mask} \mid c)$ (Exp 003) to constrain search spaces for category-specific findings (e.g., Apical prior for Emphysema, Basal prior for Effusion).
-    \item \textbf{Connected Component Noise Pruning}: Filter post-binarization predictions using \texttt{recommended\_min\_size_voxels} (Exp 005) to eliminate small false-positive instance artifacts.
+    \item \textbf{Connected Component Noise Pruning}: Filter post-binarization predictions using \texttt{recommended\_min\_size\_voxels} (Exp 005) to eliminate small false-positive instance artifacts.
     \item \textbf{4D Back-Reorientation Pipeline}: Ensure all predictions are back-reoriented using parent CT affine matrices prior to evaluation to guarantee spatial alignment against ground-truth evaluation masks.
 \end{enumerate}
 

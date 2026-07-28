@@ -68,4 +68,14 @@ Any incoming AI assistant starting a new session to revise the report MUST follo
 4. **Update Handshake State**:
    - Document key changes made during the session in `.agents/HANDSHAKE.md` to bridge state to subsequent revision rounds.
 
+---
+
+## 5. Recent Revisions Log
+
+* **July 27, 2026**: Resolved table width page overflow across all five tables in [logs/phase_1_report_overleaf/main.tex](file://logs/phase_1_report_overleaf/main.tex):
+  * Added `adjustbox` and `makecell` packages to preamble.
+  * Wrapped all table environments in `\begin{adjustbox}{max width=\linewidth}`.
+  * Multi-line column headers using `\makecell` and tightened column separation (`\tabcolsep`).
+
+
 
