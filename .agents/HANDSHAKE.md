@@ -10,12 +10,12 @@
 
 ## 1. Operational Scope & Working Context
 
-The active focus in this workspace is **Experiment 001 Label Distribution & Cross-Pathology Variance Profiling**:
+The active focus in this workspace is **Beamer Presentation Slides & Report Dissemination**:
 
 * **Immediate Next Objectives for Upcoming Session**:
-  1. **`dataset.json` Code Listing Placement**: Ensure `Listing 1` (`Representative dataset.json record entry`) in Section 1.2 does not break awkwardly across two pages (adjust page break / float specifiers for clean single-page rendering).
-  2. **Streamline Information-Dense Tables (Tables 3, 4, 5, and 6)**: Trim and simplify Tables 3 (NLP Syntax), 4 (HU Radiodensity), 5 (Morphology & Noise Pruning), and 6 (Spatial Priors) in `logs/phase_1_report_overleaf/main.tex` to remove clutter and reduce row height/column density, following the streamlined layout established for Table 2 (`tab:category_breakdown`).
-* **Primary Objective**: Finalize manuscript formatting and visual elegance in `logs/phase_1_report_overleaf/main.tex`.
+  1. **Beamer Slide Deck Development ([presentation.tex](file://logs/phase_1_report_overleaf/presentation.tex))**: Work on the Beamer slide deck associated with the Phase 1 profiling report (`logs/phase_1_report_overleaf/main.tex`), ensuring high visual impact, concise slide content, clean figure embedding, and structured presentation of dataset composition, spatial priors, NLP prompt syntax shift, HU intensity windowing, morphology, and actionable challenge utility.
+  2. **Slide Content & Layout Refinement**: Verify slide frame formatting, table compactness, visual layout hierarchy, and alignment with the audited Phase 1 empirical findings.
+* **Primary Objective**: Finalize the Beamer presentation (`logs/phase_1_report_overleaf/presentation.tex`) accompanying the technical manuscript.
 
 ---
 
@@ -96,6 +96,9 @@ Any incoming AI assistant starting a new session to revise the report MUST follo
     * Table 5 (HU Windowing): Trimmed duplicate `P5` & `P95` columns (8 $\rightarrow$ 6 columns); merged into single `Rec. Window [P5, P95] HU`.
     * Table 6 (Morphology): Trimmed redundant `Equiv Vol` and `P5 Vol` columns (10 $\rightarrow$ 8 columns); expressed voxel-to-$\text{mm}^3$ conversion in footnote.
   * **Strict Data Analysis Focus in Main Body**: Removed all modeling/training comments, loss function justifications (e.g., BCE/Dice/SPOCO/PU), hyper-parameter recommendations, and search-space pruning statements from the primary analytical body text and table footnotes across Sections 1--7. Main body text now focuses strictly on empirical data observations (counts, distributions, geometry, metrics), keeping all modeling implications cleanly isolated inside the `Actionable Challenge Utility` subsections and Section 8.
+* **July 28, 2026**: Beamer Presentation Theme & Layout Update in [logs/phase_1_report_overleaf/presentation.tex](file://logs/phase_1_report_overleaf/presentation.tex):
+  * Transitioned theme from default `seahorse` to modern `metropolis` with frametitle progress bar (`progressbar=frametitle`), filled block styling (`block=fill`), dark blue headers (`#142850`), teal progress accents (`#008080`), and clean light gray card backgrounds (`#F5F7FA`).
+  * Refactored **Slide 2 (Dataset Hierarchy)** into 4 separate vertical card blocks (Tier 1 $\rightarrow$ Tier 4) connected by downward teal transition arrows ($\downarrow$), removing table markup and bottom utility card.
 
 
 
