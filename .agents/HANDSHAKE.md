@@ -10,11 +10,13 @@
 
 ## 1. Operational Scope & Working Context
 
-The active focus in this workspace is **Iterative Revision & Polish of Phase 1 Overleaf Group Technical Report**:
+The active focus in this workspace is **Experiment 001 Label Distribution & Cross-Pathology Variance Profiling**:
 
-* **Current Baseline State**: Initial quantitative synchronization of all 5 Phase 1 data profiling experiments (`exp_001` through `exp_005`) into [logs/phase_1_report_overleaf/main.tex](file://logs/phase_1_report_overleaf/main.tex) and [logs/phase_1_report_overleaf/fig/](file://logs/phase_1_report_overleaf/fig/) is **100% completed**.
-* **Multi-Session Revision Protocol**: The report will undergo several iterative revision rounds across new AI chat sessions. In each iteration, the user may provide feedback, structural suggestions, or external review notes (e.g. from Claude or peer reviewers).
-* **Primary Objective**: Incrementally refine, expand, re-format, and polish `main.tex` based on incoming feedback while maintaining strict fidelity with the ground-truth empirical data in `logs/` and `../data/phase_1/`.
+* **Immediate Next Objective for New Chat Session**:
+  1. Perform detailed **Label Distribution Analysis** across dataset splits (Train, Validation, Test).
+  2. Investigate **cross-pathology finding count variance**: analyze whether the difference in finding prompt frequency and instance counts varies noticeably across different pathology categories and splits (e.g., comparing diffuse/multi-focal categories like `2c` Ground-glass opacities or `2d` Nodules vs focal findings like `1a` Bronchial wall thickening or `2g` Pneumothorax in Train, Validation, and Test splits).
+  3. Extend [scripts/exp_001_dataset_disparity_leakage.py](file://scripts/exp_001_dataset_disparity_leakage.py), [logs/exp_001_dataset_disparity_leakage.md](file://logs/exp_001_dataset_disparity_leakage.md), and [logs/phase_1_report_overleaf/main.tex](file://logs/phase_1_report_overleaf/main.tex) with quantitative breakdown tables and visualizations.
+* **Primary Objective**: Continue deep-dive empirical analysis on Experiment 001 dataset properties and update the technical report accordingly.
 
 ---
 
