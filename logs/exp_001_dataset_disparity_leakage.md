@@ -44,9 +44,9 @@ A 3-tier ID decomposition was performed across all 3,192 scans to identify longi
 
 ---
 
-## 4. Artifact & Script References
-
 * **Summary Output JSON**: [../data/phase_1/analysis_experiment_001/exp001_disparity_leakage_summary.json](file://../data/phase_1/analysis_experiment_001/exp001_disparity_leakage_summary.json)
+* **Category Frequency Proportion Figure**: [../data/phase_1/analysis_experiment_001/exp001_category_frequency_breakdown.png](file://../data/phase_1/analysis_experiment_001/exp001_category_frequency_breakdown.png)
+* **Findings per Scan Distribution Figure**: [../data/phase_1/analysis_experiment_001/exp001_findings_per_scan.png](file://../data/phase_1/analysis_experiment_001/exp001_findings_per_scan.png)
 * **Heatmap Visualization Figure**: [../data/phase_1/analysis_experiment_001/exp001_cooccurrence_heatmap.png](file://../data/phase_1/analysis_experiment_001/exp001_cooccurrence_heatmap.png)
 * **Execution Script**: [scripts/exp_001_dataset_disparity_leakage.py](file://scripts/exp_001_dataset_disparity_leakage.py)
 

@@ -86,7 +86,7 @@ Any incoming AI assistant starting a new session to revise the report MUST follo
   * **Layout & Tables**: Replaced rigid `adjustbox` table scaling with `tabularx` and uniform font size across all 5 tables; applied explicit `>{\raggedright\arraybackslash}X` auto-wrapping columns to resolve column overlap in Table 5 (`Category Name` vs `Blobs`); tightened padding (`\tabcolsep{2.2pt}`) to guarantee zero page margin overflow; replaced `[H]` float specifiers with flexible `[htbp]`; removed hardcoded `\bigskip` overrides.
   * **Code Listing**: Added explicit `json` language definition (`\lstdefinelanguage{json}{...}`) to preamble.
   * **Authentic Bibliography & Technical Clarity**: Updated bibliography in `main.tex` with exact user-provided BibTeX entries for **ReXGroundingCT** (*Baharoon et al., NEJM AI 2026, 3(7):AIdbp2501220*), **VoxTell** (*Rokuss et al., IEEE/CVF CVPR 2026, pp. 37538--37557*), **CT-RATE / Generalist Models** (*Hamamci et al., Nature Biomedical Engineering 2026*), and **SPOCO** (*Wolny et al., arXiv:2103.14572*); explicitly defined MPR and PU acronyms; added zero-count validation methodology note for Honeycombing (`2f`); expanded Table 1 footnote clarifying test split placeholder instance metadata ($1.000 \pm 0.000$).
-
+  * **Experiment 001 Figure Refinement**: Unified validation cases into a single "Validation" split, integrated the Test set distribution (300 scans, 582 findings), converted category frequency Y-axis from raw count to split proportion (%), and updated findings per scan distribution figure to include the Test split.
 
 
 
