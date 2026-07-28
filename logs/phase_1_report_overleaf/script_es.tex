@@ -1,0 +1,210 @@
+\documentclass[11pt, a4paper]{article}
+
+% --- Packages ---
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{parskip}
+\usepackage{enumitem}
+\usepackage{amsmath}
+
+% --- Visual Styling ---
+\definecolor{darkblue}{RGB}{20, 40, 80}
+\definecolor{tealaccent}{RGB}{0, 128, 128}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=darkblue,
+    urlcolor=tealaccent
+}
+
+\titleformat{\section}
+  {\normalfont\Large\bfseries\color{darkblue}}{\thesection}{1em}{}
+\titleformat{\subsection}
+  {\normalfont\large\bfseries\color{tealaccent}}{\thesubsection}{1em}{}
+
+% --- Metadata ---
+\title{\textbf{Perfilado de Datos 3D en ReXGroundingCT: Guión de la Presentación}\\[0.3em]
+\large Notas para la Presentación Oral del Desafío MICCAI 2026}
+\author{\textbf{Equipo de Investigación ReXGroundingCT}}
+\date{28 de Julio de 2026}
+
+\begin{document}
+
+\maketitle
+\vspace{1.5em}
+
+% ==============================================================================
+\section{Diapositiva 1: Título y Visión General Ejecutiva}
+% ==============================================================================
+
+Bienvenidos a todos a la presentación de mi informe técnico sobre ReXGroundingCT.
+
+En esta charla, presento un análisis detallado de los datos del benchmark, evaluando la estructura de los escaneos de TC, las características del texto radiológico y las propiedades geométricas, de radiodensidad y espaciales de las lesiones. El objetivo de este estudio es comprender a fondo la distribución del dataset para fundamentar el desarrollo y ajuste fino de los modelos de segmentación 3D.
+
+\bigskip
+
+% ==============================================================================
+\section{Diapositiva 2: Jerarquía de Indexación del Dataset}
+% ==============================================================================
+
+Para entender el dataset ReXGroundingCT, primero analizo su jerarquía de indexación de 4 niveles.
+
+En el Tier 1, el benchmark consta de 3,078 sesiones físicas de adquisición de TC derivadas del repositorio CT-RATE, divididas en 2,578 volúmenes de \textit{train}, 200 de \textit{val} y 300 de \textit{test}.
+
+Pasando al Tier 2, existen 3,192 entradas indexadas en \texttt{dataset.json}. Este número es ligeramente mayor que el de escaneos físicos debido a que los exámenes de algunos pacientes fueron reconstruidos bajo múltiples kernels de escáner, como series de cortes finos y gruesos.
+
+En el Tier 3, GPT-4 procesó los informes radiológicos clínicos originales para extraer 8,650 indicaciones discretas de hallazgos (\textit{prompts}). Más del 81 por ciento de estos prompts son frases literalmente únicas. El 19 por ciento restante corresponde a frases exactamente duplicadas, lo cual ocurre porque los radiólogos utilizan plantillas estandarizadas de informes clínicos para hallazgos comunes, y porque las series multi-kernel del mismo escaneo heredan exactamente el mismo texto de informe.
+
+Finalmente, en el Nivel 4, radiólogos anotaron manualmente 8,650 máscaras de segmentación 3D emparejadas 1 a 1 con cada \textit{prompt}. En el \textit{train split}, los anotadores limitaron las lesiones representativas a un máximo de 3 por hallazgo bajo el \textit{Entity Protocol}, mientras que el \textit{val split} cuenta con anotaciones exhaustivas sin restricciones.
+
+\bigskip
+
+% ==============================================================================
+\section{Diapositiva 2b: Anatomía del Registro (\texttt{dataset.json})}
+% ==============================================================================
+
+En esta diapositiva, muestro un registro concreto de \texttt{dataset.json} para el escaneo \texttt{train\_1935\_a\_1}.
+
+Cada entrada indexa:
+\begin{enumerate}[leftmargin=1.5em]
+    \item Primero, el nombre de archivo NIfTI físico. Tengan en cuenta el sufijo guion bajo uno, que indica la serie de reconstrucción 1 para este paciente.
+    \item Segundo, el diccionario de hallazgos, que contiene los \textit{prompts} de texto exactos extraídos del informe radiológico.
+    \item Tercero, los conteos de entidades (\textit{entity counts}), que muestran cuántas instancias 3D fueron anotadas para cada hallazgo; por ejemplo, 3 nódulos o 2 áreas de engrosamiento de la pared bronquial.
+    \item Cuarto, la forma de la grilla 3D y el conteo total de vóxeles para cada máscara binaria de \textit{ground truth}.
+    \item Y finalmente, el mapeo de categorías, que asigna cada consulta de texto a uno de los 14 códigos de patología del benchmark.
+\end{enumerate}
+
+\bigskip
+
+% ==============================================================================
+\section{Diapositiva 3: Resumen y Disparidad entre Particiones}
+% ==============================================================================
+
+En este resumen, presento la composición principal de los \textit{splits} del dataset y destaco la disparidad fundamental de anotación entre los conjuntos de \textit{train} y \textit{val}.
+
+El dataset comprende 2,992 registros de \textit{train}, 200 registros de \textit{val} y 300 registros de \textit{test}. A lo largo de todos los \textit{splits}, los escaneos promedian entre 1.9 y 2.5 consultas de hallazgos por escaneo.
+
+Sin embargo, observen detenidamente la columna de promedio de instancias por hallazgo: en el conjunto de \textit{Train}, los hallazgos promedian 1.95 instancias, con un máximo de 11 componentes conexos (lo cual ocurre cuando máscaras complejas anotadas se fragmentan en el espacio 3D). Esto refleja el \textit{Entity Protocol}, el cual limitó las anotaciones humanas a un máximo de 3 entidades por consulta de hallazgo.
+
+En contraste, el conjunto de \textit{Val} presenta anotaciones exhaustivas sin restricciones, promediando 3.71 instancias por hallazgo y alcanzando hasta 36 instancias en casos multifocales. Esto produce una disparidad cuantitativa global de anotación de $1.91\times$ entre \textit{splits}.
+
+Tengan en cuenta que las estadísticas de instancias del \textit{test split} están marcadas con guiones debido a que los organizadores del desafío reservan las máscaras de \textit{ground truth} para la evaluación oficial de la \textit{leaderboard}.
+
+\bigskip
+
+% ==============================================================================
+\section{Diapositiva 4: Desglose de 14 Categorías y Ratios de Disparidad}
+% ==============================================================================
+
+Esta tabla proporciona el desglose detallado de las 14 categorías entre patologías no focales (tipos 1a a 1f) y patologías focales (tipos 2a a 2h).
+
+Primero, observen la prevalencia por escaneo: Nódulos y masas pulmonares (categoría 2d) es la patología más prevalente en el dataset, apareciendo en el 43.6 por ciento de los escaneos de \textit{train} y en casi el 60 por ciento de los de \textit{val}. La opacidad en vidrio esmerilado (categoría 2c) y la Atelectasia (categoría 2b) también son hallazgos focales altamente prevalentes.
+
+Segundo, miren la columna del ratio de disparidad de anotación. La opacidad en vidrio esmerilado exhibe la mayor disparidad de todo el benchmark: un salto de 3.20 veces, de 2.23 instancias por consulta en \textit{train} a 7.13 instancias en \textit{val} exhaustivo. El engrosamiento septal y los Micronódulos también muestran saltos superiores a 2.3 veces.
+
+Finalmente, el Panal de abejas o Honeycombing (categoría 2f) es un hallazgo raro en el dataset con un 0.5 por ciento de prevalencia en \textit{train} y 0 casos en \textit{val}, lo cual tomo en cuenta durante el modelado de \textit{cross-validation}.
+
+\bigskip
+
+% ==============================================================================
+\section{Diapositiva 5: Proporciones de Categorías y Hallazgos por Escaneo}
+% ==============================================================================
+
+Esta diapositiva visualiza las proporciones de categorías y los hallazgos por escaneo de TC a través de los \textit{splits} del dataset.
+
+En el gráfico de la izquierda, se observa que la prevalencia de patologías se mantiene consistente entre los \textit{splits} de \textit{Train}, \textit{Val} y \textit{Test}. Los Nódulos pulmonares, la Opacidad en vidrio esmerilado y la Atelectasia dominan la frecuencia del dataset, mientras que categorías como Panal de abejas y Neumotórax representan hallazgos raros.
+
+En el gráfico de la derecha, examino el número de consultas de hallazgos por escaneo. Los escaneos de TC en el dataset contienen entre 1 y 5 consultas de hallazgos, promediando 2.57 hallazgos por escaneo en \textit{Train} y 1.91 en \textit{Val}.
+
+\bigskip
+
+% ==============================================================================
+\section{Diapositiva 6: Disparidad de Instancias de Componentes Conexos}
+% ==============================================================================
+
+Aquí destaco la comparación de \textit{boxplots} de los conteos de instancias por consulta de hallazgo. Es importante aclarar que cada consulta de texto genera 1 sola máscara 3D en el archivo NIfTI, pero dentro de esa máscara las instancias operativas se definen geométricamente como componentes conexos 3D o islas independientes (\textit{blobs}).
+
+Noten el marcado contraste entre las cajas azules de \textit{train} y las cajas naranjas de \textit{val}. En \textit{Train}, el conteo de instancias está limitado a un máximo de 3 por consulta bajo el \textit{Entity Protocol}. En \textit{Val}, la anotación exhaustiva sin restricciones revela los conteos verdaderos de lesiones, alcanzando hasta 36 instancias en Opacidad en vidrio esmerilado y 22 en Nódulos pulmonares.
+
+\bigskip
+
+% ==============================================================================
+\section{Diapositiva 7: Coocurrencia de Patologías Multi-Hallazgo}
+% ==============================================================================
+
+Este \textit{heatmap} muestra la matriz de probabilidad de coocurrencia condicional a nivel de escaneo $P(c_j \mid c_i)$ de 14 por 14 de la categoría $j$ dada la categoría $i$.
+
+El \textit{heatmap} revela fuertes dependencias clínicas. Por ejemplo, el Derrame pleural coocurre con Atelectasia en el 60 por ciento de los escaneos, mientras que el Panal de abejas coocurre con Atelectasis y Nódulos pulmonares en el 46.7 por ciento de los escaneos. Comprender estos priores de coocurrencia ayuda a modelar la detección conjunta de patologías.
+
+\bigskip
+
+% ==============================================================================
+\section{Diapositiva 8: Cambio Sintáctico en Prompts de Validación (Casos 1--50 vs. 51--200)}
+% ==============================================================================
+
+Aquí examino el cambio sintáctico en los \textit{prompts} de texto libre entre los 50 casos de \textit{val} originales del artículo y los nuevos 150 casos de la competencia MICCAI.
+
+Los nuevos \textit{val prompts} muestran un aumento notable en la complejidad sintáctica: la longitud máxima de palabras salta un 66.7 por ciento hasta 35 palabras, y la frecuencia de comas se duplica a más del 23.7 por ciento.
+
+Es importante destacar que, incluso con este aumento de longitud, la expansión de \textit{subword BPE tokenization} se mantiene efectivamente por debajo de 128 \textit{tokens} en los 8,650 \textit{prompts}, lo que resulta en un cero por ciento de truncamiento de contexto.
+
+Además, el lenguaje de incertidumbre o vacilaciones diagnósticas (\textit{hedging}) ocurre solo en el 0.38 por ciento de los \textit{prompts}. Específicamente, evalué el \textit{hedging} mediante un diccionario clínico basado en reglas que abarca términos de grado de certeza como \textit{``possible''} o \textit{``probable''}, diagnósticos diferenciales como \textit{``versus''}, y cláusulas de descarte como \textit{``cannot be excluded''}, excluyendo la negación pura. Esta tasa tan baja confirma que el procesamiento por GPT-4 en la curación del \textit{dataset} ya eliminó el ruido narrativo y nos permite alimentar los \textit{prompts} directamente al modelo sin necesidad de filtros de texto complejos.
+
+\bigskip
+
+% ==============================================================================
+\section{Diapositiva 9: Priores de Densidad de Probabilidad Espacial 3D Poblacionales}
+% ==============================================================================
+
+Aquí presento proyecciones coronales de los priores de densidad de probabilidad espacial 3D de la población a través de las cuatro taxonomías espaciales en una grilla RAS canónica de 128 cubos.
+
+Observen cómo los mapas de densidad confirman visualmente mis reglas taxonómicas: el Enfisema muestra una acumulación apical clara en las zonas superiores; el Derrame pleural y la Atelectasia se concentran en las bases pulmonares dependientes de la gravedad; el Engrosamiento de la pared bronquial se agrupa alrededor de las vías aéreas hiliares centrales; y los Nódulos exhiben una dispersión parenquimatosa isotrópica.
+
+\bigskip
+
+% ==============================================================================
+\section{Diapositiva 10: Perfilado de Atenuación en Unidades Hounsfield (HU)}
+% ==============================================================================
+
+Esta tabla resume las estadísticas de atenuación en Unidades Hounsfield (HU) a través de los 3,192 volúmenes de TC. La escala HU mide la densidad del tejido, desde menos 1000 HU para el aire hasta valores positivos para tejido blando y hueso.
+
+Para cada categoría, medí la radiodensidad promedio dentro de la lesión y calculé el delta de contraste restando la densidad de un anillo de parénquima sano circundante expandido por dilatación 3D. La densidad promedio varía desde lesiones atrapadoras de aire como el Engrosamiento bronquial a menos 486 HU hasta opacidades de tejido blando como Otro Focal a menos 156 HU.
+
+Estos valores son fundamentales para el modelo: definir la ventana de intensidad recomendada entre el percentil 5 y 95 para cada patología permite recortar el rango de brillo de la TC, evitando que estructuras encandilen a la red neuronal y maximizando el contraste para el aprendizaje automático.
+
+\bigskip
+
+% ==============================================================================
+\section{Diapositiva 11: Topología de Componentes Conexos 3D y Podado de Ruido}
+% ==============================================================================
+
+Esta tabla detalla la morfología de componentes conexos 3D a través de 27,138 elementos discretos o islas independientes (\textit{blobs}). Cabe aclarar que un \textit{blob} es cada estructura continua en el espacio 3D; en patologías focales equivale a 1 instancia médica, mientras que en difusas varias pueden fusionarse en 1 solo \textit{blob}. Esta distinción es clave porque el algoritmo oficial del MICCAI Challenge extrae las instancias por conectividad 3D de \textit{blobs} para evaluar el \textit{Instance F1}.
+
+Permítanme explicar cada columna de la tabla y para qué nos sirve en el challenge:
+\begin{itemize}[leftmargin=1.5em]
+    \item \textbf{Blobs} y \textbf{Blobs/Find}: Miden la cantidad total de islas 3D y la fragmentación promedio por consulta (por ejemplo, los Nódulos promedian 2.05 islas aisladas, mientras que el Engrosamiento bronquial se fragmenta en 6.44 islas). \textit{¿Para qué nos sirve en el challenge?} Nos permite adaptar la estrategia de agrupamiento e inferencia, sabiendo exactamente qué patologías esperan lesiones aisladas y cuáles esperan estructuras altamente fragmentadas.
+    \item \textbf{Sphericity ($S$)}: Mide qué tan cercana es la forma a una esfera perfecta (donde 1.0 es una pelota redonda). Los Nódulos exhiben la mayor esfericidad con 0.9416, mientras que el Engrosamiento septal y el Derrame pleural muestran baja esfericidad por debajo de 0.58. \textit{¿Para qué nos sirve en el challenge?} Nos sirve como filtro morfológico post-predicción: si el modelo propone un candidato a Nódulo con forma plana u alargada ($S < 0.60$), podemos descartarlo automáticamente por inconsistencia geométrica.
+    \item \textbf{Median y P95 Vol ($\text{mm}^3$)}: Cuantifican el volumen físico mediano y máximo de las lesiones en milímetros cúbicos. \textit{¿Para qué nos sirve en el challenge?} Nos sirve para calibrar el tamaño de los parches 3D ($192 \times 192 \times 192$) y el paso de la ventana deslizante durante la inferencia, evitando truncar o cortar las lesiones más extensas.
+    \item \textbf{Rec Min Size}: Especifica los umbrales de podado de tamaño mínimo derivados empíricamente en vóxeles (por ejemplo, 15 vóxeles para Nódulos y 47 vóxeles para la Categoría 1f). \textit{¿Para qué nos sirve en el challenge?} Nos sirve para aplicar un podado de ruido (\textit{noise pruning}) post-binarización que elimina falsos positivos diminutos, aumentando directamente el puntaje de \textit{Instance F1} e \textit{Hit Rate} en el \textit{leaderboard}.
+\end{itemize}
+
+\bigskip
+
+% ==============================================================================
+\section{Diapositiva 12: Ideas para el Challenge}
+% ==============================================================================
+
+Para concluir, de mi perfilado de la Fase 1 propongo cuatro ideas clave para el challenge para optimizar tanto el entrenamiento como la evaluación posterior:
+
+\begin{enumerate}[leftmargin=1.5em]
+    \item \textbf{Primero, Formulación de Pérdida Positive-Unlabeled (PU):} Implementar funciones de pérdida PU-SPOCO y de consistencia MPR para evitar que el modelo sea penalizado al predecir lesiones verdaderas en regiones no anotadas del conjunto de \textit{train}.
+    \item \textbf{Segundo, Ventanas de Intensidad HU Adaptadas por Categoría:} En lugar de usar un ventanado pulmonar estándar amplio de $-1000$ a $+400$ HU, propongo recortar la intensidad de entrada según los límites empíricos del percentil 5 al 95 calculados para cada patología (por ejemplo, de $-992$ a $+251$ HU para Enfisema o hasta $+194$ HU para Nódulos). Esto maximiza el contraste sutil de cada enfermedad y evita que la red se encandile con densidades extremas.
+    \item \textbf{Tercero, Máscara de Priores Espaciales 3D RAS:} Utilizar los mapas de probabilidad de densidad espacial 3D para acotar el espacio de búsqueda del modelo. Al integrar las reglas anatómicas descubiertas —como la concentración apical del Enfisema o el depósito basal y posterior de la Atelectasia y el Derrame pleural—, podemos penalizar predicciones en zonas anatómicamente inverosímiles.
+    \item \textbf{Y cuarto, Podado de Ruido por Tamaño Mínimo de Componentes:} Durante el post-procesamiento de las predicciones binarizadas, filtrar pequeñas ``motas de polvo'' o falsos positivos eliminando componentes conexos 3D (\textit{blobs}) que se encuentren por debajo del umbral mínimo empírico derivado (por ejemplo, eliminando predicciones de menos de 15 vóxeles para Nódulos y de menos de 47 vóxeles para la Categoría 1f), lo que mejora directamente las métricas de \textit{Instance F1} e \textit{Hit Rate} sin sacrificar la detección de lesiones reales.
+\end{enumerate}
+
+\end{document}

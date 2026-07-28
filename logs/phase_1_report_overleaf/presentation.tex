@@ -9,6 +9,7 @@
 }
 
 % --- Packages ---
+\usepackage{amsmath}
 \usepackage{graphicx}
 \usepackage{booktabs}
 \usepackage{tabularx}
@@ -55,7 +56,7 @@
 % --- Metadata ---
 \title[ReXGroundingCT 3D Data Profiling]{ReXGroundingCT 3D Data Profiling, Spatial Priors \& Prompt Syntax}
 \subtitle{MICCAI 2026 Challenge Benchmark Investigation}
-\author{ReXGroundingCT Challenge Research Team}
+\author{Joaquín De Ferrari}
 \date{July 28, 2026}
 
 \begin{document}
@@ -341,49 +342,7 @@
 \end{frame}
 
 % ==============================================================================
-% SLIDE 9: Table 4 - Spatial Centroids & 4-Tier Taxonomy
-% ==============================================================================
-\begin{frame}{Canonical 3D RAS Centroids \& Spatial Taxonomy}
-    \centering
-    \scriptsize
-    \setlength{\tabcolsep}{7pt}
-    \begin{tabular}{clccc>{\bfseries}l}
-        \toprule
-        \textbf{Code} & \textbf{Finding Category} & \textbf{Train Centroid $(\text{RL}, \text{AP}, \text{IS})$} & $\Delta d$ & $S_{\text{cos}}$ & Spatial Taxonomy \\
-        \midrule
-        \texttt{1a} & Bronchial wall thickening & $(0.508, 0.439, 0.541)$ & 0.0825 & 0.0412 & Hilar / Peribronchial \\
-        \texttt{1b} & Bronchiectasis           & $(0.510, 0.449, 0.545)$ & 0.0563 & 0.2059 & Hilar / Peribronchial \\
-        \rowcolor{darkblue!10}
-        \texttt{1c} & Emphysema                & $(0.504, 0.442, 0.667)$ & 0.1566 & 0.1756 & Apical Dominant \\
-        \texttt{1d} & Septal thickening        & $(0.519, 0.420, 0.563)$ & 0.1092 & 0.2228 & Isotropic / Parenchymal \\
-        \texttt{1e} & Micronodules             & $(0.517, 0.422, 0.537)$ & 0.1007 & 0.1111 & Isotropic / Parenchymal \\
-        \texttt{1f} & Other non-focal          & $(0.501, 0.426, 0.545)$ & 0.1327 & 0.0671 & Isotropic / Parenchymal \\
-        \texttt{2a} & Linear opacities         & $(0.474, 0.500, 0.535)$ & 0.0886 & 0.2562 & Isotropic / Parenchymal \\
-        \rowcolor{darkblue!10}
-        \texttt{2b} & Atelectasis / consolid.  & $(0.503, 0.433, 0.491)$ & 0.1084 & 0.3275 & Basal / Dependent \\
-        \texttt{2c} & Ground-glass opacity     & $(0.510, 0.407, 0.519)$ & 0.1711 & 0.4432 & Isotropic / Parenchymal \\
-        \texttt{2d} & Pulmonary nodules/masses & $(0.540, 0.452, 0.556)$ & 0.1012 & 0.0268 & Isotropic / Parenchymal \\
-        \rowcolor{darkblue!10}
-        \texttt{2e} & Pleural effusion/thick.  & $(0.535, 0.314, 0.484)$ & 0.2426 & 0.5032 & Basal / Dependent \\
-        \texttt{2f} & Honeycombing             & $(0.457, 0.482, 0.498)$ & -- & -- & Basal / Dependent \\
-        \texttt{2g} & Pneumothorax             & $(0.497, 0.516, 0.522)$ & 0.2293 & 0.0717 & Isotropic / Parenchymal \\
-        \texttt{2h} & Other focal              & $(0.521, 0.442, 0.536)$ & 0.0633 & 0.0101 & Isotropic / Parenchymal \\
-        \bottomrule
-    \end{tabular}
-
-    \note{
-        This table details the canonical 3D RAS spatial coordinate centroids and our 4-tier spatial density prior taxonomy across all 14 categories.
-
-        Findings are grouped into four spatial taxonomies based on 3D probability density maps:
-        First, Apical Dominant, like Emphysema, which concentrates in upper lung zones with an Inferior-Superior centroid of 0.667.
-        Second, Basal or Dependent, like Atelectasis and Pleural Effusion, which cluster in lower posterior zones.
-        Third, Hilar or Peribronchial, like Bronchial Wall Thickening and Bronchiectasis, which track central airway structures.
-        And fourth, Isotropic or Parenchymal, like Nodules and Ground-glass opacity, which distribute broadly across lung fields.
-    }
-\end{frame}
-
-% ==============================================================================
-% SLIDE 10: Figure 4 - 3D Spatial Probability Density Priors
+% SLIDE 9: Figure 4 - 3D Spatial Probability Density Priors
 % ==============================================================================
 \begin{frame}{3D Population Spatial Probability Density Priors}
     \begin{center}
@@ -398,7 +357,7 @@
 \end{frame}
 
 % ==============================================================================
-% SLIDE 11: Table 5 - HU Attenuation & Intensity Bounds
+% SLIDE 10: Table 5 - HU Attenuation & Intensity Bounds
 % ==============================================================================
 \begin{frame}{Hounsfield Unit (HU) Attenuation Profiling}
     \centering
@@ -437,31 +396,7 @@
 \end{frame}
 
 % ==============================================================================
-% SLIDE 12: Figure 5 - HU Violins & Contrast Deltas
-% ==============================================================================
-\begin{frame}{HU Radiodensity \& Contrast Deltas}
-    \begin{columns}[c]
-        \begin{column}{0.5\textwidth}
-            \centering
-            \includegraphics[width=\textwidth, height=0.68\textheight, keepaspectratio]{fig/exp004_hu_distribution_violin.png}
-        \end{column}
-        \begin{column}{0.5\textwidth}
-            \centering
-            \includegraphics[width=\textwidth, height=0.68\textheight, keepaspectratio]{fig/exp004_hu_contrast_delta_barplot.png}
-        \end{column}
-    \end{columns}
-
-    \note{
-        Here we visualize the HU radiodensity profiles.
-
-        The left plot shows violin distributions of HU values for each of the 14 categories, highlighting the wide spectrum from low-density air-trapping pathologies to high-density soft-tissue opacities.
-
-        The right plot quantifies contrast deltas between pathology regions and their surrounding parenchymal boundaries, demonstrating clear intensity gradients that can be leveraged during model windowing.
-    }
-\end{frame}
-
-% ==============================================================================
-% SLIDE 13: Table 6 - Morphological Topology & Noise Pruning
+% SLIDE 11: Table 6 - Morphological Topology & Noise Pruning
 % ==============================================================================
 \begin{frame}{3D Connected Component Topology \& Pruning}
     \centering
@@ -500,29 +435,27 @@
 \end{frame}
 
 % ==============================================================================
-% SLIDE 14: Actionable Directives
+% SLIDE 12: Ideas para el Challenge
 % ==============================================================================
-\begin{frame}{Calibrated Actionable Modeling Directives}
+\begin{frame}{Ideas para el Challenge}
     \begin{columns}[c]
         \begin{column}{0.95\textwidth}
             \begin{enumerate}
                 \item \textbf{PU Loss Formulation:} PU-SPOCO + Multi-Planar Reconstruction (MPR) consistency loss to handle training label caps ($\le 3$ instances).
-                \item \textbf{Category Intensity Windowing:} Preprocess CT volumes using category HU bounds \texttt{[min\_HU, max\_HU]} (Exp 004).
-                \item \textbf{Spatial Prior Masking:} Apply 3D RAS spatial probability density priors $P(\mathbf{x}' \in \text{mask} \mid c)$ to bound search space (Exp 003).
-                \item \textbf{Component Noise Pruning:} Filter binarized predictions with \texttt{recommended\_min\_size\_voxels} thresholds (Exp 005).
-                \item \textbf{4D Back-Reorientation:} Re-orient predictions via parent CT affine matrices prior to evaluation.
+                \item \textbf{Category Intensity Windowing:} Preprocess CT volumes using category HU bounds \texttt{[min\_HU, max\_HU]}.
+                \item \textbf{Spatial Prior Masking:} Apply 3D RAS spatial probability density priors $P(\mathbf{x}' \in \text{mask} \mid c)$ to bound search space.
+                \item \textbf{Component Noise Pruning:} Filter binarized predictions with \texttt{recommended\_min\_size\_voxels} thresholds.
             \end{enumerate}
         \end{column}
     \end{columns}
 
     \note{
-        To conclude, our Phase 1 profiling yields five mandatory calibrated directives for downstream baseline evaluation and fine-tuning:
+        To conclude, our Phase 1 profiling yields four key ideas for downstream baseline evaluation and fine-tuning:
 
         First, implement Positive-Unlabeled SPOCO and MPR consistency losses to handle training set label caps.
         Second, apply category-tailored HU intensity windowing bounds rather than naive broad windowing.
         Third, integrate 3D RAS spatial probability priors to constrain candidate search space.
-        Fourth, apply component size threshold pruning to remove false-positive noise.
-        And fifth, enforce 4D Back-Reorientation to ensure perfect spatial alignment with ground-truth NIfTI metadata.
+        And fourth, apply component size threshold pruning to remove false-positive noise.
     }
 \end{frame}
 
