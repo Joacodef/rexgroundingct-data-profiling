@@ -227,7 +227,7 @@ Experiment 002 evaluates the clinical text characteristics across all 8,650 prom
 \label{tab:nlp_shift}
 \footnotesize
 \setlength{\tabcolsep}{4.5pt}
-\begin{tabularx}{\linewidth}{Xccccc}
+\begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}Xccccc}
 \toprule
 \textbf{Metric / Parameter} & \makecell{\textbf{Cases 1--50}\\\textbf{(Paper)}} & \makecell{\textbf{Cases 51--200}\\\textbf{(MICCAI)}} & \textbf{Ratio} & \makecell{\textbf{Percentage}\\\textbf{Change}} & \textbf{Combined Val} \\
 \midrule
@@ -280,7 +280,7 @@ Based on population 3D spatial probability density distributions $\mathbf{P}_{\t
 \label{tab:spatial_centroids}
 \footnotesize
 \setlength{\tabcolsep}{3pt}
-\begin{tabularx}{\linewidth}{c X c c c c X}
+\begin{tabularx}{\linewidth}{c >{\raggedright\arraybackslash}X c c c c >{\raggedright\arraybackslash}X}
 \toprule
 \textbf{Code} & \textbf{Finding Category} & \makecell{\textbf{Train Centroid}\\\textbf{$(\text{RL}, \text{AP}, \text{IS})$}} & \makecell{\textbf{Val Centroid}\\\textbf{$(\text{RL}, \text{AP}, \text{IS})$}} & $\Delta d$ & $S_{\text{cos}}$ & \makecell{\textbf{Spatial Prior}\\\textbf{Taxonomy}} \\
 \midrule
@@ -341,7 +341,7 @@ Experiment 004 extracts physical Hounsfield Unit (HU) intensity values inside gr
 \label{tab:hu_stats}
 \footnotesize
 \setlength{\tabcolsep}{3.5pt}
-\begin{tabularx}{\linewidth}{c X c c c c c c}
+\begin{tabularx}{\linewidth}{c >{\raggedright\arraybackslash}X c c c c c c}
 \toprule
 \textbf{Cat Code} & \textbf{Category Name} & \textbf{$N_{\text{masks}}$} & \textbf{Mean HU} & \textbf{P5 HU} & \textbf{P95 HU} & \makecell{\textbf{Contrast}\\\textbf{$\Delta\text{HU}$}} & \makecell{\textbf{Rec Window}\\\textbf{[Min, Max]}} \\
 \midrule
@@ -378,9 +378,9 @@ Experiment 005 profiles 3D connected component morphology, geometric sphericity 
 \centering
 \caption{3D connected component topology, sphericity, physical volume quantiles (P5, Median, P95 in $\text{mm}^3$), and recommended post-processing noise pruning thresholds.}
 \label{tab:morphology_stats}
-\footnotesize
-\setlength{\tabcolsep}{2.5pt}
-\begin{tabularx}{\linewidth}{c X c c c c c c c c}
+\scriptsize
+\setlength{\tabcolsep}{2.2pt}
+\begin{tabularx}{\linewidth}{c >{\raggedright\arraybackslash}X c c c c c c c c}
 \toprule
 \textbf{Cat Code} & \textbf{Category Name} & \textbf{Blobs} & \makecell{\textbf{Blobs/}\\\textbf{Find}} & \makecell{\textbf{Sphericity}\\\textbf{($S$)}} & \makecell{\textbf{P5 Vol}\\\textbf{($\text{mm}^3$)}} & \makecell{\textbf{Median Vol}\\\textbf{($\text{mm}^3$)}} & \makecell{\textbf{P95 Vol}\\\textbf{($\text{mm}^3$)}} & \makecell{\textbf{Rec Min Size}\\\textbf{(voxels)}} & \makecell{\textbf{Equiv Vol}\\\textbf{($\text{mm}^3$)}} \\
 \midrule
@@ -414,7 +414,7 @@ Key topological observations:
 Based on the quantitative empirical findings across \texttt{exp\_001} through \texttt{exp\_005}, we establish five mandatory directives for baseline evaluation and fine-tuning:
 
 \begin{enumerate}
-    \item \textbf{Positive-Unlabeled (PU) Loss Formulations}: Use Positive-Unlabeled (PU) SPOCO + Multi-Planar Reconstruction (MPR) consistency loss to prevent instance suppression bias caused by the Training set's $\le 3$ instance annotation cap.
+    \item \textbf{Positive-Unlabeled (PU) Loss Formulations}: Use Positive-Unlabeled (PU) SPOCO~\cite{wolny2022spoco} + Multi-Planar Reconstruction (MPR) consistency loss to prevent instance suppression bias caused by the Training set's $\le 3$ instance annotation cap.
     \item \textbf{Category Intensity Windowing}: Preprocess CT volumes using category-specific HU bounds \texttt{[min\_HU, max\_HU]} (Exp 004) rather than naive default windowing.
     \item \textbf{Spatial Prior Probability Masking}: Integrate 3D RAS spatial probability priors $P(\mathbf{x}' \in \text{mask} \mid c)$ (Exp 003) to constrain search spaces for category-specific findings (e.g., Apical prior for Emphysema, Basal prior for Effusion).
     \item \textbf{Connected Component Noise Pruning}: Filter post-binarization predictions using \texttt{recommended\_min\_size\_voxels} (Exp 005) to eliminate small false-positive instance artifacts.
@@ -423,19 +423,24 @@ Based on the quantitative empirical findings across \texttt{exp\_001} through \t
 
 \begin{thebibliography}{99}
 \bibitem{baharoon2025rexgroundingct}
-S.~Baharoon, A.~Hamamci, et~al.
-\newblock {ReXGroundingCT}: A 3{D} multi-modal grounding benchmark for thoracic computed tomography.
-\newblock In \emph{MICCAI 2026 Challenge Benchmark Investigation}, 2025.
+M.~Baharoon, L.~Luo, M.~Moritz, A.~Kumar, S.~E.~Kim, X.~Zhang, M.~Zhu, M.~H.~Alabbad, M.~S.~Alhazmi, N.~P.~Mistry, L.~Bijnens, K.~R.~Kleinschmidt, B.~Chrisler, S.~Suryadevara, S.~S.~D.~Jaliparthi, N.~M.~Prudlo, M.~D.~Marino, J.~Palacio, R.~Akula, D.~Zhou, H.-Y.~Zhou, I.~E.~Hamamci, S.~J.~Adams, H.~R.~Alomaish, and P.~Rajpurkar.
+\newblock {ReXGroundingCT}: A 3{D} chest {CT} dataset for segmentation of findings from free-text reports.
+\newblock \emph{NEJM AI}, 3(7):AIdbp2501220, 2026.
 
 \bibitem{luo2025voxtell}
-Y.~Luo, S.~Baharoon, et~al.
-\newblock {VoxTell}: 3{D} vision-language pre-training for volumetric medical image segmentation and grounding.
-\newblock \emph{arXiv preprint arXiv:2501.00000}, 2025.
+M.~Rokuss, M.~Langenberg, Y.~Kirchhoff, F.~Isensee, B.~Hamm, C.~Ulrich, S.~Regnery, L.~Bauer, E.~Katsigiannopulos, T.~Norajitra, and K.~Maier-Hein.
+\newblock {VoxTell}: Free-text promptable universal 3{D} medical image segmentation.
+\newblock In \emph{Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)}, pages 37538--37557, June 2026.
 
 \bibitem{hamamci2024ctrate}
-A.~Hamamci, S.~Er, et~al.
-\newblock {CT-RATE}: A 3{D} chest {CT} report and annotation text dataset.
-\newblock \emph{Scientific Data}, 11(1):512, 2024.
+I.~E.~Hamamci, S.~Er, C.~Wang, F.~Almas, A.~G.~Simsek, S.~N.~Esirgun, I.~Dogan, O.~F.~Durugol, B.~Hou, S.~Shit, W.~Dai, M.~Xu, H.~Reynaud, M.~F.~Dasdelen, B.~Wittmann, T.~Amiranashvili, E.~Simsar, M.~Simsar, E.~B.~Erdemir, A.~Alanbay, A.~Sekuboyina, B.~Lafci, A.~Kaplan, Z.~Lu, M.~Polacin, B.~Kainz, C.~Bluethgen, K.~Batmanghelich, M.~K.~Ozdemir, and B.~Menze.
+\newblock Generalist foundation models from a multimodal dataset for 3{D} computed tomography.
+\newblock \emph{Nature Biomedical Engineering}, 2026.
+
+\bibitem{wolny2022spoco}
+A.~Wolny, Q.~Yu, C.~Pape, and A.~Kreshuk.
+\newblock Sparse object-level supervision for instance segmentation with pixel embeddings.
+\newblock \emph{arXiv preprint arXiv:2103.14572}, 2021.
 \end{thebibliography}
 
 \end{document}
