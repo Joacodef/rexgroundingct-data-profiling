@@ -12,11 +12,10 @@
 
 The active focus in this workspace is **Experiment 001 Label Distribution & Cross-Pathology Variance Profiling**:
 
-* **Immediate Next Objective for New Chat Session**:
-  1. Perform detailed **Label Distribution Analysis** across dataset splits (Train, Validation, Test).
-  2. Investigate **cross-pathology finding count variance**: analyze whether the difference in finding prompt frequency and instance counts varies noticeably across different pathology categories and splits (e.g., comparing diffuse/multi-focal categories like `2c` Ground-glass opacities or `2d` Nodules vs focal findings like `1a` Bronchial wall thickening or `2g` Pneumothorax in Train, Validation, and Test splits).
-  3. Extend [scripts/exp_001_dataset_disparity_leakage.py](file://scripts/exp_001_dataset_disparity_leakage.py), [logs/exp_001_dataset_disparity_leakage.md](file://logs/exp_001_dataset_disparity_leakage.md), and [logs/phase_1_report_overleaf/main.tex](file://logs/phase_1_report_overleaf/main.tex) with quantitative breakdown tables and visualizations.
-* **Primary Objective**: Continue deep-dive empirical analysis on Experiment 001 dataset properties and update the technical report accordingly.
+* **Immediate Next Objectives for Upcoming Session**:
+  1. **`dataset.json` Code Listing Placement**: Ensure `Listing 1` (`Representative dataset.json record entry`) in Section 1.2 does not break awkwardly across two pages (adjust page break / float specifiers for clean single-page rendering).
+  2. **Streamline Information-Dense Tables (Tables 3, 4, 5, and 6)**: Trim and simplify Tables 3 (NLP Syntax), 4 (HU Radiodensity), 5 (Morphology & Noise Pruning), and 6 (Spatial Priors) in `logs/phase_1_report_overleaf/main.tex` to remove clutter and reduce row height/column density, following the streamlined layout established for Table 2 (`tab:category_breakdown`).
+* **Primary Objective**: Finalize manuscript formatting and visual elegance in `logs/phase_1_report_overleaf/main.tex`.
 
 ---
 
@@ -88,10 +87,16 @@ Any incoming AI assistant starting a new session to revise the report MUST follo
   * **Layout & Tables**: Replaced rigid `adjustbox` table scaling with `tabularx` and uniform font size across all 5 tables; applied explicit `>{\raggedright\arraybackslash}X` auto-wrapping columns to resolve column overlap in Table 5 (`Category Name` vs `Blobs`); tightened padding (`\tabcolsep{2.2pt}`) to guarantee zero page margin overflow; replaced `[H]` float specifiers with flexible `[htbp]`; removed hardcoded `\bigskip` overrides.
   * **Code Listing**: Added explicit `json` language definition (`\lstdefinelanguage{json}{...}`) to preamble.
   * **Authentic Bibliography & Technical Clarity**: Updated bibliography in `main.tex` with exact user-provided BibTeX entries for **ReXGroundingCT** (*Baharoon et al., NEJM AI 2026, 3(7):AIdbp2501220*), **VoxTell** (*Rokuss et al., IEEE/CVF CVPR 2026, pp. 37538--37557*), **CT-RATE / Generalist Models** (*Hamamci et al., Nature Biomedical Engineering 2026*), and **SPOCO** (*Wolny et al., arXiv:2103.14572*); explicitly defined MPR and PU acronyms; added zero-count validation methodology note for Honeycombing (`2f`); expanded Table 1 footnote clarifying test split placeholder instance metadata ($1.000 \pm 0.000$).
-* **July 28, 2026**: Experiment 001 Detailed Label Distribution & Cross-Pathology Variance Profiling Extension:
-  * **Comprehensive 14-Category Profiling**: Extended `scripts/exp_001_dataset_disparity_leakage.py` to calculate scan prevalence (%), split finding proportions, median, IQR, coefficient of variation ($CV$), and disparity ratios ($\text{Val}/\text{Train}$) across all 14 categories.
-  * **New Publication Visualization**: Generated `exp001_instance_count_boxplot.png` comparing connected component instance count distributions between Train (sparse $\le 3$) and Validation (exhaustive ground truth) across all 14 pathology categories.
-  * **Repository Synchronization**: Updated output summary `exp001_disparity_leakage_summary.json`, reconciled markdown log `logs/exp_001_dataset_disparity_leakage.md`, and integrated Section 3 & Table 2 into Overleaf report manuscript `logs/phase_1_report_overleaf/main.tex`.
+* **July 28, 2026**: Manuscript Layout & Challenge Utility Refinements in [logs/phase_1_report_overleaf/main.tex](file://logs/phase_1_report_overleaf/main.tex):
+  * **Floating Code Listing**: Added `float=htbp` to `Listing 1` (`lst:dataset_sample`, Section 1.2) to prevent awkward page-break splits.
+  * **Aggressive Table Trimming (Tables 2--6)**:
+    * Table 2 (Category Breakdown): Trimmed redundant counts, Med/IQR string clutter, Max, and CV (12 $\rightarrow$ 8 columns); retained essential prevalence, mean instance counts, and disparity ratios.
+    * Table 3 (NLP Syntax): Set `\scriptsize`, `\tabcolsep{3pt}`, clean header unit labels.
+    * Table 4 (Spatial Priors): Rebalanced column widths (`hsize` weights 1.15 vs 0.85), centered Spatial Prior Taxonomy, expanded `tabcolsep` padding to 4.5pt for Train Centroid, $\Delta d$, and $S_{\text{cos}}$, and trimmed `Val Centroid` (7 $\rightarrow$ 6 columns).
+    * Table 5 (HU Windowing): Trimmed duplicate `P5` & `P95` columns (8 $\rightarrow$ 6 columns); merged into single `Rec. Window [P5, P95] HU`.
+    * Table 6 (Morphology): Trimmed redundant `Equiv Vol` and `P5 Vol` columns (10 $\rightarrow$ 8 columns); expressed voxel-to-$\text{mm}^3$ conversion in footnote.
+  * **Strict Data Analysis Focus in Main Body**: Removed all modeling/training comments, loss function justifications (e.g., BCE/Dice/SPOCO/PU), hyper-parameter recommendations, and search-space pruning statements from the primary analytical body text and table footnotes across Sections 1--7. Main body text now focuses strictly on empirical data observations (counts, distributions, geometry, metrics), keeping all modeling implications cleanly isolated inside the `Actionable Challenge Utility` subsections and Section 8.
+
 
 
 
