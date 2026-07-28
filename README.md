@@ -78,7 +78,7 @@ python scripts/exp_005_morphology_noise_pruning.py
    - Patient ID cross-split leakage audit lists
 
 2. **Overleaf LaTeX Group Technical Report**:
-   - Source code located in [`logs/phase_1_report_overleaf/main.tex`](file:///home/jdeferrari/rex_project/rexgroundingct-data-profiling/logs/phase_1_report_overleaf/main.tex) and packaged in `logs/phase_1_report_overleaf.zip`.
+   - Source code located in [`logs/phase_1_report_overleaf/main.tex`](file://logs/phase_1_report_overleaf/main.tex) and packaged in `logs/phase_1_report_overleaf.zip`.
 
 ---
 
