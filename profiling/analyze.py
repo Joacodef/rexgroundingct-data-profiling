@@ -47,7 +47,11 @@ SPLIT_LABEL = {"train": "train (Entity Protocol)", "val": "validation (exhaustiv
 INK, INK2, GRID = "#0b0b0b", "#52514e", "#e6e5e1"
 BLUE_RAMP = ["#cde2fb", "#9ec5f4", "#6da7ec", "#3987e5", "#256abf", "#184f95", "#0d366b"]
 CATS = list(CATEGORY_MAP)                                           # 1a..2h, fixed order everywhere
-CAT_LABEL = {c: f"{c} {CATEGORY_MAP[c]}" for c in CATS}
+CAT_LABEL = {c: CATEGORY_MAP[c] for c in CATS}                    # report rule 1: pathologies by name, never by code
+CAT_SHORT = {"1a": "Bronchial wall thick.", "1b": "Bronchiectasis", "1c": "Emphysema", "1d": "Septal thickening",
+             "1e": "Micronodules", "1f": "Other non-focal", "2a": "Linear opacities", "2b": "Atelectasis / consol.",
+             "2c": "Ground-glass", "2d": "Nodules / masses", "2e": "Pleural effusion", "2f": "Honeycombing",
+             "2g": "Pneumothorax", "2h": "Other focal"}                # panel titles
 
 plt.rcParams.update({"font.family": "DejaVu Sans", "font.size": 9, "axes.edgecolor": INK2, "axes.linewidth": 0.6,
                      "axes.titlesize": 10, "axes.titleweight": "normal", "axes.labelcolor": INK2, "xtick.color": INK2,
@@ -138,7 +142,6 @@ def splits(t: dict) -> None:
     for i, sp in enumerate(("train", "val", "test")):
         hbar_by_category(ax, share_pct[sp], SPLIT_COLOR[sp], SPLIT_LABEL[sp], offset=(i - 1) * 0.27, height=0.25)
     ax.set_xlabel("share of the split's findings (%)"); ax.legend(loc="lower right"); ax.grid(axis="y", visible=False)
-    ax.set_title("Category share of findings, by split")
     save(fig, "fig_category_share")
 
     fig, ax = plt.subplots(figsize=(7.2, 5.2))
@@ -153,7 +156,6 @@ def splits(t: dict) -> None:
             ax.text(max(a, b) + 0.15, yi, f"{b / a:.1f}x" if a > 0 else "", va="center", fontsize=8, color=INK2)
     ax.set_yticks(y); ax.set_yticklabels([CAT_LABEL[c] for c in CATS]); ax.invert_yaxis(); ax.grid(axis="y", visible=False)
     ax.set_xlabel("mean annotated instances per finding (distinct instance labels in the mask)"); ax.legend(loc="lower right")
-    ax.set_title("The annotation-density gap: instances per finding, train vs validation" + (f" ({gap_all:.2f}x overall)" if np.isfinite(gap_all) else ""))
     save(fig, "fig_annotation_gap")
 
 
@@ -179,7 +181,6 @@ def sizes(t: dict) -> None:
     ax.set_ylim(len(CATS) + 1.2, 0.3)
     ticks = [0, 1, 2, 3, 4, 5, 6]; ax.set_xticks(ticks); ax.set_xticklabels(["1 mm³", "10", "100", "1 cm³", "10", "100", "1 L"])
     ax.set_xlabel("volume of one connected component (log scale); box = quartiles, whiskers = 1.5 IQR, outliers hidden")
-    ax.set_title("Lesion size per category, train and validation components")
     save(fig, "fig_sizes")
 
 
@@ -213,9 +214,8 @@ def spatial(t: dict) -> None:
             h, _, _ = np.histogram2d(d[xcol].clip(0, 1), d["lung_z"].clip(0, 1), bins=64, range=[[0, 1], [0, 1]])
             h = gaussian_filter(h, sigma=1.0); h = h / max(h.max(), 1e-9)
             ax.imshow(h.T, origin="lower", extent=[0, 1, 0, 1], cmap=cmap, vmin=0, vmax=1, aspect="auto", interpolation="bilinear")
-            ax.set_title(f"{k} ({len(d):,})", fontsize=8.5); ax.grid(False); ax.set_xticks([0, 0.5, 1]); ax.set_yticks([0, 0.5, 1])
+            ax.set_title(f"{CAT_SHORT[k]} ({len(d):,})", fontsize=8); ax.grid(False); ax.set_xticks([0, 0.5, 1]); ax.set_yticks([0, 0.5, 1])
         axes[1, 0].set_xlabel(xlabel, fontsize=8); axes[1, 0].set_ylabel("inferior ← z → superior", fontsize=8)
-        fig.suptitle(title, fontsize=9.5)
         save(fig, name, dpi=220)
 
     density_panels("lung_x", "left ← lung box x → right", "fig_spatial_coronal",
@@ -233,12 +233,11 @@ def spatial(t: dict) -> None:
                 h = gaussian_filter(h, sigma=1.0); h = h / max(h.max(), 1e-9)
                 cm = matplotlib.colors.LinearSegmentedColormap.from_list("s", ["#ffffff", color])
                 ax.imshow(h.T, origin="lower", extent=[0, 1, 0, 1], cmap=cm, vmin=0, vmax=1, aspect="auto", interpolation="bilinear")
-                ax.set_title(f"{k} {'train' if split == 'train' else 'val'} ({len(d):,})", fontsize=8.5, color=INK)
+                ax.set_title(f"{CAT_SHORT[k]}, {'train' if split == 'train' else 'val'} ({len(d):,})", fontsize=7.5, color=INK)
                 ax.grid(False); ax.set_xticks([0, 0.5, 1]); ax.set_yticks([0, 0.5, 1])
     axes[3, 0].set_xlabel("left ← lung box x → right", fontsize=8)
     for r in range(4):
         axes[r, 0].set_ylabel("inferior ← z → superior", fontsize=7.5)
-    fig.suptitle("Coronal density of annotated components: training (Entity Protocol, blue) vs validation (exhaustive, orange), per category, per-panel scale", fontsize=9.5)
     save(fig, "fig_spatial_train_vs_val", dpi=220)
     density_panels("lung_y", "posterior ← lung box y → anterior", "fig_spatial_sagittal",
                    "Sagittal density of train components in lung-box coordinates (per-panel scale)")
@@ -264,7 +263,6 @@ def hu(t: dict) -> None:
     ax.set_yticks(y); ax.set_yticklabels([CAT_LABEL[k] for k in CATS]); ax.invert_yaxis(); ax.grid(axis="y", visible=False)
     ax.set_ylim(len(CATS) + 0.3, -0.7)
     ax.set_xlabel("median HU (median over findings of each finding's median)"); ax.legend(loc="upper right")
-    ax.set_title("Radiodensity: inside the annotation vs its surroundings, per category")
     save(fig, "fig_hu")
 
 
@@ -298,7 +296,6 @@ def text(t: dict) -> None:
             ax.hist(v, bins=bins, density=True, histtype="step", linewidth=1.6, color=SPLIT_COLOR[sp], label=f"{SPLIT_LABEL[sp]}, median {v.median():.0f}")
     ax.axvline(128, color=INK2, linewidth=0.8); ax.text(128, ax.get_ylim()[1] * 0.5, " encoder limit (128)", fontsize=7.5, color=INK2)
     ax.set_xlabel("tokens of the instruction prompt (Qwen3-Embedding tokenizer)"); ax.set_ylabel("density"); ax.legend(loc="upper right")
-    ax.set_title("Prompt length by split: no prompt reaches the 128-token limit")
     save(fig, "fig_text_tokens")
 
 
@@ -321,7 +318,7 @@ def scans(t: dict) -> None:
             if len(v):
                 ax.hist(v, bins=bins, density=True, histtype="step", linewidth=1.4, color=SPLIT_COLOR[sp], label=sp)
         ax.set_xlabel(lab); ax.set_yticks([])
-    axes[0].legend(loc="upper right"); fig.suptitle("Image geometry by split (density)", fontsize=9.5)
+    axes[0].legend(loc="upper right")
     save(fig, "fig_scans")
 
 
@@ -335,14 +332,13 @@ def cooccurrence(t: dict) -> None:
     table(cond.reset_index().rename(columns={"category": "row"}), "cooccurrence_conditional")
     fig, ax = plt.subplots(figsize=(7.4, 6.4))
     im = ax.imshow(cond.values, cmap=matplotlib.colors.LinearSegmentedColormap.from_list("b", ["#ffffff"] + BLUE_RAMP), vmin=0, vmax=1)
-    ax.set_xticks(range(len(CATS))); ax.set_xticklabels(CATS); ax.set_yticks(range(len(CATS))); ax.set_yticklabels([CAT_LABEL[k] for k in CATS]); ax.grid(False)
+    ax.set_xticks(range(len(CATS))); ax.set_xticklabels([CAT_SHORT[k] for k in CATS], rotation=45, ha="right", fontsize=7.5); ax.set_yticks(range(len(CATS))); ax.set_yticklabels([CAT_LABEL[k] for k in CATS]); ax.grid(False)
     for i in range(len(CATS)):
         for j in range(len(CATS)):
             v = cond.values[i, j]
             if i != j and v >= 0.15:
                 ax.text(j, i, f"{v:.2f}", ha="center", va="center", fontsize=6.5, color="#ffffff" if v > 0.6 else INK)
     fig.colorbar(im, ax=ax, fraction=0.035, pad=0.02, label="P(column present | row present), scan level")
-    ax.set_title(f"Category co-occurrence within a scan (all splits, {pres.shape[0]:,} scans); labels where ≥ 0.15")
     save(fig, "fig_cooccurrence")
     pat = s.assign(patient=patient_id(s["id"])).groupby("split")["patient"].apply(set).reindex(["train", "val", "test"]).apply(lambda v: v if isinstance(v, set) else set())
     overlap = pd.DataFrame([{"pair": f"{a}-{b}", "shared_patients": len(pat[a] & pat[b])} for a, b in (("train", "val"), ("train", "test"), ("val", "test"))])
