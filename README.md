@@ -1,88 +1,62 @@
-# ReXGroundingCT Challenge 2026 — Data Profiling & Analysis Workspace
+# ReXGroundingCT — Phase 1: data profiling
 
-Dedicated research workspace for **Phase 1 Data Profiling & Spatial-Text Analysis** for the **ReXGrounding Challenge @ MICCAI 2026** (3D radiological finding grounding in thoracic CT scans from free-text descriptions).
+Phase 1 of the ReXGroundingCT Challenge 2026 (MICCAI): what the dataset is, measured once and correctly,
+so that every number in the data-profiling chapter of the technical report can be regenerated from a table.
+The model phases live in the sibling repository `rexgroundingct-model-training`.
 
-> [!IMPORTANT]
-> **Repository Scope & Governance**:
-> This repository is dedicated exclusively to **Data Profiling, Spatial Density Prior Mapping, HU Radiodensity Analysis, NLP Syntax Shift Profiling, 3D Component Topology, Multi-Finding Co-Occurrence Profiling, and Group Technical Report Generation**.
-> Model fine-tuning pipelines consume the empirical priors exported in `data/phase_1/phase_1_priors_bundle.json`.
+**Rebuilt on 2026-09-12.** The previous suite (five scripts, now under `legacy/`) measured Hounsfield units
+on masks that were mirrored relative to their CT and reported voxel units as millimetres; nothing mask-based
+from it should be quoted. The findings and the reasons are in
+[`AUDIT_2026-09-12.md`](AUDIT_2026-09-12.md).
 
----
+## Design
 
-## 📂 Project Structure
+One extraction pass over every scan writes three tables; everything else reads the tables.
 
-```text
-rexgroundingct-data-profiling/
-├── .agents/                    # Agentic rules, host setup docs, and governance
-│   ├── shared/                 # Server-agnostic master plan and technical digests
-│   ├── AGENTS.md               # Repository operating rules & governance
-│   ├── STATUS.md               # Local active macro progress matrix
-│   ├── HANDSHAKE.md            # Tactical session bridge & transition handoff
-│   └── server_documentation.txt# Host server hardware setup & guides
-├── logs/                       # Data profiling experiment logs & technical report
-│   ├── exp_001_dataset_disparity_leakage.md
-│   ├── exp_002_nlp_prompt_syntax.md
-│   ├── exp_003_spatial_density_priors.md
-│   ├── exp_004_hu_radiodensity.md
-│   ├── exp_005_morphology_noise_pruning.md
-│   ├── phase_1_report_overleaf/ # Consolidated LaTeX group technical report
-│   └── phase_1_report_overleaf.zip
-├── scratch/                    # One-off exploratory analysis scripts & ITK-SNAP test masks
-│   ├── export_itksnap_mask.py
-│   ├── text_shift_analysis.py
-│   └── train_1935_a_1_itksnap_*.nii.gz
-├── scripts/                    # Flat profiling experiment suite & core utilities
-│   ├── config.py               # Dynamic path & category configuration manager (shared ../data/)
-│   ├── evaluate.py             # Challenge evaluation metric calculator
-│   ├── exp_001_dataset_disparity_leakage.py
-│   ├── exp_002_nlp_prompt_syntax.py
-│   ├── exp_003_spatial_density_priors.py
-│   ├── exp_004_hu_radiodensity.py
-│   └── exp_005_morphology_noise_pruning.py
-└── README.md                   # Primary repository documentation
-```
+| Table | One row per | Rows | What it holds |
+|---|---|---|---|
+| `tables/scans.csv` | scan | 3,492 | split, original orientation, shape, spacing, field of view, intensity regime (out-of-FOV padding), lung volume and bounding box from the TotalSegmentator lobes |
+| `tables/findings.csv` | finding sentence | 8,650 | text and category; for train and val (which have masks): voxels, mm³, instances (26-connectivity), extent, centroid in millimetres and in lung-box coordinates, lobe fractions, HU inside the mask and in a 3 mm shell |
+| `tables/components.csv` | connected component | ~35,000 | voxels, mm³, extent, elongation, centroid, lobe, marching-cubes surface, sphericity, HU |
 
----
+The column dictionary is the docstring of [`profiling/extract.py`](profiling/extract.py).
 
-## 🔬 Consolidated 5-Experiment Profiling Suite
+Measurement rules (`profiling/io.py`): the raw CTs are stored LPS with real spacing; the masks carry an
+identity affine. A mask takes its parent CT's affine before any reorientation, both are brought to RAS
+together, spacing always comes from the CT header, and voxels at or below −2048 HU are out-of-FOV padding
+(the corrected volumes use −8192) and are excluded from every intensity statistic. Lung-box coordinates run
+0..1 across the lung bounding box, x towards the patient's right, y anterior, z superior.
 
-Run any experiment using the shared Python environment:
+## Running
 
 ```bash
-# 1. Dataset Disparity (14-Category Breakdown), Scan-Level Co-Occurrence Matrix ($14 \times 14$) & Patient Leakage Audit
-python scripts/exp_001_dataset_disparity_leakage.py
-
-# 2. Free-Text NLP Syntax Shift, Subword BPE Tokenization & Truncation Thresholds (77/128 tokens)
-python scripts/exp_002_nlp_prompt_syntax.py
-
-# 3. 3D RAS Spatial Coordinate Centroids, Density Maps & 4-Panel Figure
-python scripts/exp_003_spatial_density_priors.py
-
-# 4. Hounsfield Unit (HU) Radiodensity, Contrast Deltas & Windowing Bounds
-python scripts/exp_004_hu_radiodensity.py
-
-# 5. 3D Connected-Component Morphology, Sphericity, Physical Extents (mm) & Noise Pruning Thresholds
-python scripts/exp_005_morphology_noise_pruning.py
+cp .env.example .env            # DATA_DIR, LOBES_DIR (optional), TABLES_DIR (optional)
+uv sync                         # creates .venv from pyproject.toml
+sbatch profiling/extract.slurm  # CPU job, ~1 h with 8 workers, resumable; parts land in tables/parts/
+.venv/bin/python -m profiling.extract --merge   # tables/parts/*.jsonl -> tables/*.csv (tracked)
 ```
 
----
+A shard for testing: `sbatch --export=ALL,START=0,END=3,WORKERS=1 profiling/extract.slurm`. The job never
+runs on the login node: one worker holds one CT (int16) and one mask channel (uint8) plus crops.
 
-## 📄 Key Deliverables & Outputs
+## Layout
 
-1. **Empirical Data Priors Bundle** (`../data/phase_1/phase_1_priors_bundle.json`):
-   - Categorical HU attenuation windowing bounds (`[min_HU, max_HU]`)
-   - 3D morphology noise size pruning thresholds (`recommended_min_size_voxels`)
-   - Physical 3D bounding box dimensions $(\Delta X, \Delta Y, \Delta Z)$ & aspect ratios
-   - $14 \times 14$ Scan-Level Multi-Finding Co-Occurrence Matrix ($P(c_j \mid c_i)$) & heatmap (`exp001_cooccurrence_heatmap.png`)
-   - 4-Tier Spatial Prior Taxonomy mapping
-   - Patient ID cross-split leakage audit lists
+```
+profiling/          io.py (paths, loader), extract.py (the pass), extract.slurm (launcher), text.py, analyze.py
+figures/            the figures of FINDINGS.md (tracked)
+tables/             all generated tables (ignored by git; regenerate with the commands above)
+logs/               SLURM job output only (ignored)
+legacy/             the 2026-07 suite and its experiment logs, kept for reference, superseded
+.agents/            the old governance and digests; the training repository's .agents/shared/ is authoritative
+```
 
-2. **Overleaf LaTeX Group Technical Report**:
-   - Source code located in [`logs/phase_1_report_overleaf/main.tex`](file://logs/phase_1_report_overleaf/main.tex) and packaged in `logs/phase_1_report_overleaf.zip`.
+## Results
 
----
+[`FINDINGS.md`](FINDINGS.md) states what the tables show, section by section, with the figure and the summary
+table behind every number. `profiling/analyze.py` produces `figures/*.png` and `tables/summary/*.csv`;
+`profiling/text.py` produces `tables/text.csv` (real token counts with the VoxTell text encoder's tokenizer).
 
-## 📝 Governance & Epistemic Modesty Guidelines
-
-* **Epistemic Modesty**: All preliminary empirical observations use calibrated, modest phrasing (*"initial evidence suggests"*, *"preliminary tests indicate"*).
-* **Server-Agnostic Rules**: Repository-wide code and documentation in git remain strictly server-agnostic using relative paths.
+```bash
+.venv/bin/python -m profiling.text        # tokens, laterality, locator vocabulary -> tables/text.csv
+.venv/bin/python -m profiling.analyze     # all analyses; or a subset: analyze splits sizes hu
+```

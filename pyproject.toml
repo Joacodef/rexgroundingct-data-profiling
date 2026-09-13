@@ -1,0 +1,22 @@
+[project]
+name = "rexgroundingct-data-profiling"
+version = "2.0.0"
+description = "Phase 1 of the ReXGroundingCT challenge: one extraction pass over every scan into three tables, and every figure and number of the data-profiling chapter derived from them."
+requires-python = ">=3.11"
+dependencies = [
+    "numpy>=1.26",
+    "scipy>=1.11",
+    "nibabel>=5.2",
+    "pandas>=2.0",
+    "scikit-image>=0.22",
+    "tqdm>=4.66",
+    "python-dotenv>=1.0",
+    "matplotlib>=3.8",
+    "tokenizers>=0.19",
+]
+
+[project.optional-dependencies]
+text = ["transformers>=4.40"]   # only needed to download the tokenizer when it is not in the local cache
+
+[tool.uv]
+package = false
