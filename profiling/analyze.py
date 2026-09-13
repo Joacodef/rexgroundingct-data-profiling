@@ -220,6 +220,26 @@ def spatial(t: dict) -> None:
 
     density_panels("lung_x", "left ← lung box x → right", "fig_spatial_coronal",
                    "Where each category sits: coronal density of train components in lung-box coordinates (per-panel scale, darker = more)")
+
+    # train (Entity Protocol) against validation (exhaustive): the same coronal density, one row per split
+    # for each block of seven categories, so the two annotation protocols can be compared category by category
+    fig, axes = plt.subplots(4, 7, figsize=(14, 9.6), sharex=True, sharey=True)
+    for block, cats in enumerate((CATS[:7], CATS[7:])):
+        for col, k in enumerate(cats):
+            for row, (split, color) in enumerate((("train", SPLIT_COLOR["train"]), ("val", SPLIT_COLOR["val"]))):
+                ax = axes[2 * block + row, col]
+                d = c[(c.split == split) & (c.category == k)]
+                h, _, _ = np.histogram2d(d["lung_x"].clip(0, 1), d["lung_z"].clip(0, 1), bins=64, range=[[0, 1], [0, 1]])
+                h = gaussian_filter(h, sigma=1.0); h = h / max(h.max(), 1e-9)
+                cm = matplotlib.colors.LinearSegmentedColormap.from_list("s", ["#ffffff", color])
+                ax.imshow(h.T, origin="lower", extent=[0, 1, 0, 1], cmap=cm, vmin=0, vmax=1, aspect="auto", interpolation="bilinear")
+                ax.set_title(f"{k} {'train' if split == 'train' else 'val'} ({len(d):,})", fontsize=8.5, color=INK)
+                ax.grid(False); ax.set_xticks([0, 0.5, 1]); ax.set_yticks([0, 0.5, 1])
+    axes[3, 0].set_xlabel("left ← lung box x → right", fontsize=8)
+    for r in range(4):
+        axes[r, 0].set_ylabel("inferior ← z → superior", fontsize=7.5)
+    fig.suptitle("Coronal density of annotated components: training (Entity Protocol, blue) vs validation (exhaustive, orange), per category, per-panel scale", fontsize=9.5)
+    save(fig, "fig_spatial_train_vs_val", dpi=220)
     density_panels("lung_y", "posterior ← lung box y → anterior", "fig_spatial_sagittal",
                    "Sagittal density of train components in lung-box coordinates (per-panel scale)")
 
