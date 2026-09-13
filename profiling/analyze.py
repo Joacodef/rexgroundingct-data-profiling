@@ -225,7 +225,7 @@ def spatial(t: dict) -> None:
     # for each block of seven categories, so the two annotation protocols can be compared category by category
     # a spacer row between the two blocks keeps each train/val pair visibly together
     fig = plt.figure(figsize=(14, 10.2))
-    gs = fig.add_gridspec(5, 7, height_ratios=[1, 1, 0.22, 1, 1], hspace=0.30, wspace=0.14)
+    gs = fig.add_gridspec(5, 7, height_ratios=[1, 1, 0.18, 1, 1], hspace=0.42, wspace=0.14, left=0.07, right=0.99, top=0.95, bottom=0.07)
     axes = np.empty((4, 7), dtype=object); first = None
     for block, cats in enumerate((CATS[:7], CATS[7:])):
         for col, k in enumerate(cats):
@@ -238,15 +238,16 @@ def spatial(t: dict) -> None:
                 h = gaussian_filter(h, sigma=1.0); h = h / max(h.max(), 1e-9)
                 cm = matplotlib.colors.LinearSegmentedColormap.from_list("s", ["#ffffff", color])
                 ax.imshow(h.T, origin="lower", extent=[0, 1, 0, 1], cmap=cm, vmin=0, vmax=1, aspect="auto", interpolation="bilinear")
-                if row == 0:                                        # the name once per column; split and count inside each panel
-                    ax.set_title(CAT_SHORT[k], fontsize=8.5, color=INK, pad=4)
-                ax.text(0.03, 0.97, f"{'train' if split == 'train' else 'val'} ({len(d):,})", transform=ax.transAxes, fontsize=7,
-                        color=color, va="top", ha="left", bbox=dict(facecolor="white", edgecolor="none", alpha=0.8, pad=1.5))
+                if row == 0:                                        # the name once per column; counts above each panel, nothing on the image
+                    ax.set_title(f"{CAT_SHORT[k]}\nn = {len(d):,}", fontsize=8, color=INK, pad=4)
+                else:
+                    ax.set_title(f"n = {len(d):,}", fontsize=7.5, color=INK, pad=3)
+                if col == 0:
+                    ax.set_ylabel("training split" if split == "train" else "validation split", fontsize=8.5, color=color, labelpad=6)
                 ax.grid(False); ax.set_xticks([0, 0.5, 1]); ax.set_yticks([0, 0.5, 1])
                 ax.set_xticklabels(["0", "0.5", "1"]); ax.set_yticklabels(["0", "0.5", "1"])   # short labels: neighbours do not collide
-    axes[3, 0].set_xlabel("left ← lung box x → right", fontsize=8)
-    for r in range(4):
-        axes[r, 0].set_ylabel("inferior ← z → superior", fontsize=7.5)
+    fig.supxlabel("position across the lung bounding box: 0 = patient's left edge, 1 = right edge", fontsize=9.5, y=0.02)
+    fig.supylabel("position along the lung bounding box: 0 = lowest lung voxel, 1 = highest", fontsize=9.5, x=0.005)
     save(fig, "fig_spatial_train_vs_val", dpi=220)
     density_panels("lung_y", "posterior ← lung box y → anterior", "fig_spatial_sagittal",
                    "Sagittal density of train components in lung-box coordinates (per-panel scale)")
