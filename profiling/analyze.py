@@ -66,9 +66,9 @@ def load() -> dict:
     return t
 
 
-def save(fig, name: str) -> None:
+def save(fig, name: str, dpi: int | None = None) -> None:
     FIG.mkdir(parents=True, exist_ok=True)
-    fig.savefig(FIG / f"{name}.png", bbox_inches="tight"); plt.close(fig)
+    fig.savefig(FIG / f"{name}.png", bbox_inches="tight", dpi=dpi); plt.close(fig)
     print(f"  figures/{name}.png", flush=True)
 
 
@@ -201,26 +201,27 @@ def spatial(t: dict) -> None:
     table(pd.DataFrame(rows), "spatial")
     # population densities: coronal (x, z) per category, components of the train split, in lung-box coordinates
     ctr = c[c.split == "train"]
-    fig, axes = plt.subplots(2, 7, figsize=(12.5, 4.6), sharex=True, sharey=True)
-    for ax, k in zip(axes.flat, CATS):
-        d = ctr[ctr.category == k]
-        h, xe, ye = np.histogram2d(d["lung_x"].clip(0, 1), d["lung_z"].clip(0, 1), bins=24, range=[[0, 1], [0, 1]])
-        h = h / max(h.max(), 1)
-        ax.imshow(h.T, origin="lower", extent=[0, 1, 0, 1], cmap=matplotlib.colors.LinearSegmentedColormap.from_list("b", ["#ffffff"] + BLUE_RAMP), vmin=0, vmax=1, aspect="auto")
-        ax.set_title(f"{k} ({len(d):,})", fontsize=8.5); ax.grid(False); ax.set_xticks([0, 0.5, 1]); ax.set_yticks([0, 0.5, 1])
-    axes[1, 0].set_xlabel("left ← lung box x → right", fontsize=8); axes[1, 0].set_ylabel("inferior ← z → superior", fontsize=8)
-    fig.suptitle("Where each category sits: coronal density of train components in lung-box coordinates (per-panel scale, darker = more)", fontsize=9.5)
-    save(fig, "fig_spatial_coronal")
-    fig, axes = plt.subplots(2, 7, figsize=(12.5, 4.6), sharex=True, sharey=True)
-    for ax, k in zip(axes.flat, CATS):
-        d = ctr[ctr.category == k]
-        h, xe, ye = np.histogram2d(d["lung_y"].clip(0, 1), d["lung_z"].clip(0, 1), bins=24, range=[[0, 1], [0, 1]])
-        h = h / max(h.max(), 1)
-        ax.imshow(h.T, origin="lower", extent=[0, 1, 0, 1], cmap=matplotlib.colors.LinearSegmentedColormap.from_list("b", ["#ffffff"] + BLUE_RAMP), vmin=0, vmax=1, aspect="auto")
-        ax.set_title(f"{k} ({len(d):,})", fontsize=8.5); ax.grid(False); ax.set_xticks([0, 0.5, 1]); ax.set_yticks([0, 0.5, 1])
-    axes[1, 0].set_xlabel("posterior ← lung box y → anterior", fontsize=8); axes[1, 0].set_ylabel("inferior ← z → superior", fontsize=8)
-    fig.suptitle("Sagittal density of train components in lung-box coordinates (per-panel scale)", fontsize=9.5)
-    save(fig, "fig_spatial_sagittal")
+    from scipy.ndimage import gaussian_filter
+    cmap = matplotlib.colors.LinearSegmentedColormap.from_list("b", ["#ffffff"] + BLUE_RAMP)
+
+    def density_panels(xcol, xlabel, name, title):
+        """One panel per category: a 64x64 histogram of component centroids in lung-box coordinates,
+        smoothed with a 1-bin Gaussian so the map reads as a density; each panel on its own scale."""
+        fig, axes = plt.subplots(2, 7, figsize=(14, 5.2), sharex=True, sharey=True)
+        for ax, k in zip(axes.flat, CATS):
+            d = ctr[ctr.category == k]
+            h, _, _ = np.histogram2d(d[xcol].clip(0, 1), d["lung_z"].clip(0, 1), bins=64, range=[[0, 1], [0, 1]])
+            h = gaussian_filter(h, sigma=1.0); h = h / max(h.max(), 1e-9)
+            ax.imshow(h.T, origin="lower", extent=[0, 1, 0, 1], cmap=cmap, vmin=0, vmax=1, aspect="auto", interpolation="bilinear")
+            ax.set_title(f"{k} ({len(d):,})", fontsize=8.5); ax.grid(False); ax.set_xticks([0, 0.5, 1]); ax.set_yticks([0, 0.5, 1])
+        axes[1, 0].set_xlabel(xlabel, fontsize=8); axes[1, 0].set_ylabel("inferior ← z → superior", fontsize=8)
+        fig.suptitle(title, fontsize=9.5)
+        save(fig, name, dpi=220)
+
+    density_panels("lung_x", "left ← lung box x → right", "fig_spatial_coronal",
+                   "Where each category sits: coronal density of train components in lung-box coordinates (per-panel scale, darker = more)")
+    density_panels("lung_y", "posterior ← lung box y → anterior", "fig_spatial_sagittal",
+                   "Sagittal density of train components in lung-box coordinates (per-panel scale)")
 
 
 def hu(t: dict) -> None:
