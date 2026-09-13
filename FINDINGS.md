@@ -106,7 +106,18 @@ non-focal category (0.41–0.51); consolidation accompanies effusion (0.60) and 
 ground-glass accompanies "other focal" (0.59) and septal thickening (0.51). Honeycombing (16 train findings,
 none in val or test) never co-occurs with effusion or pneumothorax.
 
-## 9. What this changes with respect to the old suite
+## 9. Anomalous masks (`tables/summary/anomalies.csv`)
+
+One training mask is not a lesion: finding 2 of `train_1378_a_2` (bronchiectasis) fills one axial plane
+edge to edge, 261,835 voxels in a single 1.25 mm slice across the full 440 mm field of view, with 28,496
+further voxels outside that plane. It was noticed as a straight line in the training repository's Phase 2A
+prior map (peteroa session, 2026-09-12) and the sweep here (`analyze.py anomalies`: a component spanning
+>= 90 % of the field of view on both in-plane axes) finds no other among the 23,739 components of the
+training and validation masks. Three further components of more than 50,000 voxels sit within three
+slices (`train_2916_a_2` finding 3, emphysema; `train_3610_a_2` finding 0, pleural effusion, two components)
+but stay inside the lungs and look like coarse single-slice annotations rather than errors.
+
+## 10. What this changes with respect to the old suite
 
 * The 1.91× annotation gap, the split counts, the co-occurrence matrix and the patient overlap stand.
 * Every HU figure and every millimetre figure of the old suite is replaced; the old HU numbers came from

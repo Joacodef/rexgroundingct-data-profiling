@@ -354,7 +354,22 @@ def cooccurrence(t: dict) -> None:
     table(overlap, "patient_overlap")
 
 
-ANALYSES = {"splits": splits, "sizes": sizes, "spatial": spatial, "hu": hu, "text": text, "scans": scans, "cooccurrence": cooccurrence}
+def anomalies(t: dict) -> None:
+    """Masks that look like annotation slips rather than lesions: a component that fills an axial plane edge
+    to edge (>= 90 % of the field of view on both in-plane axes), and any component of >= 50,000 voxels
+    confined to at most three slices. The first case was noticed as a straight line in the training
+    repository's Phase 2A prior map (train_1378_a_2, finding 2); this sweeps every volume for both."""
+    c = t["components"].merge(t["scans"][["id", "spacing_z", "fov_x_mm", "fov_y_mm"]], on="id", how="left")
+    full = (c.extent_x_mm >= 0.9 * c.fov_x_mm) & (c.extent_y_mm >= 0.9 * c.fov_y_mm)
+    slab = (c.voxels >= 50_000) & (c.extent_z_mm <= 3 * c.spacing_z)
+    out = c.loc[full | slab, ["id", "split", "finding_idx", "category", "comp_idx", "voxels", "extent_x_mm", "extent_y_mm", "extent_z_mm"]].copy()
+    out["full_plane"] = full[out.index].values
+    table(out.sort_values("voxels", ascending=False), "anomalies")
+    print(f"  {int(full.sum())} full-plane component(s), {int(slab.sum())} component(s) >= 50k voxels within 3 slices, of {len(c):,}")
+
+
+ANALYSES = {"splits": splits, "sizes": sizes, "spatial": spatial, "hu": hu, "text": text, "scans": scans, "cooccurrence": cooccurrence,
+            "anomalies": anomalies}
 
 
 def main() -> None:
