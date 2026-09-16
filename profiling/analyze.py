@@ -177,7 +177,7 @@ def sizes(t: dict) -> None:
                     boxprops=dict(facecolor=BLUE_RAMP[1], edgecolor=BLUE_RAMP[4], linewidth=0.6), whiskerprops=dict(color=BLUE_RAMP[4], linewidth=0.6), capprops=dict(color=BLUE_RAMP[4], linewidth=0.6))
     ax.set_yticks(np.arange(1, len(CATS) + 1)); ax.set_yticklabels([CAT_LABEL[k] for k in CATS]); ax.invert_yaxis(); ax.grid(axis="y", visible=False)
     vox = float(t["scans"]["voxel_mm3"].median()); floor = np.log10(27 * vox)
-    ax.axvline(floor, color=INK2, linewidth=0.8); ax.text(floor, len(CATS) + 0.9, f" 27 voxels at the median voxel ({vox:.2f} mm³)", fontsize=7.5, color=INK2, va="top")
+    ax.axvline(floor, color=INK2, linewidth=0.8)                                       # the 27-voxel floor; the caption names it (report rule 10)
     ax.set_ylim(len(CATS) + 1.2, 0.3)
     ticks = [0, 1, 2, 3, 4, 5, 6]; ax.set_xticks(ticks); ax.set_xticklabels(["1 mm³", "10", "100", "1 cm³", "10", "100", "1 L"])
     ax.set_xlabel("volume of one connected component (log scale); box = quartiles, whiskers = 1.5 IQR, outliers hidden")
