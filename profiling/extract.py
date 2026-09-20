@@ -263,8 +263,12 @@ def merge() -> None:
         df = df.drop_duplicates(subset=[c for c in ("id", "finding_idx", "comp_idx") if c in df.columns], keep="last")
         sort_cols = [c for c in ("split", "id", "finding_idx", "comp_idx") if c in df.columns]
         df = df.sort_values(sort_cols).reset_index(drop=True)
+        for col in df.columns:                                        # counts stay integers: a column of whole numbers that
+            s = df[col]                                               # carries missing values (test findings have no mask) is
+            if s.dtype.kind == "f" and s.notna().any() and (s.dropna() % 1 == 0).all():
+                df[col] = s.astype("Int64")                           # written as 3582920, never as 3.58292e+06
         out = TABLES_DIR / f"{k}.csv"
-        df.to_csv(out, index=False, float_format="%.6g")
+        df.to_csv(out, index=False, float_format="%.10g")           # ten significant digits keep millimetre volumes exact
         print(f"{out}: {len(df):,} rows x {df.shape[1]} columns", flush=True)
 
 
